@@ -987,10 +987,9 @@ setInterval(tick,1000);
     if(!PROFILES[ME.id]){try{const r=await rpc("login_profile",{p_code:ME.code});if(!r.length){store.del("vjb_profile");ME=null;go("onboard");return;}}catch(e){}}
     else{const p=PROFILES[ME.id];ME={...ME,name:p.name,church:p.church,emoji:p.emoji};store.set("vjb_profile",ME);}
     await joinFromUrl();saveScores();
-  } else {
-    const code=new URLSearchParams(location.search).get("grupp");if(code)$("obIntro").textContent="Skapa din profil så går du med i gruppen direkt.";
   }
   if(SCREEN!=="play")go(SCREEN);
+  if(!ME&&new URLSearchParams(location.search).get("grupp"))$("obIntro").textContent="Du har blivit inbjuden till en grupp! Skapa din profil så går du med direkt.";
   document.fonts&&document.fonts.ready.then(()=>{if(SCREEN==="play")fitVerse()});
 })();
 </script>
