@@ -143,6 +143,10 @@ tr.me td{color:var(--accent);font-weight:700}
 .sugg{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;margin-top:-4px;background:var(--panel);display:none}
 .sugg button{display:flex;justify-content:space-between;width:100%;padding:10px 12px;font-size:14px;border:none;border-top:1px solid var(--line);background:none;text-align:left}
 .sugg small{color:var(--muted)}
+.sugg button.add{color:var(--accent)}
+.chsel{display:flex;align-items:center;gap:10px;min-height:48px;padding-top:6px!important;padding-bottom:6px!important;border-radius:10px;border:1px solid var(--accent);background:#2c2418;padding:0 6px 0 12px;font-size:16px}
+.chsel span{flex:1}.chsel small{color:var(--muted);font-size:12px;display:block}
+.chsel button{background:none;border:none;font-size:18px;width:40px;height:40px;color:var(--muted)}
 .emo{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
 .emo button{height:38px;border-radius:9px;background:var(--cell);border:none;font-size:20px;padding:0}
 .emo button.on{outline:2px solid var(--accent);background:#2c2418}
@@ -250,6 +254,7 @@ body.nav-on .navback{visibility:hidden}
     <button class="bigbtn" id="playCard"></button>
     <button class="mrow" id="maraRow"></button>
     <button class="mrow" id="groupRow" style="display:none"></button>
+    <button class="mrow" id="churchRow" style="display:none;border-color:var(--accent)"><span class="ic">⛪</span><span>Nytt: välj din <b>församling</b> och <b>ort</b> i listan</span><span class="arr">›</span></button>
     <p class="mut" style="text-align:center;font-size:11px;margin-top:22px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
   </div>
 </section>
@@ -329,8 +334,11 @@ body.nav-on .navback{visibility:hidden}
     <p class="mut" id="obIntro">Skapa din profil. Den syns på topplistan och i dina grupper.</p>
     <label class="fl" for="obName">Namn</label>
     <input class="inp" id="obName" maxlength="20" placeholder="T.ex. Henke" autocomplete="nickname">
+    <label class="fl" for="obCity">Ort (valfritt)</label>
+    <input class="inp" id="obCity" maxlength="40" placeholder="T.ex. Katrineholm" autocomplete="off">
     <label class="fl" for="obChurch">Församling (valfritt)</label>
-    <input class="inp" id="obChurch" maxlength="60" placeholder="T.ex. Pingstkyrkan Katrineholm" autocomplete="off">
+    <div id="obChurchSel"></div>
+    <input class="inp" id="obChurch" maxlength="60" placeholder="Sök på kyrkans namn eller ort" autocomplete="off">
     <div class="sugg" id="obSugg"></div>
     <span class="fl">Välj din figur</span>
     <div class="emo" id="obEmo"></div>
@@ -538,17 +546,24 @@ async function get(path){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{head
 
 /* ---- data i minnet ---- */
 let ME=store.get("vjb_profile");      // {id,code,name,church,emoji}
-let PROFILES={}, SCORES=[], MEMBERS=[], GROUPS={}, MYGROUPS=[], MRUNS=[];
+let PROFILES={}, SCORES=[], MEMBERS=[], GROUPS={}, MYGROUPS=[], MRUNS=[], CHURCHES={};
+function churchLabel(id){const c=CHURCHES[id];if(!c)return "";return c.name.toLowerCase().includes(c.city.toLowerCase())?c.name:c.name+" "+c.city}
+function profChurch(p){return p?(churchLabel(p.church_id)||p.church||""):""}
+function meLine(){if(!ME)return "";const c=ME.church_id?churchLabel(ME.church_id):(ME.church||"");const parts=[];if(c)parts.push(c);if(ME.city&&!c.toLowerCase().includes(ME.city.trim().toLowerCase()))parts.push(ME.city);return parts.join(" · ")||"Ingen församling angiven"}
+function sameCity(a,b){return a&&b&&a.trim().toLowerCase()===b.trim().toLowerCase()}
 const hidden=p=>!p||String(p.name||"").startsWith("__");
 async function loadAll(){
   if(!DB_ON) return;
   try{
-    const [pr,sc,mem,gr]=await Promise.all([
-      get("profiles?select=id,name,church,emoji&limit=10000"),
+    const [pr,sc,mem,gr,ch]=await Promise.all([
+      get("profiles?select=id,name,church,emoji,church_id,city&limit=10000"),
       get("beta_scores?select=profile_id,day,round,attempts,solved,points,guesses&day=gte."+START_DAY+"&limit=20000"),
       get("group_members?select=group_id,profile_id&limit=20000"),
-      get("groups?select=id,name,emoji&limit=5000")]);
+      get("groups?select=id,name,emoji&limit=5000"),
+      get("churches?select=id,name,city,approved,created_by&limit=5000")]);
+    CHURCHES={}; ch.forEach(c=>CHURCHES[c.id]=c);
     PROFILES={}; pr.forEach(p=>PROFILES[p.id]=p);
+    if(ME&&PROFILES[ME.id]){const p=PROFILES[ME.id];ME={...ME,name:p.name,emoji:p.emoji,church_id:p.church_id,city:p.city,church:profChurch(p)||null};store.set("vjb_profile",ME);}
     SCORES=sc.filter(s=>!hidden(PROFILES[s.profile_id]));
     MEMBERS=mem; GROUPS={}; gr.forEach(g=>GROUPS[g.id]=g);
     if(ME){ MYGROUPS=await rpc("my_groups",{p_code:ME.code}).catch(()=>MYGROUPS); }
@@ -645,7 +660,9 @@ function renderHome(){
   if(r.total){gr.style.display="";gr.dataset.scope=pick.key;
     gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
   else gr.style.display="none";
+  $("churchRow").style.display=!ME.church_id&&!store.get("vjb_church_ask")?"":"none";
 }
+$("churchRow").onclick=()=>{EDIT=true;go("onboard");};
 $("playCard").onclick=()=>{ if(allDone()) openRes(); else go("play"); };
 $("maraRow").onclick=()=>go("mara");
 $("groupRow").onclick=()=>{BOARD.scope=$("groupRow").dataset.scope;BOARD.period="day";BOARD.back="home";go("board");};
@@ -915,13 +932,15 @@ async function maraOver(){
 let BOARD={scope:"all",period:"day",back:"home"};
 function scopeList(){
   const l=[{key:"all",icon:"🇸🇪",label:"Hela Sverige"}];
-  if(ME&&ME.church)l.push({key:"church",icon:"⛪",label:ME.church});
+  if(ME&&ME.church_id)l.push({key:"church",icon:"⛪",label:churchLabel(ME.church_id)});
+  if(ME&&ME.city)l.push({key:"city",icon:"📍",label:ME.city.trim()});
   MYGROUPS.forEach(g=>l.push({key:"g"+g.id,icon:g.emoji||"👥",label:g.name}));
   return l;
 }
 function playersIn(scope){
   if(scope==="all")return null;
-  if(scope==="church")return new Set(Object.values(PROFILES).filter(p=>ME&&p.church&&p.church.toLowerCase()===String(ME.church).toLowerCase()).map(p=>p.id));
+  if(scope==="church")return new Set(Object.values(PROFILES).filter(p=>ME&&p.church_id&&p.church_id===ME.church_id).map(p=>p.id));
+  if(scope==="city")return new Set(Object.values(PROFILES).filter(p=>ME&&sameCity(p.city,ME.city)).map(p=>p.id));
   if(scope.startsWith("g")){const gid=+scope.slice(1);return new Set(MEMBERS.filter(m=>m.group_id===gid).map(m=>m.profile_id));}
   return null;
 }
@@ -936,7 +955,7 @@ function aggregate(scope,period){
 }
 function rankIn(sc,period){const rows=aggregate(sc.key,period);const i=ME?rows.findIndex(r=>r.id===ME.id):-1;return {rank:i>=0?i+1:0,total:rows.length}}
 function playerCell(p,clickable){
-  const inner="<span class='em'>"+esc((p&&p.emoji)||"🙂")+"</span><span>"+(clickable?"<u>"+esc(p.name)+"</u> ›":esc(p?p.name:"?"))+(p&&p.church?"<small>"+esc(p.church)+"</small>":"")+"</span>";
+  const inner="<span class='em'>"+esc((p&&p.emoji)||"🙂")+"</span><span>"+(clickable?"<u>"+esc(p.name)+"</u> ›":esc(p?p.name:"?"))+(profChurch(p)||(p&&p.city)?"<small>"+esc(profChurch(p)||p.city)+"</small>":"")+"</span>";
   return clickable?"<button class='pname pl' data-p='"+esc(p.id)+"'>"+inner+"</button>":"<span class='pl'>"+inner+"</span>";
 }
 function renderBoard(){
@@ -951,10 +970,10 @@ function renderBoard(){
   } else if(BOARD.scope==="league"){
     const from=BOARD.period==="day"?TODAY:BOARD.period==="week"?weekStart(TODAY):"0000";
     const per={};
-    SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;const p=PROFILES[s.profile_id];if(!p||!p.church)return;
-      const k=p.church.trim().toLowerCase();const c=per[k]||(per[k]={name:p.church.trim(),pts:0,players:new Set()});c.pts+=s.points;c.players.add(s.profile_id);});
+    SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;const p=PROFILES[s.profile_id];if(!p||!p.church_id||!CHURCHES[p.church_id])return;
+      const k=p.church_id;const c=per[k]||(per[k]={id:k,name:churchLabel(k),pts:0,players:new Set()});c.pts+=s.points;c.players.add(s.profile_id);});
     const rows=Object.values(per).map(c=>({...c,avg:Math.round(c.pts/c.players.size)})).sort((a,b)=>b.avg-a.avg);
-    html=rows.length?"<table><tr><th></th><th>Församling</th><th class='n'>Spelare</th><th class='n'>Snitt</th></tr>"+rows.map((c,i)=>"<tr class='"+(ME&&ME.church&&c.name.toLowerCase()===ME.church.trim().toLowerCase()?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>⛪ "+esc(c.name)+"</td><td class='n'>"+c.players.size+"</td><td class='n'>"+c.avg+" p</td></tr>").join("")+"</table><p class='mut' style='font-size:12px'>Snitt = poäng per spelare under perioden.</p>"
+    html=rows.length?"<table><tr><th></th><th>Församling</th><th class='n'>Spelare</th><th class='n'>Snitt</th></tr>"+rows.map((c,i)=>"<tr class='"+(ME&&c.id===ME.church_id?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>⛪ "+esc(c.name)+"</td><td class='n'>"+c.players.size+"</td><td class='n'>"+c.avg+" p</td></tr>").join("")+"</table><p class='mut' style='font-size:12px'>Snitt = poäng per spelare under perioden.</p>"
       :"<div class='empty'>Inga församlingar har spelat "+(BOARD.period==="day"?"idag":"än")+".</div>";
   } else {
     const rows=aggregate(BOARD.scope,BOARD.period);
@@ -1016,7 +1035,7 @@ function journeyHTML(){
 }
 function renderStats(){
   const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
-  let html="<button class='hello' data-go='profile' style='background:none;border:none;width:100%;text-align:left;color:var(--text);padding:0'>"+avatar(ME,54)+"<div><b>"+esc(ME.name)+"</b><small>"+esc(ME.church||"Ingen församling angiven")+" · Ändra profil ›</small></div></button>";
+  let html="<button class='hello' data-go='profile' style='background:none;border:none;width:100%;text-align:left;color:var(--text);padding:0'>"+avatar(ME,54)+"<div><b>"+esc(ME.name)+"</b><small>"+esc(meLine())+" · Ändra profil ›</small></div></button>";
   html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div>"+
     "<div class='streak' style='margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'><span class='f'>🏃</span><div><b>"+maraBest()+" i rad</b><div class='mut'>Längsta maraton</div></div></div></div>";
   html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
@@ -1047,7 +1066,7 @@ function earnedBadges(){const h=myHistory();return BADGES.filter(b=>badgeState(b
 /* ===== PROFIL ===== */
 function renderProfile(){
   const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
-  let html="<div class='hello'>"+avatar(ME,60)+"<div><b style='font-size:20px'>"+esc(ME.name)+"</b><small>"+esc(ME.church||"Ingen församling angiven")+"</small></div></div>";
+  let html="<div class='hello'>"+avatar(ME,60)+"<div><b style='font-size:20px'>"+esc(ME.name)+"</b><small>"+esc(meLine())+"</small></div></div>";
   html+="<button class='card r2' data-go='stats' style='width:100%;color:var(--text)'><span>🔥 "+sk.cur+(sk.cur===1?" dag":" dagar")+" i rad · "+earnedBadges().length+(earnedBadges().length===1?" märke":" märken")+" · "+bookStatus().filter(x=>x===2).length+(bookStatus().filter(x=>x===2).length===1?" bok":" böcker")+"</span><b>Statistik ›</b></button>";
   html+="<div class='card'><div class='mut'>Din personliga kod – använd den för att logga in på en annan telefon:</div><div class='code'>"+esc(ME.code)+"</div><p class='mut' style='font-size:12px;margin:0'>Dela inte koden med andra, den fungerar som ett lösenord.</p></div>";
   html+="<button class='btn ghost' id='editProfile'>✏️ Ändra namn, församling eller figur</button><button class='linkbtn' id='logout' style='display:block;margin:12px auto'>Logga ut från den här telefonen</button>";
@@ -1063,26 +1082,53 @@ function renderOnboard(){
   $("obTitle").textContent=EDIT?"Ändra profil":"Vem är du?";
   $("obIntro").textContent=EDIT?"Ändringarna syns direkt på topplistorna.":"Skapa din profil. Den syns på topplistan och i dina grupper.";
   $("obLogin").style.display=EDIT?"none":"";$("obCancel").style.display=EDIT?"":"none";
-  if(EDIT&&ME){$("obName").value=ME.name;$("obChurch").value=ME.church||"";PICK=ME.emoji||EMOJIS[0];}
+  if(EDIT&&ME){$("obName").value=ME.name;$("obCity").value=ME.city||"";PICK=ME.emoji||EMOJIS[0];CHPICK=ME.church_id&&CHURCHES[ME.church_id]?{id:ME.church_id}:null;}
+  else if(!EDIT){CHPICK=null;}
+  $("obChurch").value="";$("obSugg").style.display="none";renderChurchSel();
   $("obEmo").innerHTML=EMOJIS.map(e=>"<button data-e='"+e+"' class='"+(e===PICK?"on":"")+"'>"+e+"</button>").join("");
   $("obSave").textContent=EDIT?"Spara ändringar":"Spara profil";
 }
 $("obEmo").onclick=e=>{const b=e.target.closest("button[data-e]");if(!b)return;PICK=b.dataset.e;[...$("obEmo").children].forEach(x=>x.classList.toggle("on",x===b));};
-function churches(){const m={};Object.values(PROFILES).forEach(p=>{if(hidden(p)||!p.church)return;const k=p.church.trim().toLowerCase();m[k]=m[k]||{name:p.church.trim(),n:0};m[k].n++;});return Object.values(m)}
-$("obChurch").oninput=()=>{const q=$("obChurch").value.trim().toLowerCase();const s=$("obSugg");
+let CHPICK=null; // {id} eller {name:nytt namn}
+function renderChurchSel(){
+  const box=$("obChurchSel"),inp=$("obChurch");
+  if(!CHPICK){box.innerHTML="";inp.style.display="";return;}
+  const label=CHPICK.id?churchLabel(CHPICK.id):CHPICK.name+" "+($("obCity").value.trim()||"");
+  const pending=CHPICK.name||(CHPICK.id&&CHURCHES[CHPICK.id]&&!CHURCHES[CHPICK.id].approved);
+  box.innerHTML="<div class='chsel'><span>⛪ "+esc(label)+(pending?"<small>Ny – väntar på godkännande, men räknas redan för dig</small>":"")+"</span><button type='button' aria-label='Ta bort'>✕</button></div>";
+  inp.style.display="none";
+}
+$("obChurchSel").onclick=e=>{if(e.target.closest("button")){CHPICK=null;renderChurchSel();$("obChurch").focus();}};
+function churchList(){return Object.values(CHURCHES).filter(c=>c.approved||(ME&&c.created_by===ME.id))}
+const norm=t=>t.toLowerCase().replace(/\s+/g," ").trim();
+$("obChurch").oninput=()=>{const q=norm($("obChurch").value);const s=$("obSugg");
   if(q.length<2){s.style.display="none";return;}
-  const hits=churches().filter(c=>c.name.toLowerCase().includes(q)&&c.name.toLowerCase()!==q).sort((a,b)=>b.n-a.n).slice(0,4);
-  s.innerHTML=hits.map(c=>"<button data-c='"+esc(c.name)+"'>"+esc(c.name)+"<small>"+c.n+" spelare</small></button>").join("");s.style.display=hits.length?"block":"none";};
-$("obSugg").onclick=e=>{const b=e.target.closest("button[data-c]");if(!b)return;$("obChurch").value=b.dataset.c;$("obSugg").style.display="none";};
-$("obCancel").onclick=()=>{EDIT=false;go("profile");};
+  const cnt={};Object.values(PROFILES).forEach(p=>{if(p.church_id)cnt[p.church_id]=(cnt[p.church_id]||0)+1;});
+  const words=q.split(" ");
+  const hits=churchList().filter(c=>{const l=norm(c.name+" "+c.city);return words.every(w=>l.includes(w));}).sort((a,b)=>(cnt[b.id]||0)-(cnt[a.id]||0)).slice(0,5);
+  s.innerHTML=hits.map(c=>"<button type='button' data-c='"+c.id+"'>"+esc(churchLabel(c.id))+"<small>"+(cnt[c.id]||0)+" spelare</small></button>").join("")+
+    "<button type='button' class='add' data-new='1'>＋ Lägg till ”"+esc($("obChurch").value.trim())+"” som ny församling</button>";
+  s.style.display="block";};
+$("obSugg").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.new){const n=$("obChurch").value.trim();if(n.length<2)return;
+    if(!$("obCity").value.trim()){toast("Fyll i ort först, så vet vi var kyrkan ligger");$("obCity").focus();return;}
+    CHPICK={name:n};}
+  else CHPICK={id:+b.dataset.c};
+  $("obSugg").style.display="none";$("obChurch").value="";renderChurchSel();};
+$("obCity").oninput=()=>{if(CHPICK&&CHPICK.name)renderChurchSel();};
+$("obCancel").onclick=()=>{EDIT=false;store.set("vjb_church_ask",1);go("profile");};
 $("obSave").onclick=async()=>{
-  const name=$("obName").value.trim().replace(/\s+/g," "),church=$("obChurch").value.trim().replace(/\s+/g," ");
+  const name=$("obName").value.trim().replace(/\s+/g," "),city=$("obCity").value.trim().replace(/\s+/g," ");
   if(name.length<2){toast("Skriv minst 2 tecken i namnet");return;}
+  if($("obChurch").value.trim()&&!CHPICK){toast("Välj en församling i listan, eller lägg till en ny");return;}
+  if(CHPICK&&CHPICK.name&&!city){toast("Fyll i ort för den nya församlingen");return;}
   if(!DB_ON){toast("Ingen kontakt med servern");return;}
   $("obSave").disabled=true;
   try{
-    if(EDIT){await rpc("update_profile",{p_code:ME.code,p_name:name,p_church:church,p_emoji:PICK});ME={...ME,name,church:church||null,emoji:PICK};store.set("vjb_profile",ME);EDIT=false;toast("Profilen är sparad");await loadAll();go("profile");}
-    else{const r=await rpc("create_profile",{p_name:name,p_church:church,p_emoji:PICK});ME={id:r[0].id,code:r[0].code,name,church:church||null,emoji:PICK};store.set("vjb_profile",ME);
+    const r=await rpc("save_profile",{p_code:EDIT&&ME?ME.code:null,p_name:name,p_emoji:PICK,p_church_id:CHPICK&&CHPICK.id?CHPICK.id:null,p_city:city||null,p_new_church:CHPICK&&CHPICK.name?CHPICK.name:null,p_new_church_city:CHPICK&&CHPICK.name?city:null});
+    store.set("vjb_church_ask",1);
+    if(EDIT){ME={...ME,name,emoji:PICK,city:city||null,church_id:r[0].out_church_id};store.set("vjb_profile",ME);EDIT=false;await loadAll();toast("Profilen är sparad");go("profile");}
+    else{ME={id:r[0].out_id,code:r[0].out_code,name,emoji:PICK,city:city||null,church_id:r[0].out_church_id,church:null};store.set("vjb_profile",ME);
       await loadAll();await joinFromUrl();toast("Välkommen "+name+"! Din kod är "+ME.code,4000);go("home");}
   }catch(e){toast(e.message);}
   $("obSave").disabled=false;
@@ -1102,6 +1148,7 @@ function renderGroups(){
   h+=sc.map(s=>{const r=rankIn(s,"day");let sub="";
     if(s.key==="all")sub=r.total+" har spelat idag";
     else if(s.key==="church")sub="Din församling · "+playersIn("church").size+" spelare";
+    else if(s.key==="city")sub="Din ort · "+playersIn("city").size+" spelare";
     else{const g=MYGROUPS.find(x=>"g"+x.id===s.key);sub="Kod "+(g?g.code:"")+" · "+playersIn(s.key).size+" medlemmar";}
     return "<button class='grp' data-scope='"+esc(s.key)+"'><span class='ic'>"+esc(s.icon)+"</span><span><b>"+esc(s.label)+"</b><small>"+esc(sub)+"</small></span><span class='rk'>"+(r.rank?r.rank+":a":"–")+"</span></button>";}).join("");
   h+="</div>";
@@ -1146,7 +1193,7 @@ setInterval(tick,1000);
   if(ME){
     // kontrollera att profilen finns kvar
     if(!PROFILES[ME.id]){try{const r=await rpc("login_profile",{p_code:ME.code});if(!r.length){store.del("vjb_profile");ME=null;go("onboard");return;}}catch(e){}}
-    else{const p=PROFILES[ME.id];ME={...ME,name:p.name,church:p.church,emoji:p.emoji};store.set("vjb_profile",ME);}
+    else{const p=PROFILES[ME.id];ME={...ME,name:p.name,church:profChurch(p)||null,emoji:p.emoji,church_id:p.church_id,city:p.city};store.set("vjb_profile",ME);}
     await joinFromUrl();saveScores();
   }
   if(SCREEN!=="play")go(SCREEN);
