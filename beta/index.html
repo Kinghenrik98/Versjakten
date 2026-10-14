@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Versjakten BETA</title>
+<meta name="theme-color" content="#14110f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14110f; --panel:#1e1a17; --cell:#2a2420; --line:#3a322c;
+  --text:#f2ebe1; --muted:#a39785; --green:#5f8f4e; --yellow:#c9a43a; --gray:#4a423b;
+  --accent:#d9a55b; --red:#b0503f;
+  --serif:"Fraunces",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --tile:clamp(34px,5.2dvh,46px);
+  --key:clamp(40px,6dvh,52px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,.c,.pad,.choose{-webkit-user-select:none;user-select:none}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit}
+.screen{display:none;max-width:440px;margin:0 auto;height:100dvh;flex-direction:column;padding:0 14px max(10px,env(safe-area-inset-bottom))}
+.screen.on{display:flex}
+.scroll{flex:1;overflow-y:auto;padding-bottom:16px;-webkit-overflow-scrolling:touch}
+header{flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+header h1{font-family:var(--serif);font-weight:800;font-size:25px;margin:0;letter-spacing:-.5px;display:flex;align-items:center}
+header h1 span{color:var(--accent)}
+.beta{font-family:var(--sans);font-size:9.5px;font-weight:800;letter-spacing:1px;background:var(--red);color:#fff;border-radius:4px;padding:2px 5px;margin-left:5px}
+.iconbtn{background:none;border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:17px}
+.iconbtn.ghost{visibility:hidden}
+h2.t{font-family:var(--serif);font-size:22px;margin:14px 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.mut{color:var(--muted);font-size:13px}
+.btn{display:block;width:100%;height:46px;border:none;border-radius:10px;background:var(--accent);color:#1c160d;font-weight:700;font-size:16px;margin-top:10px}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--text)}
+.btn.sm{height:38px;font-size:14px}
+.btnrow{display:flex;gap:8px}.btnrow .btn{flex:1}
+.av{border-radius:50%;background:var(--cell);display:grid;place-items:center;border:2px solid var(--accent);flex:none}
+/* home */
+.hello{display:flex;align-items:center;gap:12px;margin:14px 0 14px}
+.hello .av{width:50px;height:50px;font-size:27px}
+.hello b{font-size:17px;display:block}.hello small{font-size:12.5px;color:var(--muted)}
+.play{background:linear-gradient(160deg,#e0b066,#c48c3e);color:#1c160d;border-radius:18px;padding:20px 18px;margin-bottom:10px;border:none;width:100%;text-align:left;display:block}
+.play .t{font-family:var(--serif);font-size:26px;font-weight:800}
+.play .s{font-size:13px;margin-top:3px;opacity:.85}
+.play .dots{display:flex;gap:6px;margin-top:12px}.play .dots i{flex:1;height:8px;border-radius:9px;background:#0002}.play .dots i.d{background:#1c160d}
+.play .go{margin-top:14px;background:#1c160d;color:var(--accent);text-align:center;border-radius:12px;padding:12px;font-weight:800;font-size:16px}
+.count{text-align:center;font-size:13px;color:var(--muted);margin:0 0 14px}.count b{color:var(--text)}
+.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.menu button{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;font-size:13px}
+.menu button span{display:block;font-size:26px;margin-bottom:6px}
+.r2{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:9px 0;border-bottom:1px solid var(--line);background:none;border-left:none;border-right:none;border-top:none;width:100%;text-align:left}
+.r2:last-child{border-bottom:none}.r2 b{color:var(--accent)}
+/* game */
+.rounds{flex:none;display:flex;justify-content:center;gap:6px;margin-top:8px}
+.rounds button{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
+.rounds button.done{background:var(--cell);color:var(--text)}
+.rounds button.cur{border-color:var(--accent);color:var(--text)}
+.rounds button b{color:var(--accent)}
+.rounds button:disabled{opacity:.4}
+.verseBox{flex:1 1 auto;min-height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px 2px;position:relative}
+.verse{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.4;text-align:center;margin:0;text-wrap:balance}
+.src{flex:none;text-align:center;font-size:10px;color:#6f6458;letter-spacing:.5px;margin:-4px 0 6px}
+.grid{flex:none;display:flex;flex-direction:column;gap:5px}
+.row{display:grid;grid-template-columns:1fr var(--tile) var(--tile) 8px var(--tile) var(--tile);gap:5px;align-items:center}
+.c{height:var(--tile);border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600}
+.c.book{justify-content:flex-start;padding:0 10px;font-size:14px;white-space:nowrap;overflow:hidden}
+.c.filled{border-color:#6b5e52}
+.row.active .c{border-color:#55493f}
+.row.active .c.book.empty{color:var(--muted);font-weight:400}
+.c.book .bn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.c.book .bx{flex:none;margin-left:6px;font-size:11px;font-weight:700;background:var(--red);color:#fff;border-radius:4px;padding:2px 5px}
+.c.book .bok{flex:none;margin-left:6px;color:#e6f5dc;font-size:14px;font-weight:700}
+.colon{text-align:center;font-weight:700;color:var(--muted)}
+.c.g{background:var(--green);border-color:var(--green)}
+.c.y{background:var(--yellow);border-color:var(--yellow);color:#1c160d}
+.c.x{background:var(--gray);border-color:var(--gray)}
+.c.drop{animation:drop .55s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes drop{0%{transform:translateY(-140px) scale(.9);opacity:0}60%{opacity:1}80%{transform:translateY(0) scale(1.06,.92)}100%{transform:translateY(0) scale(1)}}
+.row.win .c{animation:thud .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes thud{0%{transform:translateY(-160px);opacity:0}70%{transform:translateY(0) scale(1.08,.9);opacity:1}100%{transform:none}}
+.hint{flex:none;min-height:34px;display:flex;align-items:center;justify-content:center;text-align:center;margin:6px 0 5px;font-size:13px;color:var(--muted)}
+.hint .dir{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--accent);border-radius:999px;padding:6px 14px;font-size:15.5px;color:var(--text)}
+.hint .dir b{color:var(--accent);font-size:17px;letter-spacing:.5px}
+.hint .dir .arr{font-size:18px;color:var(--accent)}
+.hint .guide{font-size:15px;color:var(--text)}.hint .guide b{color:var(--accent)}
+.hint .dir.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.pulse{animation:pulse 1.4s ease-in-out infinite;border-color:var(--accent)!important}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,91,.55)}50%{box-shadow:0 0 0 7px rgba(217,165,91,0)}}
+#controls{flex:none}
+.choose{display:block;width:100%;height:var(--key);border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:16px;margin-bottom:7px}
+.pad{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pad button{height:var(--key);border:none;border-radius:8px;background:var(--cell);font-size:19px;font-weight:600}
+.pad button:active{filter:brightness(1.3)}
+.pad .ok{background:var(--green)}.pad .ok:disabled{opacity:.45}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.donebar{flex:none;display:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+.donebar .l1{font-family:var(--serif);font-size:17px}.donebar .l1 b{color:var(--accent)}
+.donebar .l2{font-size:12px;color:var(--muted);margin-top:2px}.donebar .l2 b{color:var(--text);font-variant-numeric:tabular-nums}
+.legend{position:absolute;left:0;right:0;top:4px;z-index:5;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;font-size:13px;text-align:left;box-shadow:0 8px 24px #000a}
+.legend .lx{position:absolute;right:6px;top:4px;background:none;border:none;color:var(--muted);font-size:18px;padding:4px 8px}
+.legend .li{display:flex;align-items:center;gap:8px;margin:5px 0}
+.legend i{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:5px;font-style:normal;font-weight:700;font-size:13px;flex:none}
+.legend .tag{background:var(--red);color:#fff;font-size:10px;border-radius:4px;padding:2px 4px;font-weight:700;flex:none}
+/* tabeller */
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button{flex:1;height:34px;border-radius:8px;border:1px solid var(--line);background:none;font-size:14px;color:var(--muted)}
+.tabs button.on{background:var(--accent);color:#1c160d;border-color:var(--accent);font-weight:700}
+.scopes{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:10px 0 8px;scrollbar-width:none}
+.scopes button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--muted);white-space:nowrap}
+.scopes button.on{background:var(--cell);border-color:var(--accent);color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:1px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.me td{color:var(--accent);font-weight:700}
+.rank{width:24px;color:var(--muted)}
+.pl{display:flex;align-items:center;gap:8px}
+.pl .em{font-size:18px;width:24px;text-align:center}
+.pl small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.pname{background:none;border:none;padding:0;color:inherit;font:inherit;text-align:left}
+.pname u{text-decoration-color:#6b5e52;text-underline-offset:3px}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:14px 0}
+/* modaler */
+.toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:80;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:400px;max-height:88dvh;overflow:auto;padding:18px}
+.sheet h2{font-family:var(--serif);margin:0 0 10px;font-size:22px}
+.sheet p,.sheet li{font-size:14px;line-height:1.55;color:#d9cfc2}
+.inp{width:100%;height:48px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px;padding:0 12px}
+.inp:focus{outline:none;border-color:var(--accent)}
+.fl{font-size:12px;color:var(--muted);margin:12px 0 5px;display:block}
+.sugg{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;margin-top:-4px;background:var(--panel);display:none}
+.sugg button{display:flex;justify-content:space-between;width:100%;padding:10px 12px;font-size:14px;border:none;border-top:1px solid var(--line);background:none;text-align:left}
+.sugg small{color:var(--muted)}
+.emo{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.emo button{height:38px;border-radius:9px;background:var(--cell);border:none;font-size:20px;padding:0}
+.emo button.on{outline:2px solid var(--accent);background:#2c2418}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:21px;letter-spacing:4px;text-align:center;background:var(--bg);border:1px dashed var(--accent);border-radius:10px;padding:10px;margin:8px 0}
+.books{padding:0}
+.books .head{position:sticky;top:0;background:var(--panel);padding:16px 18px 8px;font-family:var(--serif);font-weight:800;font-size:20px;border-bottom:1px solid var(--line)}
+.books h4{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 18px 4px;font-weight:500}
+.books .bk{display:block;width:calc(100% - 36px);margin:0 18px;text-align:left;background:none;border:none;border-left:3px solid var(--accent);padding:11px 12px;font-size:16px;border-bottom:1px solid #2b2521}
+.books .nt .bk{border-left-color:var(--green)}
+.books .bk.dim{color:#5c5249;border-left-color:#3a322c}
+.books .bk.sel{background:var(--cell)}
+.books .pad-b{height:14px}
+.res h2{text-align:center;margin-bottom:2px}
+.res .pts{text-align:center;font-size:42px;font-weight:800;color:var(--accent);font-family:var(--serif);line-height:1.1}
+.res .sub{text-align:center;color:var(--muted);font-size:14px}
+.ptable td{padding:6px 4px}
+.ctx{font-family:var(--serif);font-size:16px;line-height:1.5;background:#2c2418;border-left:3px solid var(--accent);padding:8px 10px;border-radius:4px;margin:6px 0 10px}
+.fact{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
+.fact b{color:var(--muted);font-weight:500}
+a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center}
+/* jämför */
+#cmpTabs .ctab{height:auto;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid #6b5e52;background:var(--cell);color:var(--text);border-radius:10px}
+#cmpTabs .ctab small{font-size:11px;color:var(--muted)}
+#cmpTabs .ctab.on{background:var(--accent);border-color:var(--accent);color:#1c160d}
+#cmpTabs .ctab.on small{color:#3b2c17}
+#cmpTabs .ctab:disabled{opacity:.4}
+#cmpModal{z-index:45}
+.cmpbox{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+.cmph{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}.cmph b{color:var(--accent)}
+.grid.minig{--tile:32px}.grid.minig .c{font-size:15px}.grid.minig .c.book{font-size:12.5px;padding:0 8px}
+/* resa + märken */
+.bar{height:10px;background:var(--cell);border-radius:99px;overflow:hidden;margin:6px 0 2px}.bar div{height:100%;background:var(--green)}
+.sec{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.jb{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.jb button{height:32px;border-radius:5px;background:var(--cell);border:none;font-size:9.5px;color:var(--muted);padding:0}
+.jb button.g{background:var(--green);color:#fff}.jb button.y{background:#6b5a2c;color:#fff}
+.lg{font-size:11px;color:var(--muted);display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge{background:var(--cell);border-radius:12px;padding:10px 6px;text-align:center;font-size:11.5px;color:var(--muted);border:1px solid transparent}
+.badge .e{font-size:28px;display:block;margin-bottom:4px;filter:grayscale(1);opacity:.5}
+.badge.on{background:#2c2418;border-color:var(--accent);color:var(--text)}.badge.on .e{filter:none;opacity:1}
+.streak{display:flex;align-items:center;gap:12px}.streak .f{font-size:42px}.streak b{font-family:var(--serif);font-size:28px;color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:4px}
+.stats b{display:block;font-size:20px}.stats span{font-size:11px;color:var(--muted)}
+.grp{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:none;border-right:none;border-top:none;text-align:left}
+.grp:last-child{border-bottom:none}
+.grp .ic{width:38px;height:38px;border-radius:10px;background:var(--cell);display:grid;place-items:center;font-size:20px;flex:none}
+.grp b{display:block;font-size:14.5px}.grp small{color:var(--muted);font-size:12px}
+.grp .rk{margin-left:auto;color:var(--accent);font-weight:700;font-size:14px;white-space:nowrap}
+.linkbtn{background:none;border:none;color:var(--muted);text-decoration:underline;font-size:12px;padding:6px 0}
+</style>
+</head>
+<body>
+
+<!-- ===== STARTSIDA ===== -->
+<section class="screen" id="s-home">
+  <header>
+    <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
+    <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn" data-go="profile" aria-label="Profil">👤</button>
+  </header>
+  <div class="scroll">
+    <div class="hello" id="hello"></div>
+    <button class="play" id="playCard"></button>
+    <div class="count" id="countToday"></div>
+    <div class="menu">
+      <button data-go="profile"><span>👤</span>Min profil</button>
+      <button data-go="journey"><span>🗺️</span>Bibelresan</button>
+      <button data-go="groups"><span>👥</span>Grupper</button>
+    </div>
+    <div class="card" id="homeGroups"></div>
+    <p class="mut" style="text-align:center;font-size:11px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
+  </div>
+</section>
+
+<!-- ===== SPELET ===== -->
+<section class="screen" id="s-play">
+  <header>
+    <button class="iconbtn" data-go="home" aria-label="Hem">🏠</button>
+    <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
+  </header>
+  <div class="rounds" id="rounds"></div>
+  <div class="verseBox" id="verseBox"><p class="verse" id="verse"></p><div id="legendBox"></div></div>
+  <div class="src">Svenska Folkbibeln 2015</div>
+  <div class="grid" id="grid"></div>
+  <div class="hint" id="hint"></div>
+  <div id="controls">
+    <button class="choose" id="chooseBtn">Välj bok</button>
+    <div class="pad" id="pad"></div>
+  </div>
+  <div class="donebar" id="donebar"></div>
+</section>
+
+<!-- ===== PROFIL ===== -->
+<section class="screen" id="s-profile">
+  <header>
+    <button class="iconbtn" data-go="home">←</button>
+    <h1>Min profil</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll" id="profileBody"></div>
+</section>
+
+<!-- ===== BIBELRESAN ===== -->
+<section class="screen" id="s-journey">
+  <header>
+    <button class="iconbtn" data-go="home">←</button>
+    <h1>Bibelresan</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll" id="journeyBody"></div>
+</section>
+
+<!-- ===== GRUPPER ===== -->
+<section class="screen" id="s-groups">
+  <header>
+    <button class="iconbtn" data-go="home">←</button>
+    <h1>Grupper</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll" id="groupsBody"></div>
+</section>
+
+<!-- ===== TOPPLISTA ===== -->
+<section class="screen" id="s-board">
+  <header>
+    <button class="iconbtn" id="boardBack">←</button>
+    <h1>Topplista</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll">
+    <div class="scopes" id="scopes"></div>
+    <div class="tabs" id="ptabs"><button data-t="day" class="on">Idag</button><button data-t="week">Veckan</button><button data-t="all">Totalt</button></div>
+    <div id="boardBody"></div>
+  </div>
+</section>
+
+<!-- ===== VÄLKOMMEN / PROFIL-FORMULÄR ===== -->
+<section class="screen" id="s-onboard">
+  <header>
+    <button class="iconbtn ghost"></button>
+    <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll">
+    <h2 class="t" id="obTitle">Vem är du?</h2>
+    <p class="mut" id="obIntro">Skapa din profil. Den syns på topplistan och i dina grupper.</p>
+    <label class="fl" for="obName">Namn</label>
+    <input class="inp" id="obName" maxlength="20" placeholder="T.ex. Henke" autocomplete="nickname">
+    <label class="fl" for="obChurch">Församling (valfritt)</label>
+    <input class="inp" id="obChurch" maxlength="60" placeholder="T.ex. Pingstkyrkan Katrineholm" autocomplete="off">
+    <div class="sugg" id="obSugg"></div>
+    <span class="fl">Välj din figur</span>
+    <div class="emo" id="obEmo"></div>
+    <button class="btn" id="obSave">Spara profil</button>
+    <div id="obLogin">
+      <p class="mut" style="text-align:center;margin-top:18px">Har du redan en profil på en annan telefon?</p>
+      <button class="btn ghost" id="obLoginBtn">Logga in med din kod</button>
+    </div>
+    <button class="btn ghost" id="obCancel" style="display:none">Avbryt</button>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="bookModal"><div class="sheet books" id="bookSheet"><div class="head">Välj bok</div><div id="bookList"></div></div></div>
+
+<div class="modal" id="loginModal"><div class="sheet">
+  <h2>Logga in med kod</h2>
+  <p>Skriv koden som visas under "Min profil" på din andra telefon.</p>
+  <input class="inp" id="loginCode" placeholder="T.ex. HENKE-7Q2" autocomplete="off" style="text-transform:uppercase">
+  <button class="btn" id="loginGo">Logga in</button>
+  <button class="btn ghost" data-close>Avbryt</button>
+</div></div>
+
+<div class="modal" id="joinModal"><div class="sheet">
+  <h2>Gå med i grupp</h2>
+  <p>Skriv gruppkoden du har fått, t.ex. <b>ABC-123</b>.</p>
+  <input class="inp" id="joinCode" placeholder="ABC-123" autocomplete="off" style="text-transform:uppercase">
+  <button class="btn" id="joinGo">Gå med</button>
+  <button class="btn ghost" data-close>Avbryt</button>
+</div></div>
+
+<div class="modal" id="createModal"><div class="sheet">
+  <h2>Skapa grupp</h2>
+  <label class="fl" for="newGroupName">Gruppens namn</label>
+  <input class="inp" id="newGroupName" maxlength="40" placeholder="T.ex. Morgongänget">
+  <span class="fl">Symbol</span>
+  <div class="emo" id="grpEmo"></div>
+  <button class="btn" id="createGo">Skapa</button>
+  <button class="btn ghost" data-close>Avbryt</button>
+</div></div>
+
+<div class="modal" id="shareModal"><div class="sheet">
+  <h2 id="shareTitle">Bjud in</h2>
+  <p>Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.</p>
+  <div class="code" id="shareCode"></div>
+  <a class="btn" id="shareWa" target="_blank" rel="noopener">Dela i WhatsApp</a>
+  <button class="btn ghost" id="shareCopy">Kopiera länk</button>
+  <button class="linkbtn" id="shareLeave" style="display:block;margin:10px auto 0">Lämna gruppen</button>
+  <button class="btn ghost" data-close>Stäng</button>
+</div></div>
+
+<div class="modal" id="ctxModal"><div class="sheet" id="ctxBody"></div></div>
+
+<div class="modal" id="resModal"><div class="sheet" id="resBody"></div></div>
+
+<div class="modal" id="cmpModal"><div class="sheet">
+  <h2 id="cmpTitle">Jämför</h2>
+  <div class="tabs" id="cmpTabs"></div>
+  <p class="mut" style="text-align:center;margin:-2px 0 8px;font-size:12px">👆 Tryck på en vers för att byta (deras – dina poäng)</p>
+  <p class="mut" style="margin:0 0 8px">Rätt svar: <b id="cmpRef" style="color:var(--accent);font-family:var(--serif)"></b></p>
+  <div id="cmpBody"></div>
+  <button class="btn ghost" data-close>Tillbaka</button>
+</div></div>
+
+<div class="modal" id="infoModal"><div class="sheet">
+  <h2>Så spelar du</h2>
+  <p>Varje dag kommer <b>tre nya verser</b>, samma för alla. Gissa <b>bok, kapitel och vers</b> på 5 försök per vers.</p>
+  <ul>
+    <li>Välj bok och skriv kapitel och vers med två siffror var. Kapitel 6 vers 3 skrivs <b>06:03</b>.</li>
+    <li><b style="color:var(--green)">Grönt</b>: rätt bok, eller rätt siffra på <b>rätt plats</b>.</li>
+    <li><b style="color:var(--yellow)">Gult</b>: siffran <b>finns</b> i svaret, men på <b>fel plats</b>.</li>
+    <li><b>Grått</b>: siffran finns inte (där).</li>
+    <li>Efter varje miss får du veta om versen står <b>tidigare eller senare</b> i Bibeln.</li>
+  </ul>
+  <h2>Poäng</h2>
+  <table class="ptable">
+    <tr><td>Rätt på försök 1 / 2 / 3 / 4 / 5</td><td class="n">50 / 35 / 25 / 15 / 10 p</td></tr>
+    <tr><td>Ej klarat, men rätt bok och kapitel</td><td class="n">8 p</td></tr>
+    <tr><td>Ej klarat, men rätt bok</td><td class="n">5 p</td></tr>
+  </table>
+  <button class="btn ghost" id="showLegendBtn">Visa färgförklaringen</button>
+  <p style="font-size:12px;color:var(--muted)">Bibeltexten är hämtad från Svenska Folkbibeln 2015 (SFB15), © Stiftelsen Svenska Folkbibeln.</p>
+  <button class="btn ghost" data-close>Stäng</button>
+</div></div>
+
+<script>
+/* ===== INSTÄLLNINGAR ===== */
+const SUPABASE_URL = "https://qccrlaxzfiddgfsxozim.supabase.co";
+const SUPABASE_KEY = "sb_publishable_q_6FHlE8r41gQqtgTwNn7g_1QPN0zbs";
+const START_DAY = "2026-10-14";
+/* ========================= */
+const DATA = {"books":["1 Mosebok","2 Mosebok","3 Mosebok","4 Mosebok","5 Mosebok","Josua","Domarboken","Rut","1 Samuelsboken","2 Samuelsboken","1 Kungaboken","2 Kungaboken","1 Krönikeboken","2 Krönikeboken","Esra","Nehemja","Ester","Job","Psaltaren","Ordspråksboken","Predikaren","Höga visan","Jesaja","Jeremia","Klagovisorna","Hesekiel","Daniel","Hosea","Joel","Amos","Obadja","Jona","Mika","Nahum","Habackuk","Sefanja","Haggai","Sakarja","Malaki","Matteus","Markus","Lukas","Johannes","Apostlagärningarna","Romarbrevet","1 Korinthierbrevet","2 Korinthierbrevet","Galaterbrevet","Efesierbrevet","Filipperbrevet","Kolosserbrevet","1 Thessalonikerbrevet","2 Thessalonikerbrevet","1 Timotheosbrevet","2 Timotheosbrevet","Titusbrevet","Filemonbrevet","Hebreerbrevet","Jakobsbrevet","1 Petrusbrevet","2 Petrusbrevet","1 Johannesbrevet","2 Johannesbrevet","3 Johannesbrevet","Judasbrevet","Uppenbarelseboken"],"counts":[[31,25,24,26,32,22,24,22,29,32,32,20,18,24,21,16,27,33,38,18,34,24,20,67,34,35,46,22,35,43,55,32,20,31,29,43,36,30,23,23,57,38,34,34,28,34,31,22,33,26],[22,25,22,31,23,30,25,32,35,29,10,51,22,31,27,36,16,27,25,26,36,31,33,18,40,37,21,43,46,38,18,35,23,35,35,38,29,31,43,38],[17,16,17,35,19,30,38,36,24,20,47,8,59,57,33,34,16,30,37,27,24,33,44,23,55,46,34],[54,34,51,49,31,27,89,26,23,36,35,16,33,45,41,50,13,32,22,29,35,41,30,25,18,65,23,31,40,16,54,42,56,29,34,13],[46,37,29,49,33,25,26,20,29,22,32,32,18,29,23,22,20,22,21,20,23,30,25,22,19,19,26,68,29,20,30,52,29,12],[18,24,17,24,15,27,26,35,27,43,23,24,33,15,63,10,18,28,51,9,45,34,16,33],[36,23,31,24,31,40,25,35,57,18,40,15,25,20,20,31,13,31,30,48,25],[22,23,18,22],[28,36,21,22,12,21,17,22,27,27,15,25,23,52,35,23,58,30,24,42,15,23,29,22,44,25,12,25,11,31,13],[27,32,39,12,25,23,29,18,13,19,27,31,39,33,37,23,29,33,43,26,22,51,39,25],[53,46,28,34,18,38,51,66,28,29,43,33,34,31,34,34,24,46,21,43,29,53],[18,25,27,44,27,33,20,29,37,36,21,21,25,29,38,20,41,37,37,21,26,20,37,20,30],[54,55,24,43,26,81,40,40,44,14,47,40,14,17,29,43,27,17,19,8,30,19,32,31,31,32,34,21,30],[17,18,17,22,14,42,22,18,31,19,23,16,22,15,19,14,19,34,11,37,20,12,21,27,28,23,9,27,36,27,21,33,25,33,27,23],[11,70,13,24,17,22,28,36,15,44],[11,20,32,23,19,19,73,18,38,39,36,47,31],[22,23,15,17,14,14,10,17,32,3],[22,13,26,21,27,30,21,22,35,22,20,25,28,22,35,22,16,21,29,29,34,30,17,25,6,14,23,28,25,31,40,22,33,37,16,33,24,41,30,24,34,17],[6,12,8,8,12,10,17,9,20,18,7,8,6,7,5,11,15,50,14,9,13,31,6,10,22,12,14,9,11,12,24,11,22,22,28,12,40,22,13,17,13,11,5,26,17,11,9,14,20,23,19,9,6,7,23,13,11,11,17,12,8,12,11,10,13,20,7,35,36,5,24,20,28,23,10,12,20,72,13,19,16,8,18,12,13,17,7,18,52,17,16,15,5,23,11,13,12,9,9,5,8,28,22,35,45,48,43,13,31,7,10,10,9,8,18,19,2,29,176,7,8,9,4,8,5,6,5,6,8,8,3,18,3,3,21,26,9,8,24,13,10,7,12,15,21,10,20,14,9,6],[33,22,35,27,23,35,27,36,18,32,31,28,25,35,33,33,28,24,29,30,31,29,35,34,28,28,27,28,27,33,31],[18,26,22,16,20,12,29,17,18,20,10,14],[17,17,11,16,16,13,13,14],[31,22,26,6,30,13,25,22,21,34,16,6,22,32,9,14,14,7,25,6,17,25,18,23,12,21,13,29,24,33,9,20,24,17,10,22,38,22,8,31,29,25,28,28,25,13,15,22,26,11,23,15,12,17,13,12,21,14,21,22,11,12,19,12,25,24],[19,37,25,31,31,30,34,22,26,25,23,17,27,22,21,21,27,23,15,18,14,30,40,10,38,24,22,17,32,24,40,44,26,22,19,32,21,28,18,16,18,22,13,30,5,28,7,47,39,46,64,34],[22,22,66,22,22],[28,10,27,17,17,14,27,18,11,22,25,28,23,23,8,63,24,32,14,49,32,31,49,27,17,21,36,26,21,26,18,32,33,31,15,38,28,23,29,49,26,20,27,31,25,24,23,35],[21,49,30,37,31,28,28,27,27,21,45,13],[11,23,5,19,15,11,16,14,17,15,12,14,16,9],[20,32,21],[15,16,15,13,27,14,17,14,15],[21],[17,10,10,11],[16,13,12,13,15,16,20],[15,13,19],[17,20,19],[18,15,20],[15,23],[21,13,10,14,11,15,14,23,17,12,17,14,9,21],[14,17,18,6],[25,23,17,25,48,34,29,34,38,42,30,50,58,36,39,28,27,35,30,34,46,46,39,51,46,75,66,20],[45,28,35,41,43,56,37,38,50,52,33,44,37,72,47,20],[80,52,38,44,39,49,50,56,62,42,54,59,35,35,32,31,37,43,48,47,38,71,56,53],[51,25,36,54,47,71,53,59,41,42,57,50,38,31,27,33,26,40,42,31,25],[26,47,26,37,42,15,60,40,43,48,30,25,52,28,41,40,34,28,41,38,40,30,35,27,27,32,44,31],[32,29,31,25,21,23,25,39,33,21,36,21,14,23,33,27],[31,16,23,21,13,20,40,13,27,33,34,31,13,40,58,24],[24,17,18,18,21,18,16,24,15,18,33,21,14],[24,21,29,31,26,18],[23,22,21,32,33,24],[30,30,21,23],[29,23,25,18],[10,20,13,18,28],[12,17,18],[20,15,16,16,25,21],[18,26,17,22],[16,15,15],[25],[14,18,19,16,14,20,28,13,28,39,40,29,25],[27,26,18,17,20],[25,25,22,19,14],[21,22,18],[10,29,24,21,21],[13],[15],[25],[20,29,22,11,14,17,17,13,21,11,19,18,18,20,8,21,18,24,21,15,27,21]],"verses":[[47,2,20,"och nu lever inte längre jag, utan Kristus lever i mig. Och det liv jag nu lever i min kropp, det lever jag i tron på Guds Son som har älskat mig och utgett sig för mig."],[40,4,39,"Han vaknade och talade strängt till vinden och sade till sjön: \"Tig! Var tyst!\" Då lade sig vinden och det blev alldeles stilla."],[1,14,14,"Herren ska strida för er, och ni ska hålla er stilla."],[48,6,1,"Ni barn, lyd era föräldrar i Herren, för det är rätt och riktigt."],[40,1,17,"Jesus sade till dem: \"Kom och följ mig, så ska jag göra er till människofiskare.\""],[11,6,16,"Han svarade: ”Var inte rädd! De som är med oss är fler än de som är med dem.”"],[42,15,13,"Ingen har större kärlek än den som ger sitt liv för sina vänner."],[19,31,10,"Vem kan finna en driftig hustru? Långt mer än pärlor är hon värd."],[44,1,16,"Jag skäms inte för evangeliet. Det är en Guds kraft till frälsning för var och en som tror, juden först men också greken."],[32,7,18,"Vem är en Gud som du, som förlåter skuld och inte tillräknar synd hos dem som är kvar av din arvedel? Han håller inte kvar sin vrede för evigt, för han har sin glädje i nåd."],[18,37,5,"Anförtro din väg åt Herren och lita på honom. Han ska göra det."],[42,17,17,"Helga dem i sanningen: ditt ord är sanning."],[24,3,22,"Det är Herrens nåd att det inte är ute med oss, att det inte är slut med hans barmhärtighet."],[65,3,20,"Se, jag står vid dörren och knackar. Om någon hör min röst och öppnar dörren, ska jag gå in till honom och hålla måltid med honom och han med mig."],[59,5,8,"Var nyktra och vakna. Er fiende djävulen går omkring som ett rytande lejon och söker efter någon att sluka."],[46,5,7,"Vi lever här i tro, utan att se."],[20,3,1,"Allt har sin tid, det finns en tid för allt som sker under himlen:"],[45,16,14,"Låt allt hos er ske i kärlek."],[49,4,13,"Allt förmår jag i honom som ger mig kraft."],[42,1,1,"I begynnelsen var Ordet, och Ordet var hos Gud, och Ordet var Gud."],[0,15,6,"Och Abram trodde på Herren, och han räknade honom det till rättfärdighet."],[39,5,14,"Ni är världens ljus. En stad som ligger på ett berg kan inte döljas."],[48,4,32,"Var i stället goda och barmhärtiga mot varandra och förlåt varandra, så som Gud i Kristus har förlåtit er."],[42,20,31,"Men dessa har blivit nerskrivna för att ni ska tro att Jesus är Messias, Guds Son, och för att ni genom tron ska ha liv i hans namn."],[44,8,28,"Vi vet att allt samverkar till det bästa för dem som älskar Gud, som är kallade efter hans beslut."],[44,10,9,"För om du med din mun bekänner att Jesus är Herren och i ditt hjärta tror att Gud har uppväckt honom från de döda, ska du bli frälst."],[40,9,24,"Genast ropade barnets far: \"Jag tror. Hjälp min otro!\""],[23,1,5,"”Innan jag formade dig i moderlivet utvalde jag dig, och innan du kom fram ur modersskötet helgade jag dig. Jag satte dig till profet för folken.”"],[49,4,8,"För övrigt, bröder: allt som är sant och värdigt, rätt och rent, allt som är värt att älska och uppskatta, allt som kallas dygd och förtjänar beröm, tänk på allt sådant."],[61,3,1,"Se vilken kärlek Fadern har skänkt oss: att vi får kallas Guds barn! Och det är vi också. Världen känner oss inte, eftersom den inte har lärt känna honom."],[57,4,16,"Låt oss därför frimodigt gå fram till nådens tron för att få barmhärtighet och finna nåd till hjälp i rätt tid."],[39,16,26,"För vad hjälper det en människa om hon vinner hela världen men förlorar sin själ? Eller vad kan en människa ge till lösen för sin själ?"],[40,9,23,"Jesus sade till honom: \"Om du kan? Allt är möjligt för den som tror.\""],[39,5,44,"Jag säger er: Älska era fiender och be för dem som förföljer er."],[39,22,37,"Han svarade: \"Du ska älska Herren din Gud av hela ditt hjärta och av hela din själ och av hela ditt förstånd."],[47,5,22,"Andens frukt däremot är kärlek, glädje, frid, tålamod, vänlighet, godhet, trohet,"],[18,29,11,"Herren ger styrka åt sitt folk, Herren välsignar sitt folk med frid."],[41,23,34,"Men Jesus sade: \"Far, förlåt dem, för de vet inte vad de gör.\" Och de delade hans kläder mellan sig och kastade lott om dem."],[17,1,21,"Han sade: Naken kom jag ur min moders liv, och naken ska jag återvända dit. Herren gav och Herren tog. Lovat är Herrens namn!"],[39,6,34,"Bekymra er alltså inte för morgondagen, för morgondagen bär sitt eget bekymmer. Var dag har nog av sin egen plåga."],[0,12,2,"Där ska jag göra dig till ett stort folk. Jag ska välsigna dig och göra ditt namn stort, och du ska bli en välsignelse."],[58,2,17,"Så är också tron i sig själv död när den är utan gärningar."],[57,13,5,"Lev inte för pengar, utan nöj er med vad ni har. Gud har själv sagt: Jag ska aldrig lämna dig eller överge dig."],[10,3,9,"Ge din tjänare ett lyhört hjärta, så att han kan vara domare för ditt folk och skilja mellan gott och ont. Vem kan annars vara domare för detta ditt stora folk?”"],[43,3,19,"Ångra er därför och vänd om, så att era synder blir utplånade"],[1,20,12,"Hedra din far och din mor, så att du får leva länge i det land som Herren din Gud ger dig."],[41,2,52,"Och Jesus växte i vishet, ålder och välbehag inför Gud och människor."],[22,43,1,"Men så säger nu Herren, han som har skapat dig, Jakob, han som har format dig, Israel: Var inte rädd, för jag har återlöst dig, jag har kallat dig vid namn, du är min."],[46,5,17,"Om någon är i Kristus är han alltså en ny skapelse. Det gamla är förbi, något nytt har kommit."],[53,6,6,"Men gudsfruktan förenad med förnöjsamhet är verkligen en stor vinst."],[45,15,58,"Stå därför fasta och orubbliga, mina älskade bröder, och arbeta alltid hängivet för Herren. Ni vet ju att er möda i Herren inte är förgäves."],[18,16,8,"Jag har alltid Herren för ögonen. Han är vid min högra sida, jag vacklar inte."],[42,8,32,"Ni ska lära känna sanningen, och sanningen ska göra er fria.\""],[18,95,6,"Kom, låt oss falla ner och tillbe, böja knä för Herren vår Skapare,"],[20,3,11,"Allt har han gjort skönt i sin tid. Även evigheten har han lagt i människornas hjärtan. Ändå kan de inte förstå Guds verk från början till slut."],[49,4,7,"Då ska Guds frid, som övergår allt förstånd, bevara era hjärtan och era tankar i Kristus Jesus."],[0,1,27,"Och Gud skapade människan till sin avbild, till Guds avbild skapade han henne, till man och kvinna skapade han dem."],[44,5,1,"När vi nu har förklarats rättfärdiga av tro, har vi frid med Gud genom vår Herre Jesus Kristus."],[39,19,14,"Då sade Jesus: \"Låt barnen komma till mig och hindra dem inte, för himmelriket tillhör sådana som de.\""],[23,29,13,"Ni ska söka mig, och ni ska också finna mig om ni söker mig av hela ert hjärta."],[58,1,2,"Räkna det som ren glädje, mina bröder, när ni råkar ut för olika slags prövningar."],[53,6,10,"Kärlek till pengar är en rot till allt ont. I sitt begär efter pengar har vissa kommit bort från tron och vållat sig själva mycket lidande."],[65,22,13,"Jag är A och O, den förste och den siste, begynnelsen och änden."],[22,40,8,"Gräset vissnar, blomman faller av, men vår Guds ord består för evigt.\""],[0,1,31,"Gud såg på allt som han hade gjort, och se, det var mycket gott. Och det blev afton och det blev morgon, den sjätte dagen."],[45,10,31,"Alltså: om ni äter eller dricker eller vad ni än gör, så gör allt till Guds ära."],[18,27,4,"Ett har jag begärt av Herren, detta söker jag: att få bo i Herrens hus i alla mina livsdagar, för att se Herrens ljuvlighet och söka honom i hans tempel."],[3,6,24,"Herren välsigne dig och bevare dig."],[18,37,23,"Med Herren blir en mans steg fasta och han gläds över hans väg."],[22,60,1,"Stå upp, stråla, för ditt ljus kommer och Herrens härlighet går upp över dig."],[44,6,23,"Syndens lön är döden, men Guds gåva är evigt liv i Kristus Jesus, vår Herre."],[19,14,12,"En väg kan verka rätt för en människa, men till slut leda till döden."],[17,38,4,"Var var du när jag lade jordens grund? Svara, om du vet och förstår."],[29,5,24,"Men låt rätten flöda fram som vatten och rättfärdigheten som en ständigt rinnande ström."],[44,5,3,"Men inte bara det, vi gläder oss också mitt i våra lidanden, för vi vet att lidandet ger tålamod,"],[18,28,7,"Herren är min styrka och min sköld. På honom litar mitt hjärta, jag får hjälp och mitt hjärta jublar. Honom vill jag tacka med min sång."],[39,9,37,"Och han sade till sina lärjungar: \"Skörden är stor men arbetarna är få."],[45,15,55,"Du död, var är din seger? Du död, var är din udd?"],[45,13,13,"Så består nu tro, hopp och kärlek, dessa tre, och störst av dem är kärleken."],[41,6,38,"Ge, så ska ni få. Ett gott mått, packat, skakat och rågat, ska ni få i er famn. Med det mått som ni mäter med ska det mätas upp åt er.\""],[18,91,2,"han säger till Herren: \"Min tillflykt och min borg, min Gud som jag litar på.\""],[17,42,2,"Jag vet att du kan göra allt, inget du beslutar är omöjligt för dig."],[39,5,6,"Saliga är de som hungrar och törstar efter rättfärdighet, för de ska bli mättade."],[46,9,7,"Var och en ska ge vad han har bestämt i sitt hjärta, inte med olust eller tvång, för Gud älskar en glad givare."],[50,4,2,"Var uthålliga i bönen. Vaka och be med tacksägelse."],[60,1,3,"Hans gudomliga makt har skänkt oss allt vi behöver för liv och gudsfruktan genom kunskapen om honom som har kallat oss med sin härlighet och godhet."],[18,23,4,"Även om jag vandrar i dödsskuggans dal fruktar jag inget ont, för du är med mig. Din käpp och stav, de tröstar mig."],[43,2,42,"De höll troget fast vid apostlarnas undervisning och vid gemenskapen, brödsbrytelsen och bönerna."],[0,2,18,"Herren Gud sade: ”Det är inte bra att mannen är ensam. Jag ska göra en medhjälpare åt honom, en som är hans like.”"],[21,2,4,"Han har fört mig in i vinsalen, kärleken är hans baner över mig."],[39,19,26,"Jesus såg på dem och sade: \"För människor är det omöjligt. Men för Gud är allting möjligt.\""],[23,31,33,"Nej, detta är förbundet som jag efter denna tid ska sluta med Israels hus, säger Herren: Jag ska lägga min lag i deras inre och skriva den i deras hjärtan. Jag ska vara deras Gud, och de ska vara mitt folk."],[35,3,17,"Herren din Gud bor i dig, en hjälte som frälser. Han gläder sig över dig med lust, han tiger stilla i sin kärlek, han fröjdas över dig med jubel.”"],[42,14,1,"Låt inte era hjärtan oroas. Tro på Gud och tro på mig."],[41,24,6,"Han är inte här, han har uppstått! Kom ihåg vad han sade till er medan han fortfarande var i Galileen:"],[19,3,6,"Räkna med honom på alla dina vägar, så ska han jämna dina stigar."],[39,4,19,"Han sade till dem: \"Kom och följ mig, så ska jag göra er till människofiskare.\""],[22,40,29,"Han ger den trötte kraft och ökar den maktlöses styrka."],[45,2,9,"Men som Skriften säger: Vad ögat inte sett och örat inte hört och människans hjärta inte anat, det har Gud berett åt dem som älskar honom."],[41,6,27,"Men till er som lyssnar säger jag: Älska era fiender och gör gott mot dem som hatar er."],[22,6,8,"Och jag hörde Herrens röst. Han sade: \"Vem ska jag sända? Och vem vill vara vår budbärare?\" Då sade jag: \"Här är jag, sänd mig!\""],[65,1,8,"Jag är A och O, säger Herren Gud, han som är och som var och som kommer, den Allsmäktige."],[39,6,3,"Nej, när du ger en gåva, låt inte din vänstra hand veta vad den högra gör."],[18,73,26,"När min kropp och mitt hjärta ger upp, är Gud mitt hjärtas klippa och min lott för evigt."],[18,25,4,"Herre, visa mig dina vägar, lär mig dina stigar."],[57,13,2,"Glöm inte att visa gästfrihet, för genom gästfrihet har några fått änglar till gäster utan att veta om det."],[45,1,18,"Ordet om korset är en dårskap för dem som går förlorade, men för oss som blir frälsta är det en Guds kraft."],[20,12,13,"Detta är slutsatsen, när allt blivit hört: Frukta Gud och håll hans bud, det gäller alla människor."],[19,3,5,"Förtrösta på Herren av hela ditt hjärta, förlita dig inte på ditt förstånd."],[22,40,31,"Men de som hoppas på Herren får ny kraft, de lyfter med vingar som örnar. De springer utan att mattas, de vandrar utan att bli trötta."],[41,15,7,"Jag säger er: På samma sätt blir det större glädje i himlen över en enda syndare som omvänder sig än över nittionio rättfärdiga som inte behöver någon omvändelse."],[42,13,35,"Om ni har kärlek till varandra ska alla förstå att ni är mina lärjungar.\""],[22,41,10,"Var inte rädd, för jag är med dig, se dig inte ängsligt om, för jag är din Gud. Jag styrker dig, jag hjälper dig, jag stöder dig med min rättfärdighets högra hand."],[59,3,15,"Herren Kristus ska ni hålla helig i era hjärtan. Var ständigt beredda att svara var och en som ber er förklara det hopp ni har."],[39,18,20,"För där två eller tre är samlade i mitt namn, där är jag mitt ibland dem.\""],[18,37,4,"och ha din glädje i Herren. Då ska han ge dig vad ditt hjärta begär."],[0,50,20,"Ni menade ont mot mig, men Gud har menat något gott genom det, för att bevara många människor vid liv."],[42,1,12,"Men åt alla som tog emot honom gav han rätten att bli Guds barn, åt dem som tror på hans namn."],[37,9,9,"Fröjda dig stort, dotter Sion! Jubla, dotter Jerusalem! Se, din kung kommer till dig, rättfärdig och segerrik är han. Han kommer ödmjuk, ridande på en åsna, på en åsninnas föl."],[53,2,5,"Gud är en, och en är medlare mellan Gud och människor: människan Kristus Jesus,"],[36,2,9,"Mitt är silvret och mitt är guldet, säger Herren Sebaot."],[0,1,3,"Gud sade: ”Varde ljus!” Och det blev ljus."],[12,16,34,"Tacka Herren, för han är god, evig är hans nåd."],[65,22,20,"Han som betygar detta säger: \"Ja, jag kommer snart.\" Amen, kom Herre Jesus!"],[0,12,3,"Jag ska välsigna dem som välsignar dig och förbanna den som förbannar dig. I dig ska jordens alla släkten bli välsignade.”"],[19,16,18,"Stolthet går före undergång och högmod går före fall."],[58,1,19,"Detta vet ni, mina älskade bröder. Varje människa ska vara snar att höra, sen att tala och sen till vrede,"],[7,1,16,"Men Rut svarade: ”Tvinga mig inte att lämna dig och vända tillbaka från dig. För dit du går, går också jag, och där du stannar, stannar jag. Ditt folk är mitt folk och din Gud är min Gud."],[2,19,18,"Du ska inte hämnas och inte hysa agg mot någon i ditt folk, utan du ska älska din nästa som dig själv. Jag är Herren."],[49,3,14,"och jagar mot målet för att vinna segerpriset, Guds kallelse till himlen i Kristus Jesus."],[39,6,10,"Låt ditt rike komma. Låt din vilja ske, på jorden som i himlen."],[47,6,9,"Låt oss inte tröttna på att göra gott, för när tiden är inne får vi skörda om vi inte ger upp."],[57,12,1,"När vi nu har en så stor sky av vittnen omkring oss, låt oss då lägga bort allt som tynger och särskilt synden som snärjer oss så hårt, och löpa uthålligt i det lopp vi har framför oss."],[42,11,25,"Jesus sade: \"Jag är uppståndelsen och livet. Den som tror på mig ska leva om han än dör,"],[19,11,2,"När högfärd kommer följer förakt, men vishet finns hos de ödmjuka."],[39,17,20,"Han svarade: \"Därför att ni har så lite tro. Jag säger er sanningen: Om ni har tro, bara som ett senapskorn, ska ni säga till det här berget: Flytta dig dit bort, och det kommer att flytta sig. Ingenting kommer att vara omöjligt för er.\""],[39,28,19,"Gå därför ut och gör alla folk till lärjungar! Döp dem i Faderns och Sonens och den helige Andes namn"],[5,1,9,"Har jag inte befallt dig att vara stark och frimodig? Var inte rädd eller förfärad, för Herren din Gud är med dig vart än du går.”"],[19,18,10,"Herrens namn är ett starkt torn, den rättfärdige skyndar dit och får skydd."],[18,23,2,"Han låter mig vila på gröna ängar, han för mig till vatten där jag finner ro."],[42,3,16,"Så älskade Gud världen att han utgav sin enfödde Son, för att var och en som tror på honom inte ska gå förlorad utan ha evigt liv."],[47,6,7,"Bedra inte er själva, Gud lurar man inte: det människan sår ska hon också skörda."],[40,12,31,"Sedan kommer detta: Du ska älska din nästa som dig själv. Inget annat bud är större än dessa.\""],[39,4,4,"Jesus svarade: \"Det står skrivet: Människan lever inte bara av bröd, utan av varje ord som utgår från Guds mun.\""],[5,24,15,"Men om ni inte vill tjäna Herren, så välj i dag vem ni vill tjäna, antingen de gudar som era fäder tjänade på andra sidan floden eller de gudar som dyrkas av amoreerna i vilkas land ni bor. Men jag och mitt hus, vi vill tjäna Herren.”"],[25,37,4,"Då sade han till mig: ”Profetera över dessa ben och säg till dem: Ni förtorkade ben, hör Herrens ord:"],[20,1,9,"Det som har hänt kommer att hända igen, det som är gjort kommer att göras igen. Det finns inget nytt under solen."],[18,96,1,"Sjung till Herren en ny sång, sjung till Herren, hela jorden!"],[0,4,9,"Och Herren sade till Kain: ”Var är din bror Abel?” Han svarade: ”Jag vet inte. Ska jag hålla reda på min bror?”"],[18,1,3,"Han är som ett träd, planterat vid vattenbäckar, som bär sin frukt i rätt tid och vars löv inte vissnar. Och allt han gör, det lyckas väl."],[1,34,6,"Och Herren gick förbi honom där han stod och ropade: ”Herren! Herren! – en barmhärtig och nådig Gud, sen till vrede och stor i nåd och sanning."],[47,5,1,"Till denna frihet har Kristus gjort oss fria. Stå därför fasta och låt er inte tvingas in under slavoket igen."],[37,4,6,"Då sade han till mig: ”Här är Herrens ord till Serubbabel: Varken genom styrka eller makt, utan genom min Ande, säger Herren Sebaot."],[42,8,36,"Om nu Sonen gör er fria blir ni verkligen fria."],[6,6,12,"För honom uppenbarade sig Herrens ängel och sade till honom: ”Herren är med dig, du tappre stridsman!”"],[0,1,1,"I begynnelsen skapade Gud himmel och jord."],[48,3,20,"Han som kan göra långt mycket mer än allt vi ber om eller tänker oss genom den kraft som verkar i oss,"],[54,4,7,"Jag har kämpat den goda kampen, jag har fullbordat loppet, jag har bevarat tron."],[57,11,6,"Utan tro är det omöjligt att behaga Gud, för den som kommer till Gud måste tro att han finns och att han lönar dem som söker honom."],[18,16,11,"Du visar mig livets väg. Jag mättas av glädje inför ditt ansikte, av ljuvlighet på din högra sida för evigt."],[42,14,27,"Frid lämnar jag åt er. Min frid ger jag er. Jag ger er inte det som världen ger. Låt inte era hjärtan oroas och tappa inte modet."],[40,12,30,"Och du ska älska Herren din Gud av hela ditt hjärta, av hela din själ, av hela ditt förstånd och av hela din kraft."],[23,33,3,"Ropa till mig, så ska jag svara dig och låta dig höra om stora och ofattbara ting som du inte känner till."],[49,4,6,"Bekymra er inte för något, utan låt Gud få veta alla era önskningar genom bön och åkallan med tacksägelse."],[20,9,10,"Allt som din hand kan göra ska du göra med kraft, för i graven dit du går finns varken gärning eller planer eller kunskap eller vishet."],[42,15,12,"Detta är mitt bud: att ni ska älska varandra så som jag har älskat er."],[42,8,12,"Jesus talade till dem igen och sade: \"Jag är världens ljus. Den som följer mig ska inte vandra i mörkret utan ha livets ljus.\""],[42,3,17,"Gud har inte sänt sin Son till världen för att döma världen, utan för att världen ska bli frälst genom honom."],[43,2,38,"Petrus svarade dem: \"Omvänd er och låt er alla döpas i Jesu Kristi namn, så att era synder blir förlåtna. Då får ni den helige Ande som gåva."],[39,7,1,"Döm inte, så blir ni inte dömda."],[19,31,30,"Charm är bedräglig och skönhet förgänglig, men prisas ska den kvinna som vördar Herren."],[39,5,16,"På samma sätt ska ert ljus lysa för människorna, så att de ser era goda gärningar och prisar er Far i himlen."],[41,15,24,"för min son var död men har fått liv igen, han var förlorad men är återfunnen. Och festen började."],[0,3,9,"Men Herren Gud kallade på mannen och sade till honom: ”Var är du?”"],[1,15,2,"Herren är min styrka och min lovsång, han blev min frälsning. Han är min Gud, jag vill prisa honom, min fars Gud, jag vill upphöja honom."],[58,1,22,"Var ordets görare, inte bara dess hörare, annars bedrar ni er själva."],[45,10,13,"Ingen annan frestelse har drabbat er än vad människor får möta. Och Gud är trofast, han ska inte tillåta att ni frestas över er förmåga. Samtidigt med frestelsen kommer han också att ge en utväg, så att ni kan härda ut."],[59,1,3,"Välsignad är vår Herre Jesu Kristi Gud och Far! I sin stora barmhärtighet har han genom Jesu Kristi uppståndelse från de döda fött oss på nytt till ett levande hopp,"],[44,15,13,"Må nu hoppets Gud fylla er med all glädje och frid i tron, så att ni överflödar i hoppet genom den helige Andes kraft."],[39,6,9,"Så ska ni be: Vår Far i himlen, låt ditt namn bli helgat."],[1,3,14,"Gud sade till Mose: ”Jag är den Jag Är.” Och han fortsatte: ”Så ska du säga till Israels barn: Jag Är har sänt mig till er.”"],[23,29,11,"Jag vet vilka tankar jag har för er, säger Herren, nämligen fridens tankar och inte ofärdens för att ge er en framtid och ett hopp."],[44,3,23,"Alla har syndat och saknar härligheten från Gud,"],[44,8,1,"Så finns nu ingen fördömelse för dem som är i Kristus Jesus."],[39,6,24,"Ingen kan tjäna två herrar. Antingen kommer han att hata den ene och älska den andre, eller hålla fast vid den ene och förakta den andre. Ni kan inte tjäna både Gud och mammon."],[46,12,9,"men han svarade mig: \"Min nåd är nog för dig, för min kraft fullkomnas i svaghet.\" Därför vill jag hellre berömma mig av min svaghet, för att Kristi kraft ska vila över mig."],[23,32,27,"”Se, jag är Herren, allt kötts Gud. Skulle något vara omöjligt för mig?"],[42,14,2,"I min Fars hus finns många rum. Om det inte vore så, skulle jag då ha sagt er att jag går bort för att bereda plats för er?"],[58,4,7,"Underordna er därför Gud. Stå emot djävulen, så ska han fly från er."],[18,91,11,"för han ska befalla sina änglar att bevara dig på alla dina vägar."],[39,7,13,"Gå in genom den trånga porten. Den port är vid och den väg är bred som leder till fördärvet, och det är många som går in genom den."],[22,49,16,"Se, jag har skrivit dig på mina händer. Dina murar står ständigt inför mig."],[27,6,3,"Låt oss lära känna Herren, låt oss sträva efter att lära känna honom. Han ska träda fram lika visst som gryningen och komma till oss som ett regn, som ett vårregn som vattnar jorden.”"],[18,1,2,"utan har sin glädje i Herrens undervisning och begrundar hans ord både dag och natt."],[42,10,10,"Tjuven kommer bara för att stjäla, slakta och döda. Jag har kommit för att de ska ha liv, och liv i överflöd."],[45,13,4,"Kärleken är tålig och mild. Kärleken avundas inte, den skryter inte, den är inte uppblåst."],[19,16,9,"Människans hjärta tänker ut sin väg, men Herren styr hennes steg."],[62,1,6,"Och detta är kärleken: att vi lever efter hans bud. Detta är det bud ni har hört från början: att ni ska leva i kärleken."],[60,3,18,"Väx i stället i nåd och kunskap om vår Herre och Frälsare Jesus Kristus. Hans är äran, nu och till evighetens dag. Amen."],[42,4,24,"Gud är ande, och de som tillber honom måste tillbe i ande och sanning.\""],[46,4,7,"Men denna skatt har vi i lerkärl, för att den väldiga kraften ska vara Guds och inte komma från oss."],[44,12,1,"Därför uppmanar jag er, bröder, vid Guds barmhärtighet, att frambära era kroppar som ett levande och heligt offer som behagar Gud – er andliga gudstjänst."],[13,20,15,"Han sade: ”Lyssna, alla ni i Juda och ni Jerusalems invånare och kung Joshafat! Så säger Herren till er: Var inte rädda eller modlösa inför denna stora skara, för striden är inte er utan Guds."],[39,1,23,"Se, jungfrun ska bli havande och föda en son, och man ska ge honom namnet Immanuel. Det betyder: Gud med oss."],[39,6,21,"För där din skatt är, där kommer också ditt hjärta att vara."],[4,31,8,"Herren går själv framför dig och han ska vara med dig. Han ska inte lämna dig eller överge dig. Var inte rädd eller förfärad.”"],[34,2,4,"Se, hans själ är uppblåst och oärlig i honom. Men den rättfärdige ska leva genom sin tro."],[40,1,15,"Han sade: \"Tiden är inne och Guds rike är nära. Omvänd er och tro på evangeliet!\""],[43,1,8,"Men när den helige Ande kommer över er, ska ni få kraft och bli mina vittnen i Jerusalem, i hela Judeen och Samarien och ända till jordens yttersta gräns.\""],[58,4,8,"Närma er Gud, så ska han närma sig er. Rena era händer, ni syndare, och rena era hjärtan, ni splittrade."],[59,4,8,"Framför allt ska ni visa uthållig kärlek till varandra, för kärleken överskyler många synder."],[24,3,25,"Herren är god mot dem som väntar på honom, mot den själ som söker honom."],[39,5,3,"\"Saliga är de som är fattiga i anden, för dem tillhör himmelriket."],[0,9,13,"Min båge sätter jag i skyn, och den ska vara tecknet på förbundet mellan mig och jorden."],[44,8,31,"Vad ska vi nu säga om detta? Om Gud är för oss, vem kan då vara emot oss?"],[51,5,18,"och tacka Gud i allt. Detta är Guds vilja med er i Kristus Jesus."],[22,30,15,"För så säger Herren Gud, Israels Helige: \"Om ni vänder om och är stilla blir ni frälsta. Genom stillhet och tillit blir ni starka.\" Men ni vill inte."],[61,4,19,"Vi älskar därför att han först har älskat oss."],[0,2,7,"Och Herren Gud formade människan av jord från marken och blåste in livsande i hennes näsa. Så blev människan en levande varelse."],[25,36,26,"Jag ska ge er ett nytt hjärta och låta en ny ande komma in i er. Jag ska ta bort stenhjärtat ur er kropp och ge er ett hjärta av kött."],[50,3,23,"Vad ni än gör, gör det av hjärtat, som för Herren och inte för människor."],[19,1,7,"Att vörda Herren är början till kunskap, men dårar föraktar vishet och förmaning."],[40,11,24,"Därför säger jag er: Allt vad ni ber om och begär, tro att ni har fått det, så ska det bli ert."],[45,13,7,"Allt bär den, allt tror den, allt hoppas den, allt uthärdar den."],[58,1,17,"Allt det goda vi får och varje fullkomlig gåva är från ovan. Det kommer ner från ljusens Far, som inte förändras eller växlar mellan ljus och mörker."],[34,3,18,"Men jag vill jubla i Herren och glädja mig i min frälsnings Gud."],[32,6,8,"Han har sagt dig, du människa, vad som är gott. Vad begär Herren av dig annat än att du gör det rätta, älskar barmhärtighet och vandrar i ödmjukhet med din Gud?"],[46,4,18,"Vi riktar inte blicken mot det synliga, utan mot det osynliga. Det synliga är förgängligt, men det osynliga är evigt."],[27,6,6,"för jag har min glädje i kärlek och inte i offer, kunskap om Gud mer än brännoffer."],[16,4,14,"För om du tiger denna gång kommer hjälp och befrielse till judarna från annat håll, men du och din fars hus kommer att gå under. Vem vet, kanske är det just för en tid som denna som du har uppnått kunglig värdighet?”"],[40,2,17,"Jesus hörde det och sade till dem: \"Det är inte de friska som behöver läkare, utan de sjuka. Jag har inte kommit för att kalla rättfärdiga, utan syndare.\""],[23,31,3,"Fjärran ifrån uppenbarade sig Herren för mig: ”Med evig kärlek har jag älskat dig, därför låter jag min nåd bli kvar över dig."],[46,3,17,"Herren är Anden, och där Herrens Ande är, där är frihet."],[42,1,29,"Nästa dag såg han Jesus komma, och han sade: \"Se Guds Lamm som tar bort världens synd!"],[3,6,26,"Herren vände sitt ansikte till dig och give dig frid."],[43,16,31,"De svarade: \"Tro på Herren Jesus så blir du frälst, du och din familj.\""],[19,4,23,"Mer än allt som ska bevaras, bevara ditt hjärta, för därifrån utgår livet."],[61,4,18,"Det finns ingen rädsla i kärleken, utan den fullkomliga kärleken driver ut rädslan, för rädsla hör samman med straff. Den som är rädd är inte fullkomnad i kärleken."],[65,4,11,"\"Värdig är du, vår Herre och Gud, att ta emot lov och ära och makt, för du har skapat allt. Genom din vilja kom det till och blev skapat.\""],[2,19,2,"Säg till Israels barns hela församling: Ni ska vara heliga, för jag, Herren er Gud, är helig."],[57,12,2,"Och låt oss ha blicken fäst på Jesus, trons upphovsman och fullkomnare. För att nå den glädje som låg framför honom uthärdade han korset, utan att bry sig om skammen, och sitter nu på högra sidan om Guds tron."],[40,5,36,"Men Jesus fäste sig inte vid deras ord utan sade till föreståndaren: \"Var inte rädd. Bara tro.\""],[61,5,14,"Och den tilliten har vi till honom, att om vi ber om något efter hans vilja så hör han oss."],[50,3,14,"Och över allt detta ska ni klä er i kärleken, bandet som förenar till fullkomlig enhet."],[42,1,5,"Och ljuset lyser i mörkret, och mörkret har inte övervunnit det."],[5,1,8,"Låt inte denna lagbok vara skild från din mun. Tänk på den både dag och natt, så att du håller fast vid och följer allt som är skrivet i den. Då ska du lyckas på din väg och då ska du ha framgång."],[42,1,14,"Och Ordet blev kött och bodde bland oss, och vi såg hans härlighet, den härlighet som den Enfödde har från Fadern. Och han var full av nåd och sanning."],[44,10,17,"Alltså kommer tron av predikan och predikan genom Kristi ord."],[39,5,8,"Saliga är de renhjärtade, för de ska se Gud."],[39,5,4,"Saliga är de som sörjer, för de ska bli tröstade."],[41,12,34,"För där er skatt är, där kommer också ert hjärta att vara."],[9,22,2,"Han sade: Herre, mitt bergfäste, min borg och min räddare,"],[44,12,12,"Var glada i hoppet, tåliga i lidandet, uthålliga i bönen."],[39,28,20,"och lär dem att hålla allt som jag befallt er. Och se, jag är med er alla dagar till tidens slut.\""],[39,7,12,"Alltså: allt vad ni vill att människorna ska göra för er, det ska ni också göra för dem. Detta är lagen och profeterna."],[57,13,8,"Jesus Kristus är densamme i går och i dag och i evighet."],[41,6,31,"Så som ni vill att människorna ska göra mot er, så ska ni göra mot dem."],[65,21,5,"Och han som satt på tronen sade: \"Se, jag gör allting nytt.\" Och han sade: \"Skriv, för dessa ord är trovärdiga och sanna.\""],[58,1,12,"Salig är den som håller ut i prövningen, för när han har bestått provet ska han få livets krona som Gud har lovat dem som älskar honom."],[1,33,14,"Herren sade: ”Min närvaro ska gå med dig och låta dig få ro.”"],[54,1,7,"Gud har inte gett oss modlöshetens ande, utan kraftens, kärlekens och självbehärskningens Ande."],[0,6,8,"Men Noa hade funnit nåd inför Herrens ögon."],[65,21,4,"Och han ska torka alla tårar från deras ögon. Döden ska inte finnas mer, och ingen sorg och ingen gråt och ingen plåga, för det som förr var är borta.\""],[19,22,6,"Vänj den unge vid den väg han ska vandra, så viker han inte av från den när han blir gammal."],[42,16,33,"Detta har jag sagt er för att ni ska ha frid i mig. I världen får ni lida, men var frimodiga: jag har övervunnit världen.\""],[23,17,7,"Men välsignad är den som litar till Herren och har Herren till sin trygghet."],[8,16,7,"Men Herren sade till Samuel: ”Se inte på hans yttre och hans resliga gestalt. Jag har förkastat honom, för det går inte efter vad en människa ser. En människa ser det som är för ögonen, men Herren ser till hjärtat.”"],[4,33,27,"En tillflykt är han, urtidens Gud, och här nere råder hans eviga armar. Han ska jaga fienderna framför dig och säga: Förgör dem!"],[43,20,35,"I allt har jag visat er att man så ska arbeta och ta hand om de svaga och komma ihåg de ord som Herren Jesus själv har sagt: Det är saligare att ge än att ta.\""],[22,43,19,"Se, jag gör något nytt. Redan nu visar det sig. Märker ni det inte? Jag ska göra en väg i vildmarken och strömmar i öknen."],[39,7,7,"Be, och ni ska få. Sök, och ni ska finna. Bulta, och dörren ska öppnas för er."],[48,6,10,"Till sist, bli starka i Herren och i hans väldiga kraft."],[39,26,41,"Vaka och be att ni inte kommer i frestelse. Anden är villig, men köttet är svagt.\""],[41,19,10,"Människosonen har kommit för att söka upp och frälsa det som var förlorat.\""],[39,11,28,"Kom till mig, alla ni som arbetar och är tyngda av bördor, så ska jag ge er vila."],[22,61,1,"Herren Guds Ande är över mig, för Herren har smort mig till att förkunna glädjens budskap för de ödmjuka. Han har sänt mig att förbinda dem som har förkrossade hjärtan, att utropa frihet för de fångna och befrielse för de bundna,"],[59,2,9,"Men ni är ett utvalt släkte, ett kungligt prästerskap, ett heligt folk, ett Guds eget folk för att förkunna hans härliga gärningar, han som har kallat er från mörkret till sitt underbara ljus."],[42,21,17,"För tredje gången frågade han: \"Simon, Johannes son. Har du mig kär?\" Petrus blev bedrövad när Jesus för tredje gången frågade: \"Har du mig kär?\", och han svarade: \"Herre, du vet allt. Du vet att jag har dig kär.\" Jesus sade: \"För mina får på bete."],[58,5,16,"Bekänn därför era synder för varandra och be för varandra så att ni blir helade. Den rättfärdiges bön har stor kraft och verkan."],[44,12,21,"Låt dig inte besegras av det onda, utan besegra det onda med det goda."],[39,6,33,"Nej, sök först Guds rike och hans rättfärdighet, så ska ni få allt det andra också."],[39,16,24,"Jesus sade till sina lärjungar: \"Om någon vill följa mig, ska han förneka sig själv och ta sitt kors och följa mig."],[61,4,7,"Mina älskade, låt oss älska varandra, för kärleken kommer från Gud. Var och en som älskar är född av Gud och känner Gud."],[18,37,7,"Var stilla inför Herren och vänta på honom. Gräm dig inte över den som har framgång, som gör upp onda planer."],[48,4,29,"Låt inga smutsiga ord komma över era läppar, utan bara det som är gott och bygger upp där det behövs, så att det blir till glädje för dem som hör det."],[8,17,47,"Alla som samlats här ska förstå att det inte är genom svärd och spjut som Herren räddar. Striden är Herrens, och han ska ge er i vår hand.”"],[39,11,30,"för mitt ok är milt och min börda är lätt.\""],[45,3,16,"Vet ni inte att ni är Guds tempel och att Guds Ande bor i er?"],[43,4,12,"Hos ingen annan finns frälsningen, och under himlen finns inget annat namn som människor fått genom vilket vi blir frälsta.\""],[61,3,18,"Kära barn, låt oss inte älska med ord eller fraser, utan i handling och sanning."],[19,15,1,"Ett mjukt svar stillar vrede, sårande ord väcker harm."],[19,19,21,"Många planer har en man i sitt hjärta, men Herrens råd ska bestå."],[22,55,11,"så ska det vara med ordet som går ut från min mun. Det ska inte komma tillbaka till mig förgäves utan att ha gjort vad jag vill och utfört vad jag sänt det till."],[49,1,21,"För mig är livet Kristus och döden en vinst."],[39,16,18,"Och jag säger dig: Du är Petrus, och på denna klippa ska jag bygga min församling, och helvetets portar ska inte få makt över den."],[46,4,16,"Därför ger vi inte upp. Även om vår yttre människa bryts ner, förnyas vår inre människa dag för dag."],[39,28,6,"Han är inte här, han har uppstått som han har sagt! Kom och se platsen där han låg."],[0,18,14,"Skulle något vara omöjligt för Herren? Vid den bestämda tiden nästa år kommer jag tillbaka till dig, och då ska Sara ha en son.”"],[42,14,6,"Jesus sade till honom: \"Jag är vägen, sanningen och livet. Ingen kommer till Fadern utom genom mig."],[57,4,12,"Guds ord är levande och verksamt. Det är skarpare än något tveeggat svärd och genomtränger tills det skiljer själ och ande, led och märg, och det dömer över hjärtats uppsåt och tankar."],[1,20,3,"Du ska inte ha andra gudar vid sidan av mig."],[57,11,1,"Tron är en övertygelse om det man hoppas, en visshet om ting som man inte ser."],[48,4,26,"Grips ni av vrede, synda inte. Låt inte solen gå ner över er vrede"],[39,11,29,"Ta på er mitt ok och lär av mig, för jag är mild och ödmjuk i hjärtat. Då ska ni finna ro för era själar,"],[18,90,2,"Innan bergen blev till och du skapade jorden och världen, från evighet till evighet är du, Gud."],[61,1,9,"Om vi bekänner våra synder, är han trofast och rättfärdig så att han förlåter oss våra synder och renar oss från all orättfärdighet."],[22,55,8,"Mina tankar är inte era tankar, och era vägar är inte mina vägar, säger Herren."],[50,3,13,"Ha överseende med varandra och förlåt varandra, om ni har något att anklaga någon för. Så som Herren har förlåtit er ska ni förlåta varandra."],[22,55,9,"Nej, liksom himlen är högre än jorden, så är mina vägar högre än era vägar och mina tankar högre än era tankar."],[61,4,8,"Den som inte älskar har inte lärt känna Gud, för Gud är kärlek."],[42,13,34,"Ett nytt bud ger jag er: att ni ska älska varandra. Så som jag har älskat er ska också ni älska varandra."],[19,17,17,"En väns kärlek består alltid, en broder föds för att hjälpa i nöd."],[53,4,12,"Ingen får förakta dig för att du är ung, utan var ett föredöme för de troende i ord och gärning, i kärlek, tro och renhet."],[4,31,6,"Var starka och frimodiga, var inte rädda eller förskräckta för dem, för Herren din Gud går själv med dig. Han ska inte lämna dig eller överge dig.”"],[22,53,6,"Vi gick alla vilse som får, var och en gick sin egen väg. Men all vår skuld lade Herren på honom."],[22,12,2,"Se, Gud är min frälsning, jag är trygg och inte rädd, för Herren Herren är min styrka och min lovsång. Han har blivit min frälsning.\""],[39,10,31,"Var alltså inte rädda. Ni är mer värda än många sparvar."],[0,22,8,"Abraham svarade: ”Gud kommer att utse åt sig lammet till brännoffret, min son.” Så fortsatte de sin vandring tillsammans."],[39,24,35,"Himmel och jord ska förgå, men mina ord ska aldrig förgå."],[49,4,4,"Gläd er alltid i Herren. Än en gång säger jag: gläd er!"],[49,4,19,"Så ska min Gud efter sin rikedom på ett härligt sätt i Kristus Jesus ge er allt ni behöver."],[8,3,10,"Då kom Herren och ställde sig där och ropade som förut: ”Samuel! Samuel!” Och Samuel svarade: ”Tala, din tjänare hör.”"],[15,8,10,"Och han sade till dem: ”Gå och ät er bästa mat och drick ert sötaste vin. Och skicka gåvor av mat till dem som inte har något färdigt, för denna dag är helgad åt vår Gud. Var inte bedrövade, för glädje i Herren är er styrka.”"],[22,7,14,"Därför ska Herren själv ge er ett tecken: Se, jungfrun ska bli havande och föda en son, och hon ska ge honom namnet Immanuel."],[57,10,24,"Låt oss ge akt på varandra och sporra varandra till kärlek och goda gärningar."],[19,9,10,"Att vörda Herren är början till vishet, att känna den Helige är förstånd,"],[22,58,11,"Och Herren ska alltid leda dig, han ska mätta dig i ödemarken och ge styrka åt benen i din kropp. Du ska vara som en vattenrik trädgård och likna en källa vars vatten aldrig sinar."],[0,8,22,"Så länge jorden består ska sådd och skörd, köld och värme, sommar och vinter, dag och natt aldrig upphöra.”"],[39,7,24,"Den som hör dessa mina ord och handlar efter dem liknar alltså en klok man som byggde sitt hus på klippan."],[43,17,28,"För i honom är det vi lever och rör oss och är till, så som även några av era egna skalder har sagt: Vi är av hans släkt."],[0,28,15,"Och se, jag är med dig och ska bevara dig vart du än går, och jag ska föra dig tillbaka till detta land. Jag ska inte överge dig förrän jag har gjort vad jag lovat dig.”"],[49,2,3,"Sök inte konflikt eller tom ära. Var i stället ödmjuka och sätt andra högre än er själva."],[41,2,14,"\"Ära åt Gud i höjden, och frid på jorden bland människor som han älskar.\""],[48,2,10,"Hans verk är vi, skapade i Kristus Jesus till goda gärningar som Gud har förberett för att vi ska vandra i dem."],[40,10,45,"Människosonen har inte kommit för att bli betjänad, utan för att tjäna och ge sitt liv till lösen för många.\""],[19,12,25,"Bekymmer tynger en mans hjärta, ett vänligt ord ger det glädje."],[44,13,10,"Kärleken gör inte sin nästa något ont. Alltså är kärleken lagens uppfyllelse."],[52,3,3,"Men Herren är trofast. Han ska styrka er och skydda er från den onde."],[53,6,12,"Kämpa trons goda kamp, grip det eviga livet som du blev kallad till och som du bekände dig till genom att avge den goda bekännelsen inför många vittnen."],[22,54,10,"Även om bergen viker bort och höjderna vacklar, så ska min nåd inte vika från dig eller mitt fridsförbund vackla, säger Herren din förbarmare."],[22,53,5,"Han blev genomborrad för våra brott, slagen för våra synder. Straffet blev lagt på honom för att vi skulle få frid, och genom hans sår är vi helade."],[3,23,19,"Gud är inte en människa, så att han skulle ljuga, inte en människoson, så att han skulle ångra sig. Säger han något utan att göra det, talar han något utan att fullborda det?"],[42,3,30,"Han måste bli större och jag mindre."],[45,6,19,"Eller vet ni inte att er kropp är ett tempel för den helige Ande som bor i er och som ni har fått av Gud? Ni tillhör inte er själva,"],[42,20,29,"Jesus sade till honom: \"Du tror därför att du har sett mig. Saliga är de som inte har sett men ändå tror.\""],[22,26,3,"Den som är fast i sitt sinne bevarar du i frid, i frid, för han förtröstar på dig."],[41,1,38,"Maria sade: \"Jag är Herrens tjänarinna. Låt det ske med mig som du har sagt.\" Och ängeln lämnade henne."],[41,10,27,"Han svarade: \"Du ska älska Herren din Gud av hela ditt hjärta och av hela din själ och av hela din kraft och av hela ditt förstånd, och din nästa som dig själv.\""],[19,3,27,"Neka inte en behövande något gott när det står i din makt att hjälpa."],[49,4,11,"Jag säger inte att jag har saknat något, för jag har lärt mig att vara nöjd med det jag har."],[42,3,3,"Jesus svarade: \"Jag säger dig sanningen: Den som inte blir född på nytt kan inte se Guds rike.\""],[39,5,7,"Saliga är de barmhärtiga, för de ska få barmhärtighet."],[39,25,40,"Då ska Kungen svara dem: Jag säger er sanningen: Allt vad ni har gjort för en av dessa mina minsta bröder, det har ni gjort för mig."],[18,90,12,"Lär oss att våra dagar är räknade, så att vi får visa hjärtan."],[44,8,38,"För jag är viss om att varken död eller liv, varken änglar eller furstar, varken något som nu är eller något som ska komma, varken makter,"],[39,5,13,"Ni är jordens salt. Men om saltet förlorar sin sälta, hur ska man då få det salt igen? Det duger inte till annat än att kastas ut och trampas ner av människorna."],[19,16,3,"Anförtro dina verk åt Herren, så har dina planer framgång."],[22,43,2,"Om du går genom vatten är jag med dig, eller genom strömmar så ska de inte dränka dig. Om du går genom eld ska du inte bli svedd, lågan ska inte bränna dig."],[50,3,17,"Och allt vad ni gör i ord eller handling, gör det i Herren Jesu namn och tacka Gud Fadern genom honom."],[18,27,14,"Hoppas på Herren, var stark och modig i ditt hjärta och hoppas på Herren!"],[59,5,7,"Och kasta alla era bekymmer på honom, för han har omsorg om er."],[4,6,4,"Hör, Israel! Herren vår Gud, Herren är en."],[56,1,7,"Din kärlek har varit till stor glädje och tröst för mig, eftersom de heliga har blivit styrkta i sina hjärtan tack vare dig, broder."],[50,3,2,"Tänk på det som är där ovan, inte på det som är på jorden."],[64,1,24,"Han som har makt att bevara er från fall och föra fram er fläckfria och jublande inför sin härlighet –"],[39,6,11,"Ge oss i dag vårt dagliga bröd."],[0,2,24,"Därför ska en man lämna sin far och sin mor och hålla sig till sin hustru, och de ska bli ett kött."],[39,2,2,"och frågade: \"Var är judarnas nyfödde kung? Vi har sett hans stjärna gå upp och har kommit för att tillbe honom.\""],[41,1,37,"för ingenting är omöjligt för Gud.\""],[47,3,28,"Här är inte jude eller grek, slav eller fri, man och kvinna. Alla är ni ett i Kristus Jesus."],[39,5,5,"Saliga är de ödmjuka, för de ska ärva jorden."],[21,8,6,"Sätt mig som ett sigill på ditt hjärta, som ett sigill på din arm, för kärleken är stark som döden, dess lidelse obeveklig som dödsriket. Dess glöd är eldens glöd, en Herrens låga."],[47,6,2,"Bär varandras bördor, så uppfyller ni Kristi lag."],[55,3,5,"frälste han oss, inte för rättfärdiga gärningar som vi hade gjort utan på grund av sin barmhärtighet. Han frälste oss genom ett bad till ny födelse och förnyelse i den helige Ande,"],[40,8,36,"För vad hjälper det en människa om hon vinner hela världen men förlorar sin själ?"],[42,10,11,"Jag är den gode herden. Den gode herden ger sitt liv för fåren."],[4,6,5,"Och du ska älska Herren din Gud av hela ditt hjärta och av hela din själ och av hela din kraft."],[60,3,9,"Herren dröjer inte med att uppfylla sitt löfte, så som en del menar. Nej, han har tålamod med er, eftersom han inte vill att någon ska gå förlorad utan att alla ska få tid att omvända sig."],[41,9,23,"Sedan sade han till alla: \"Om någon vill följa mig, ska han förneka sig själv och varje dag ta sitt kors och följa mig."],[44,5,8,"Men Gud bevisar sin kärlek till oss genom att Kristus dog för oss medan vi ännu var syndare."],[39,22,39,"Sedan kommer ett som liknar det: Du ska älska din nästa som dig själv."],[61,4,16,"Och vi har lärt känna den kärlek som Gud har till oss och tror på den. Gud är kärlek. Den som förblir i kärleken förblir i Gud, och Gud förblir i honom."],[18,91,1,"Den som sitter under den Högstes beskydd och vilar under den Allsmäktiges skugga,"],[58,1,5,"Om någon av er brister i vishet ska han be till Gud, som ger åt alla villigt och utan att kritisera, och han ska få."],[48,4,2,"Var alltid ödmjuka och milda, var tålmodiga och överseende med varandra i kärlek."],[19,27,17,"Järn skärper järn, den ena människan den andra."],[49,3,13,"Bröder, jag menar inte att jag har gripit det än. Men ett gör jag: jag glömmer det som ligger bakom och sträcker mig mot det som ligger framför"],[18,23,6,"Ja, godhet och nåd ska följa mig i alla mina livsdagar, och jag ska bo i Herrens hus för alltid."],[42,6,35,"Jesus svarade: \"Jag är livets bröd. Den som kommer till mig ska aldrig hungra, och den som tror på mig ska aldrig någonsin törsta."],[42,15,5,"Jag är vinstocken, ni är grenarna. Om någon förblir i mig och jag i honom, så bär han rik frukt. Utan mig kan ni ingenting göra."],[4,30,19,"Jag tar i dag himmel och jord till vittne mot er att jag har förelagt dig liv och död, välsignelse och förbannelse. Välj då livet, så att du och dina efterkommande får leva,"],[44,8,18,"Jag menar att den här tidens lidanden inte kan jämföras med den härlighet som ska uppenbaras och bli vår."],[44,12,2,"Och anpassa er inte efter den här världen, utan låt er förvandlas genom förnyelsen av ert sinne så att ni kan pröva vad som är Guds vilja: det som är gott och fullkomligt och behagar honom."],[49,1,6,"Och jag är övertygad om att han som har börjat ett gott verk i er också ska fullborda det till Kristi Jesu dag."],[24,3,23,"Den är ny varje morgon, stor är din trofasthet."],[39,1,21,"Hon ska föda en son, och du ska ge honom namnet Jesus, för han ska frälsa sitt folk från deras synder.\""],[41,23,43,"Jesus svarade: \"Jag säger dig sanningen: I dag ska du vara med mig i paradiset.\""],[48,2,8,"Av nåden är ni frälsta genom tron, inte av er själva. Guds gåva är det,"],[18,23,3,"Han ger liv åt min själ, han leder mig på rätta vägar för sitt namns skull."],[26,12,3,"De förståndiga ska då lysa som himlavalvets ljus, och de som har fört många till rättfärdighet som stjärnorna för alltid och för evigt."],[40,16,15,"Och han sade till dem: \"Gå ut i hela världen och förkunna evangeliet för hela skapelsen."],[40,10,27,"Jesus såg på dem och sade: \"För människor är det omöjligt, men inte för Gud. För Gud är allting möjligt.\""],[12,29,11,"Dig, Herre, tillhör storhet och makt, härlighet och glans och majestät, allt som finns i himlen och på jorden. Ditt, o Herre, är riket, och du har upphöjt dig till ett huvud över allt."],[54,2,15,"Gör allt du kan för att bestå provet inför Gud, som en arbetare som inte behöver skämmas utan rätt delar sanningens ord."],[41,2,10,"Men ängeln sade: \"Var inte rädda! Jag bär bud till er om en stor glädje för hela folket:"],[39,5,9,"Saliga är de som skapar frid, för de ska kallas Guds barn."],[3,6,25,"Herren låte sitt ansikte lysa över dig och vare dig nådig."],[54,3,16,"Hela Skriften är utandad av Gud och nyttig till undervisning, tillrättavisning, upprättelse och fostran i rättfärdighet,"],[49,2,5,"Var så till sinnes som Kristus Jesus var:"],[18,1,1,"Salig är den som inte följer de gudlösas råd, som inte går in på syndares väg och sitter bland föraktare,"],[39,3,17,"Och en röst från himlen sade: \"Han är min älskade Son. I honom har jag min glädje.\""],[10,19,12,"Efter jordbävningen kom en eld. Men Herren var inte i elden. Efter elden hördes ljudet av en svag susning."],[41,11,9,"Och jag säger er: Be, och ni ska få. Sök, och ni ska finna. Bulta, och dörren ska öppnas för er."],[13,7,14,"men mitt folk, som är uppkallat efter mitt namn, ödmjukar sig och ber och söker mitt ansikte och omvänder sig från sina onda vägar, då vill jag höra det från himlen och förlåta deras synd och skaffa läkedom åt deras land."],[17,19,25,"Men jag vet att min återlösare lever, att han till sist ska träda fram över stoftet."],[18,33,4,"för Herrens ord är rätt och han är trofast i allt han gör."],[50,1,17,"Han är till före allt, och allt hålls samman genom honom."],[51,5,11,"Uppmuntra därför varandra och uppbygg varandra, så som ni redan gör."],[42,10,27,"Mina får lyssnar till min röst, och jag känner dem, och de följer mig."],[0,3,19,"I ditt anletes svett ska du äta ditt bröd tills du vänder åter till jorden, för av den är du tagen. Jord är du, och jord ska du åter bli.”"],[44,8,39,"höjd eller djup eller något annat skapat ska kunna skilja oss från Guds kärlek i Kristus Jesus, vår Herre."],[18,86,5,"Du, Herre, är god och förlåtande, stor i nåd mot alla som ropar till dig."],[48,6,11,"Ta på er hela Guds vapenrustning, så att ni kan stå emot djävulens listiga angrepp."],[18,32,8,"Jag vill lära dig och undervisa dig om den väg du ska vandra, jag vill ge dig råd och låta mitt öga vaka över dig."],[4,8,3,"Han ödmjukade dig och lät dig hungra, och han lät dig äta manna, något som varken du eller dina fäder kände till. Han ville lära dig att människan lever inte bara av bröd, utan av varje ord som utgår från Herrens mun."],[22,1,18,"Kom, låt oss gå till rätta med varandra, säger Herren. Om än era synder är blodröda ska de bli snövita, om än de är röda som scharlakan ska de bli vita som ull."]]};
+const BOOKS = DATA.books, VERSES = DATA.verses;
+const OSIS=['Gen','Exod','Lev','Num','Deut','Josh','Judg','Ruth','1Sam','2Sam','1Kgs','2Kgs','1Chr','2Chr','Ezra','Neh','Esth','Job','Ps','Prov','Eccl','Song','Isa','Jer','Lam','Ezek','Dan','Hos','Joel','Amos','Obad','Jonah','Mic','Nah','Hab','Zeph','Hag','Zech','Mal','Matt','Mark','Luke','John','Acts','Rom','1Cor','2Cor','Gal','Eph','Phil','Col','1Thess','2Thess','1Tim','2Tim','Titus','Phlm','Heb','Jas','1Pet','2Pet','1John','2John','3John','Jude','Rev'];
+const SHORT=['1 Mos','2 Mos','3 Mos','4 Mos','5 Mos','Jos','Dom','Rut','1 Sam','2 Sam','1 Kung','2 Kung','1 Krön','2 Krön','Esra','Neh','Est','Job','Ps','Ords','Pred','Höga','Jes','Jer','Klag','Hes','Dan','Hos','Joel','Amos','Ob','Jona','Mika','Nah','Hab','Sef','Hagg','Sak','Mal','Matt','Mark','Luk','Joh','Apg','Rom','1 Kor','2 Kor','Gal','Ef','Fil','Kol','1 Tess','2 Tess','1 Tim','2 Tim','Tit','Filem','Hebr','Jak','1 Pet','2 Pet','1 Joh','2 Joh','3 Joh','Jud','Upp'];
+const BOOKINFO=[
+["Traditionellt Mose","Moseböckerna · GT","Skapelsen, syndafallet, Noa, Abraham, Isak, Jakob och Josef"],
+["Traditionellt Mose","Moseböckerna · GT","Uttåget ur Egypten, de tio budorden och tabernaklet"],
+["Traditionellt Mose","Moseböckerna · GT","Offer, prästtjänst och hur folket skulle leva heligt"],
+["Traditionellt Mose","Moseböckerna · GT","Israels år i öknen på väg mot det utlovade landet"],
+["Traditionellt Mose","Moseböckerna · GT","Moses avskedstal: lagen upprepas innan folket går in i landet"],
+["Okänd, traditionellt Josua","Historia · GT","Intåget i Kanaan och fördelningen av landet"],
+["Okänd","Historia · GT","Tiden med domare som Debora, Gideon och Simson"],
+["Okänd","Historia · GT","Moabitiskan Rut som blir stammoder till kung David"],
+["Okänd","Historia · GT","Samuel, kung Saul och den unge David"],
+["Okänd","Historia · GT","David som kung över Israel"],
+["Okänd","Historia · GT","Salomo, templet, rikets delning och profeten Elia"],
+["Okänd","Historia · GT","Elisa, kungarna i Israel och Juda och fångenskapen i Babylon"],
+["Okänd, traditionellt Esra","Historia · GT","Släkttavlor och kung Davids regering"],
+["Okänd, traditionellt Esra","Historia · GT","Salomo och Juda kungar fram till fångenskapen"],
+["Traditionellt Esra","Historia · GT","Återkomsten från Babylon och templets återuppbyggnad"],
+["Nehemja","Historia · GT","Jerusalems murar byggs upp igen"],
+["Okänd","Historia · GT","Drottning Ester som räddar det judiska folket"],
+["Okänd","Vishet · GT","Varför drabbas en rättfärdig människa av lidande?"],
+["David m.fl.","Poesi · GT","150 psalmer: lovsång, klagan, bön och tack"],
+["Främst Salomo","Vishet · GT","Korta visdomsord för vardagslivet"],
+["Traditionellt Salomo","Vishet · GT","Livets mening: allt är förgängligt utan Gud"],
+["Traditionellt Salomo","Poesi · GT","Kärlekssånger mellan brud och brudgum"],
+["Profeten Jesaja","Profet · GT","Dom och hopp, med profetior om Messias"],
+["Profeten Jeremia","Profet · GT","Varningar före Jerusalems fall och löftet om ett nytt förbund"],
+["Traditionellt Jeremia","Poesi · GT","Sorgesånger över Jerusalems förstörelse"],
+["Profeten Hesekiel","Profet · GT","Syner i fångenskapen i Babylon, bl.a. dalen med de torra benen"],
+["Daniel","Profet · GT","Daniel i Babylon: lejongropen, den brinnande ugnen och syner"],
+["Profeten Hosea","Profet · GT","Guds trofasta kärlek trots folkets otrohet"],
+["Profeten Joel","Profet · GT","Herrens dag och löftet om Anden"],
+["Profeten Amos","Profet · GT","Krav på rättvisa och omsorg om de fattiga"],
+["Profeten Obadja","Profet · GT","Dom över Edom – GT:s kortaste bok"],
+["Okänd, handlar om Jona","Profet · GT","Profeten som flydde, den stora fisken och staden Nineve"],
+["Profeten Mika","Profet · GT","Rättvisa, barmhärtighet och Messias född i Betlehem"],
+["Profeten Nahum","Profet · GT","Dom över Nineve"],
+["Profeten Habackuk","Profet · GT","Samtal med Gud om ondskan: den rättfärdige ska leva genom sin tro"],
+["Profeten Sefanja","Profet · GT","Herrens dag och glädjen över ett återupprättat folk"],
+["Profeten Haggai","Profet · GT","Uppmaning att bygga upp templet igen"],
+["Profeten Sakarja","Profet · GT","Syner och löftet om kungen som kommer ridande på en åsna"],
+["Profeten Malaki","Profet · GT","GT:s sista bok: en kallelse till omvändelse"],
+["Traditionellt Matteus, lärjunge","Evangelium · NT","Jesus som den utlovade kungen, med bergspredikan"],
+["Traditionellt Markus","Evangelium · NT","Det kortaste evangeliet – Jesus i handling"],
+["Lukas, läkare","Evangelium · NT","Jesu liv noggrant berättat, med många liknelser"],
+["Traditionellt aposteln Johannes","Evangelium · NT","Jesus som Guds Son och hans ”Jag är”-ord"],
+["Lukas","Historia · NT","Den första församlingen och Paulus resor"],
+["Paulus","Brev · NT","Frälsning genom tro för både judar och greker"],
+["Paulus","Brev · NT","Råd till en splittrad församling – och kärlekens kapitel 13"],
+["Paulus","Brev · NT","Paulus tjänst, svaghet och Guds nåd"],
+["Paulus","Brev · NT","Friheten i Kristus: rättfärdig genom tro, inte genom lagen"],
+["Paulus","Brev · NT","Församlingen som Kristi kropp och Guds vapenrustning"],
+["Paulus","Brev · NT","Glädje i Herren, skrivet i fängelset"],
+["Paulus","Brev · NT","Kristus är över allt"],
+["Paulus","Brev · NT","Uppmuntran och Jesu återkomst"],
+["Paulus","Brev · NT","Mer om Herrens dag och att leva troget"],
+["Paulus","Brev · NT","Råd till den unge ledaren Timoteus"],
+["Paulus","Brev · NT","Paulus sista brev: håll fast vid Skriften"],
+["Paulus","Brev · NT","Råd till Titus om ledarskap och ett gott liv"],
+["Paulus","Brev · NT","Ett personligt brev om slaven Onesimos"],
+["Okänd","Brev · NT","Jesus som den större översteprästen; trons hjältar i kapitel 11"],
+["Jakob, Jesu bror","Brev · NT","Tro som syns i handling"],
+["Petrus","Brev · NT","Hopp och fasthet mitt i lidande"],
+["Petrus","Brev · NT","Varning för falska lärare och löftet om Jesu återkomst"],
+["Traditionellt aposteln Johannes","Brev · NT","Gud är kärlek – att leva i ljuset"],
+["Johannes, ”den äldste”","Brev · NT","Kort brev om sanning och kärlek"],
+["Johannes, ”den äldste”","Brev · NT","Kort brev om gästfrihet"],
+["Judas, Jakobs bror","Brev · NT","Kämpa för tron mot falska lärare"],
+["Johannes","Profetia · NT","Syner om Jesu seger och en ny himmel och en ny jord"]];
+const EMOJIS=["🦁","🐑","🕊️","🐟","⛵","🔥","🌿","⭐","🍞","🏔️","👑","🎺","🌈","🐪","🗝️","📯"];
+const GEMOJIS=["☕","🎸","⛪","🙏","📖","🔥","⚽","🎉","🌟","🏠","🎓","❤️","🌍","🍕","🚀","🐑"];
+const PTS_WIN=[50,35,25,15,10], PTS_BOOKCH=8, PTS_BOOK=5, MAX=5, ROUNDS=3, STAGGER=230, DROP_MS=550;
+const $=id=>document.getElementById(id);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const DB_ON=SUPABASE_URL.startsWith("http")&&SUPABASE_KEY.length>20;
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function toast(m,ms){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),ms||2400);}
+const pad2=n=>String(n).padStart(2,"0");
+
+/* ---- datum ---- */
+function sthlmDate(d=new Date()){return new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
+function dayNum(s){const [y,m,d]=s.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)}
+function addDays(s,n){return new Date((dayNum(s)+n)*864e5).toISOString().slice(0,10)}
+function weekStart(s){const wd=(new Date(dayNum(s)*864e5).getUTCDay()+6)%7;return addDays(s,-wd)}
+const TODAY=sthlmDate();
+function ansForDay(day,r){const dn=dayNum(day)-dayNum(START_DAY);const i=((dn*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length;const [b,c,v,t]=VERSES[i];return {b,c,v,t}}
+const ansFor=r=>ansForDay(TODAY,r);
+function prettyDate(s){return new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"}).format(new Date(dayNum(s)*864e5)).replace(/^./,c=>c.toUpperCase())}
+
+/* ---- Supabase ---- */
+function hdr(x){const h={"apikey":SUPABASE_KEY,"Content-Type":"application/json"};if(SUPABASE_KEY.startsWith("eyJ"))h.Authorization="Bearer "+SUPABASE_KEY;return Object.assign(h,x||{})}
+async function rpc(fn,body){
+  const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:hdr(),body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>null);
+  if(!r.ok) throw new Error((j&&j.message)||("Fel "+r.status));
+  return j;
+}
+async function get(path){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:hdr()});if(!r.ok)throw new Error(r.status);return r.json()}
+
+/* ---- data i minnet ---- */
+let ME=store.get("vjb_profile");      // {id,code,name,church,emoji}
+let PROFILES={}, SCORES=[], MEMBERS=[], GROUPS={}, MYGROUPS=[];
+const hidden=p=>!p||String(p.name||"").startsWith("__");
+async function loadAll(){
+  if(!DB_ON) return;
+  try{
+    const [pr,sc,mem,gr]=await Promise.all([
+      get("profiles?select=id,name,church,emoji&limit=10000"),
+      get("beta_scores?select=profile_id,day,round,attempts,solved,points,guesses&day=gte."+START_DAY+"&limit=20000"),
+      get("group_members?select=group_id,profile_id&limit=20000"),
+      get("groups?select=id,name,emoji&limit=5000")]);
+    PROFILES={}; pr.forEach(p=>PROFILES[p.id]=p);
+    SCORES=sc.filter(s=>!hidden(PROFILES[s.profile_id]));
+    MEMBERS=mem; GROUPS={}; gr.forEach(g=>GROUPS[g.id]=g);
+    if(ME){ MYGROUPS=await rpc("my_groups",{p_code:ME.code}).catch(()=>MYGROUPS); }
+  }catch(e){ console.warn(e); }
+}
+
+/* ---- lokalt spelläge ---- */
+const skey=(r,day=TODAY)=>"vjb_game_"+day+"_"+r;
+const loadSt=r=>store.get(skey(r))||{guesses:[],done:false,saved:false};
+let R=0, ANS=ansFor(0), st=loadSt(0), cur={b:null,d:""}, busy=false;
+
+function score(g,a=ANS){
+  const ad=(pad2(a.c)+pad2(a.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
+  const res=Array(4).fill("x"), left={};
+  gd.forEach((d,i)=>{ if(d===ad[i]) res[i]="g"; else left[ad[i]]=(left[ad[i]]||0)+1; });
+  gd.forEach((d,i)=>{ if(res[i]!=="g"&&left[d]>0){res[i]="y";left[d]--;} });
+  return {book:g.b===a.b?"g":"x",digits:res};
+}
+function cmp(g,a=ANS){const x=[a.b,a.c,a.v],y=[g.b,g.c,g.v];for(let i=0;i<3;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1;}return 0}
+function possibleBooks(){
+  let lo=0,hi=BOOKS.length-1;const no=new Set();
+  st.guesses.forEach(g=>{const d=cmp(g);if(g.b!==ANS.b)no.add(g.b);if(d>0)lo=Math.max(lo,g.b);if(d<0)hi=Math.min(hi,g.b);});
+  return BOOKS.map((_,i)=>i>=lo&&i<=hi&&!no.has(i));
+}
+
+/* ---- navigering ---- */
+let SCREEN="home";
+function go(name){
+  if(!ME && name!=="onboard"){ name="onboard"; }
+  SCREEN=name;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-"+name));
+  if(name==="home") renderHome();
+  if(name==="play") loadRound(firstOpen());
+  if(name==="profile") renderProfile();
+  if(name==="journey") renderJourney();
+  if(name==="groups") renderGroups();
+  if(name==="board") renderBoard();
+  if(name==="onboard") renderOnboard();
+}
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-go]"); if(g){ go(g.dataset.go); return; }
+  const o=e.target.closest("[data-open]"); if(o){ $(o.dataset.open).classList.add("on"); return; }
+});
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{
+  if(e.target===m||e.target.hasAttribute("data-close")) m.classList.remove("on");
+}));
+
+/* ===== STARTSIDA ===== */
+function myScores(){return ME?SCORES.filter(s=>s.profile_id===ME.id):[]}
+function streakInfo(){
+  const days=new Set(myScores().map(s=>s.day));
+  for(let r=0;r<ROUNDS;r++) if(loadSt(r).done) days.add(TODAY);
+  let s=0,d=days.has(TODAY)?TODAY:addDays(TODAY,-1);
+  while(days.has(d)){s++;d=addDays(d,-1);}
+  const sorted=[...days].sort(); let best=0,run=0,prev=null;
+  sorted.forEach(x=>{run=(prev&&dayNum(x)-dayNum(prev)===1)?run+1:1;best=Math.max(best,run);prev=x;});
+  return {cur:s,best:Math.max(best,s),days};
+}
+function dayTotal(){let t=0;for(let r=0;r<ROUNDS;r++){const x=loadSt(r);if(x.done)t+=x.points;}return t}
+function allDone(){for(let r=0;r<ROUNDS;r++)if(!loadSt(r).done)return false;return true}
+function firstOpen(){for(let r=0;r<ROUNDS;r++)if(!loadSt(r).done)return r;return ROUNDS-1}
+function doneCount(){let n=0;for(let r=0;r<ROUNDS;r++)if(loadSt(r).done)n++;return n}
+function avatar(p,size){return "<span class='av' style='width:"+size+"px;height:"+size+"px;font-size:"+Math.round(size*.55)+"px'>"+esc((p&&p.emoji)||"🙂")+"</span>"}
+
+function renderHome(){
+  if(!ME) return;
+  const sk=streakInfo();
+  $("hello").innerHTML=avatar(ME,50)+"<div><b>Hej "+esc(ME.name)+"!</b><small>"+(ME.church?esc(ME.church)+" · ":"")+"🔥 "+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</small></div>";
+  const n=doneCount(), done=n===ROUNDS;
+  $("playCard").innerHTML="<div class='t'>Dagens verser</div><div class='s'>"+prettyDate(TODAY)+" · "+(done?"Klar! "+dayTotal()+" p":n+" av 3 klara")+"</div><div class='dots'>"+[0,1,2].map(r=>"<i class='"+(loadSt(r).done?"d":"")+"'></i>").join("")+"</div><div class='go'>"+(done?"Se dina verser & topplistan":n?"Fortsätt spela →":"Spela →")+"</div>";
+  const today=new Set(SCORES.filter(s=>s.day===TODAY).map(s=>s.profile_id));
+  if(ME&&n) today.add(ME.id);
+  $("countToday").innerHTML="📖 <b>"+today.size+"</b> "+(today.size===1?"har":"har")+" spelat idag";
+  // grupper
+  const rows=scopeList().map(sc=>{
+    const r=rankIn(sc,"day");
+    return "<button class='r2' data-scope='"+esc(sc.key)+"'><span>"+esc(sc.icon+" "+sc.label)+"</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total:"<span class='mut'>"+r.total+" har spelat</span>")+"</span></button>";
+  }).join("");
+  $("homeGroups").innerHTML="<div class='mut' style='margin-bottom:2px'>Idag i dina grupper</div>"+rows;
+}
+$("playCard").onclick=()=>{ if(allDone()) openRes(); else go("play"); };
+$("homeGroups").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(b){BOARD.scope=b.dataset.scope;BOARD.back="home";go("board");}});
+
+/* ===== SPELET ===== */
+function fillBookCell(bc,bookIdx,cls){
+  bc.innerHTML="";const n=document.createElement("span");n.className="bn";n.textContent=BOOKS[bookIdx];bc.appendChild(n);
+  if(cls==="x"){const t=document.createElement("span");t.className="bx";t.textContent="✗ fel bok";bc.appendChild(t);}
+  if(cls==="g"){const t=document.createElement("span");t.className="bok";t.textContent="✓";bc.appendChild(t);}
+}
+function staticRow(guess,a){
+  const row=document.createElement("div");row.className="row";
+  const cls=score(guess,a), digs=(pad2(guess.c)+pad2(guess.v)).split("");
+  const bc=document.createElement("div");bc.className="c book filled "+cls.book;fillBookCell(bc,guess.b,cls.book);row.appendChild(bc);
+  digs.forEach((d,i)=>{if(i===2){const k=document.createElement("div");k.className="colon";k.textContent=":";row.appendChild(k);}
+    const c=document.createElement("div");c.className="c filled "+cls.digits[i];c.textContent=d;row.appendChild(c);});
+  return row;
+}
+function renderGrid(anim){
+  const g=$("grid");g.innerHTML="";
+  for(let r=0;r<MAX;r++){
+    const row=document.createElement("div");row.className="row";
+    const guess=st.guesses[r];let book="",digs=["","","",""],cls=null;
+    const active=r===st.guesses.length&&!st.done;
+    if(guess){book=BOOKS[guess.b];digs=(pad2(guess.c)+pad2(guess.v)).split("");cls=score(guess);}
+    else if(active){row.classList.add("active");book=cur.b===null?"":BOOKS[cur.b];digs=(cur.d+"    ").slice(0,4).split("").map(x=>x.trim());}
+    const cells=[];const bc=document.createElement("div");
+    bc.className="c book"+(cls?" "+cls.book:"")+(book?" filled":" empty");
+    if(guess)fillBookCell(bc,guess.b,cls.book);else bc.textContent=book||(active?"Bok":"");
+    if(active)bc.onclick=openBooks;
+    row.appendChild(bc);cells.push(bc);
+    digs.forEach((d,i)=>{if(i===2){const k=document.createElement("div");k.className="colon";k.textContent=":";row.appendChild(k);}
+      const c=document.createElement("div");c.className="c"+(cls?" "+cls.digits[i]:"")+(d?" filled":"");c.textContent=d;row.appendChild(c);cells.push(c);});
+    if(anim&&anim.row===r){if(anim.win)row.classList.add("win");else cells.forEach((c,i)=>{c.classList.add("drop");c.style.animationDelay=(i*STAGGER)+"ms";});}
+    g.appendChild(row);
+  }
+  renderHint();
+  $("chooseBtn").textContent=cur.b===null?"Välj bok":BOOKS[cur.b];
+  $("okBtn").disabled=!(cur.b!==null&&cur.d.length===4)||busy;
+}
+let lastHintKey="";
+function renderHint(){
+  const last=st.guesses[st.guesses.length-1];
+  const h=$("hint"),cb=$("chooseBtn"),bookCell=document.querySelector(".row.active .c.book");
+  cb.classList.remove("pulse");bookCell&&bookCell.classList.remove("pulse");
+  if(st.done||busy){h.innerHTML="&nbsp;";lastHintKey="";return;}
+  if(last){const earlier=cmp(last)<0,key="d"+R+"_"+st.guesses.length;
+    h.innerHTML="<span class='dir"+(key!==lastHintKey?" pop":"")+"'><span class='arr'>"+(earlier?"⬆":"⬇")+"</span>Versen står <b>"+(earlier?"TIDIGARE":"SENARE")+"</b> i Bibeln</span>";lastHintKey=key;return;}
+  lastHintKey="";
+  if(cur.b===null){h.innerHTML="<span class='guide'>👇 Börja med att trycka på <b>Välj bok</b></span>";cb.classList.add("pulse");bookCell&&bookCell.classList.add("pulse");}
+  else if(cur.d.length<4)h.innerHTML="<span class='guide'>Skriv <b>kapitel</b> och <b>vers</b> med siffrorna, t.ex. <b>06 03</b></span>";
+  else h.innerHTML="<span class='guide'>Tryck på <b>✓</b> för att gissa</span>";
+}
+function fitVerse(){const box=$("verseBox"),v=$("verse");let s=21;v.style.fontSize=s+"px";while(s>12&&v.scrollHeight>box.clientHeight-6){s-=.5;v.style.fontSize=s+"px";}}
+addEventListener("resize",()=>{if(SCREEN==="play")fitVerse()});
+function buildPad(){
+  const p=$("pad");
+  [0,1,2,3,4,"⌫",5,6,7,8,9,"✓"].forEach(k=>{const b=document.createElement("button");b.textContent=k;
+    if(k==="✓"){b.className="ok";b.id="okBtn";b.onclick=submit;}else if(k==="⌫")b.onclick=back;else b.onclick=()=>typeDigit(String(k));p.appendChild(b);});
+  $("chooseBtn").onclick=openBooks;
+  document.addEventListener("keydown",e=>{if(SCREEN!=="play"||st.done||busy||document.querySelector(".modal.on"))return;
+    if(/^[0-9]$/.test(e.key))typeDigit(e.key);else if(e.key==="Backspace")back();else if(e.key==="Enter")submit();});
+}
+function typeDigit(k){if(busy||st.done)return;if(cur.d.length<4){cur.d+=k;renderGrid();}}
+function back(){if(busy||st.done)return;cur.d=cur.d.slice(0,-1);renderGrid();}
+function shake(){const r=document.querySelector(".row.active");if(r){r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");}}
+function calcPoints(){const n=st.guesses.length;
+  if(st.guesses.some(g=>cmp(g)===0))return PTS_WIN[n-1];
+  if(st.guesses.some(g=>g.b===ANS.b&&g.c===ANS.c))return PTS_BOOKCH;
+  if(st.guesses.some(g=>g.b===ANS.b))return PTS_BOOK;return 0;}
+function submit(){
+  if(st.done||busy)return;
+  if(cur.b===null){toast("Välj en bok först");shake();return;}
+  if(cur.d.length<4){toast("Skriv kapitel och vers, t.ex. 06:03");shake();return;}
+  const g={b:cur.b,c:+cur.d.slice(0,2),v:+cur.d.slice(2)};
+  const badgesBefore=earnedBadges();
+  st.guesses.push(g);
+  const won=cmp(g)===0;
+  if(won||st.guesses.length>=MAX){st.done=true;st.won=won;st.points=calcPoints();}
+  store.set(skey(R),st);
+  cur={b:possibleBooks()[cur.b]?cur.b:null,d:""};
+  busy=true;renderGrid({row:st.guesses.length-1,win:won});
+  const wait=won?650:4*STAGGER+DROP_MS;
+  setTimeout(()=>{busy=false;renderGrid();renderRounds();
+    if(st.guesses.length===1&&!st.done)maybeLegend();
+    if(st.done){finish(true);const nb=earnedBadges().filter(b=>!badgesBefore.includes(b));if(nb.length){const b=BADGES.find(x=>x.id===nb[0]);setTimeout(()=>toast("🏅 Nytt märke: "+b.e+" "+b.name+"!",3200),900);}}
+  },wait);
+}
+function openBooks(){
+  if(st.done||busy)return;
+  const ok=possibleBooks();
+  const item=i=>"<button class='bk"+(ok[i]?"":" dim")+(cur.b===i?" sel":"")+"' data-b='"+i+"'>"+BOOKS[i]+"</button>";
+  let h="<h4>Gamla testamentet</h4><div class='ot'>";for(let i=0;i<39;i++)h+=item(i);
+  h+="</div><h4>Nya testamentet</h4><div class='nt'>";for(let i=39;i<66;i++)h+=item(i);h+="</div><div class='pad-b'></div>";
+  $("bookList").innerHTML=h;$("bookModal").classList.add("on");
+  const first=cur.b!==null?cur.b:ok.indexOf(true);const el=$("bookList").querySelector("[data-b='"+first+"']");
+  $("bookSheet").scrollTop=el&&st.guesses.length?Math.max(0,el.offsetTop-90):0;
+}
+$("bookList").onclick=e=>{const b=e.target.closest("button[data-b]");if(!b)return;cur.b=+b.dataset.b;$("bookModal").classList.remove("on");renderGrid();};
+
+/* färgförklaring */
+function legendHTML(){return "<div class='legend'><button class='lx' aria-label='Stäng'>✕</button><b style='font-size:14px'>Så läser du färgerna</b>"+
+  "<div class='li'><i style='background:var(--green);color:#fff'>1</i>Rätt siffra på <b>rätt plats</b></div>"+
+  "<div class='li'><i style='background:var(--yellow);color:#1c160d'>4</i>Siffran <b>finns</b> i svaret, men på <b>fel plats</b></div>"+
+  "<div class='li'><i style='background:var(--gray);color:#fff'>0</i>Siffran finns inte (där)</div>"+
+  "<div class='li'><span class='tag'>✗ fel bok</span>Det är inte den här boken</div></div>"}
+function showLegend(){$("legendBox").innerHTML=legendHTML();}
+function maybeLegend(){const n=store.get("vjb_legend_n")||0;if(n<3){store.set("vjb_legend_n",n+1);showLegend();}}
+$("legendBox").addEventListener("click",e=>{if(e.target.closest(".lx")||e.target.closest(".legend"))$("legendBox").innerHTML="";});
+$("showLegendBtn").onclick=()=>{$("infoModal").classList.remove("on");if(SCREEN!=="play")go("play");showLegend();};
+
+function renderRounds(){
+  const el=$("rounds");el.innerHTML="";
+  for(let r=0;r<ROUNDS;r++){const x=loadSt(r),b=document.createElement("button");const unlocked=r===0||loadSt(r-1).done;
+    b.className=(r===R?"cur ":"")+(x.done?"done":"");b.innerHTML="Vers "+(r+1)+(x.done?" · <b>"+x.points+" p</b>":"");
+    b.disabled=!unlocked;b.onclick=()=>{if(!busy&&unlocked&&r!==R)loadRound(r);};el.appendChild(b);}
+}
+function loadRound(r){
+  R=r;ANS=ansFor(r);st=loadSt(r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  if(st.done)finish(false);else{$("controls").style.display="";$("donebar").style.display="none";}
+  fitVerse();
+}
+function finish(fresh){
+  $("controls").style.display="none";$("hint").innerHTML="&nbsp;";renderRounds();
+  const d=$("donebar");d.style.display="block";const done=allDone();
+  let h="<div class='l1'>"+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
+  h+=done?"<div class='l2'>Dagens total <b>"+dayTotal()+" p</b> · Nya verser om <b class='cd'></b></div>":"<div class='l2'>Dagens total hittills <b>"+dayTotal()+" p</b></div>";
+  h+="<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Om versen</button>"+(done?"<button class='btn' id='resBtn'>Resultat</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
+  d.innerHTML=h;
+  $("ctxBtn").onclick=()=>openCtx(R);
+  if(done)$("resBtn").onclick=openRes;else $("nextBtn").onclick=()=>loadRound(firstOpen());
+  tick();fitVerse();
+  saveScores();
+  if(fresh) setTimeout(()=>openCtx(R,true),500);
+}
+async function saveScores(){
+  if(!DB_ON||!ME)return;
+  let changed=false;
+  for(let r=0;r<ROUNDS;r++){const s=loadSt(r);if(!s.done||s.saved)continue;
+    try{const res=await rpc("submit_score",{p_code:ME.code,p_day:TODAY,p_round:r+1,p_attempts:s.guesses.length,p_solved:!!s.won,p_points:s.points,p_guesses:s.guesses.map(g=>({b:g.b,c:g.c,v:g.v}))});
+      s.saved=true;store.set(skey(r),s);if(r===R)st.saved=true;changed=true;
+      if(!SCORES.some(x=>x.profile_id===ME.id&&x.day===TODAY&&x.round===r+1))SCORES.push({profile_id:ME.id,day:TODAY,round:r+1,attempts:s.guesses.length,solved:!!s.won,points:s.points,guesses:s.guesses});
+    }catch(e){toast("Kunde inte spara: "+e.message);break;}
+  }
+  if(changed) loadAll();
+}
+
+/* ---- om versen (sammanhang + bokfakta) ---- */
+function chapterUrl(a){return "https://www.biblegateway.com/passage/?search="+encodeURIComponent(OSIS[a.b]+" "+a.c)+"&version=SFB15"}
+function openCtx(r,auto){
+  const a=ansFor(r),x=loadSt(r),info=BOOKINFO[a.b];
+  const head=auto?"<div class='res'><h2>"+(x.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][x.guesses.length-1]:"Inte den här gången")+"</h2><div class='pts'>"+x.points+" p</div></div>":"";
+  $("ctxBody").innerHTML=head+"<h2 style='margin-top:10px'>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</h2><div class='ctx'>"+esc(a.t)+"</div>"+
+    "<a class='btn ghost' href='"+chapterUrl(a)+"' target='_blank' rel='noopener'>📖 Läs hela kapitel "+a.c+"</a>"+
+    "<div class='card' style='margin-top:12px'><h2 style='font-size:18px'>Om "+esc(BOOKS[a.b])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div></div>"+
+    (allDone()?"<button class='btn' data-close id='ctxRes'>Se resultat</button>":"<button class='btn' data-close id='ctxNext'>Nästa vers →</button>")+
+    "<button class='btn ghost' data-close>Stäng</button>";
+  $("ctxModal").classList.add("on");
+  const n=$("ctxNext");if(n)n.onclick=()=>{$("ctxModal").classList.remove("on");loadRound(firstOpen());};
+  const rr=$("ctxRes");if(rr)rr.onclick=()=>{$("ctxModal").classList.remove("on");openRes();};
+}
+function openRes(){
+  const t=dayTotal(),parts=[];
+  for(let r=0;r<ROUNDS;r++){const x=loadSt(r),a=ansFor(r);parts.push("<tr><td>Vers "+(r+1)+"</td><td>"+(x.done?esc(BOOKS[a.b]+" "+a.c+":"+a.v):"<span class='mut'>Ej spelad</span>")+"</td><td class='n'>"+(x.done?x.points+" p":"–")+"</td></tr>");}
+  const title=!allDone()?"Dagens verser":t>=100?"Fantastisk dag!":t>=50?"Bra jobbat!":t>0?"Det blev några poäng":"Inte idag";
+  $("resBody").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin:10px 0'>"+parts.join("")+"</table>"+
+    "<p class='mut' style='text-align:center'>Nya verser om <b class='cd' style='color:var(--text)'></b></p>"+
+    "<button class='btn' id='resBoard'>🏆 Topplistan</button><button class='btn ghost' id='resPlay'>Visa mina gissningar</button><button class='btn ghost' id='resHome'>Till startsidan</button>";
+  $("resModal").classList.add("on");tick();
+  $("resBoard").onclick=()=>{$("resModal").classList.remove("on");BOARD.back=SCREEN;go("board");};
+  $("resPlay").onclick=()=>{$("resModal").classList.remove("on");go("play");};
+  $("resHome").onclick=()=>{$("resModal").classList.remove("on");go("home");};
+}
+function tick(){
+  const now=new Date();let txt;
+  if(sthlmDate(now)!==TODAY)txt="nu – ladda om sidan";
+  else{const p=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(now);
+    const g=t=>+p.find(x=>x.type===t).value;const left=86400-(g("hour")*3600+g("minute")*60+g("second"));
+    txt=pad2(Math.floor(left/3600))+":"+pad2(Math.floor(left%3600/60))+":"+pad2(left%60);}
+  document.querySelectorAll(".cd").forEach(e=>e.textContent=txt);
+}
+
+/* ===== TOPPLISTOR ===== */
+let BOARD={scope:"all",period:"day",back:"home"};
+function scopeList(){
+  const l=[{key:"all",icon:"🇸🇪",label:"Hela Sverige"}];
+  if(ME&&ME.church)l.push({key:"church",icon:"⛪",label:ME.church});
+  MYGROUPS.forEach(g=>l.push({key:"g"+g.id,icon:g.emoji||"👥",label:g.name}));
+  return l;
+}
+function playersIn(scope){
+  if(scope==="all")return null;
+  if(scope==="church")return new Set(Object.values(PROFILES).filter(p=>ME&&p.church&&p.church.toLowerCase()===String(ME.church).toLowerCase()).map(p=>p.id));
+  if(scope.startsWith("g")){const gid=+scope.slice(1);return new Set(MEMBERS.filter(m=>m.group_id===gid).map(m=>m.profile_id));}
+  return null;
+}
+function aggregate(scope,period){
+  const set=playersIn(scope);
+  const from=period==="day"?TODAY:period==="week"?weekStart(TODAY):"0000";
+  const agg={};
+  SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;if(set&&!set.has(s.profile_id))return;
+    const a=agg[s.profile_id]||(agg[s.profile_id]={id:s.profile_id,pts:0,n:0,w:0,parts:[null,null,null]});
+    a.pts+=s.points;a.n++;if(s.solved)a.w++;if(s.day===TODAY)a.parts[s.round-1]=s.points;});
+  return Object.values(agg).sort((a,b)=>b.pts-a.pts||b.w-a.w);
+}
+function rankIn(sc,period){const rows=aggregate(sc.key,period);const i=ME?rows.findIndex(r=>r.id===ME.id):-1;return {rank:i>=0?i+1:0,total:rows.length}}
+function playerCell(p,clickable){
+  const inner="<span class='em'>"+esc((p&&p.emoji)||"🙂")+"</span><span>"+(clickable?"<u>"+esc(p.name)+"</u> ›":esc(p?p.name:"?"))+(p&&p.church?"<small>"+esc(p.church)+"</small>":"")+"</span>";
+  return clickable?"<button class='pname pl' data-p='"+esc(p.id)+"'>"+inner+"</button>":"<span class='pl'>"+inner+"</span>";
+}
+function renderBoard(){
+  const scopes=scopeList().concat([{key:"league",icon:"⛪",label:"Församlingsligan"}]);
+  if(!scopes.some(s=>s.key===BOARD.scope))BOARD.scope="all";
+  $("scopes").innerHTML=scopes.map(s=>"<button data-s='"+esc(s.key)+"' class='"+(s.key===BOARD.scope?"on":"")+"'>"+esc(s.icon+" "+s.label)+"</button>").join("");
+  [...$("ptabs").children].forEach(b=>b.classList.toggle("on",b.dataset.t===BOARD.period));
+  let html="";
+  if(BOARD.scope==="league"){
+    const from=BOARD.period==="day"?TODAY:BOARD.period==="week"?weekStart(TODAY):"0000";
+    const per={};
+    SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;const p=PROFILES[s.profile_id];if(!p||!p.church)return;
+      const k=p.church.trim().toLowerCase();const c=per[k]||(per[k]={name:p.church.trim(),pts:0,players:new Set()});c.pts+=s.points;c.players.add(s.profile_id);});
+    const rows=Object.values(per).map(c=>({...c,avg:Math.round(c.pts/c.players.size)})).sort((a,b)=>b.avg-a.avg);
+    html=rows.length?"<table><tr><th></th><th>Församling</th><th class='n'>Spelare</th><th class='n'>Snitt</th></tr>"+rows.map((c,i)=>"<tr class='"+(ME&&ME.church&&c.name.toLowerCase()===ME.church.trim().toLowerCase()?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>⛪ "+esc(c.name)+"</td><td class='n'>"+c.players.size+"</td><td class='n'>"+c.avg+" p</td></tr>").join("")+"</table><p class='mut' style='font-size:12px'>Snitt = poäng per spelare under perioden.</p>"
+      :"<div class='empty'>Inga församlingar har spelat "+(BOARD.period==="day"?"idag":"än")+".</div>";
+  } else {
+    const rows=aggregate(BOARD.scope,BOARD.period);
+    const canCmp=doneCount()>0;
+    if(BOARD.period==="day"){
+      html="<table><tr><th></th><th>Namn</th><th>1·2·3</th><th class='n'>P</th></tr>"+rows.map((a,i)=>{const p=PROFILES[a.id]||{id:a.id,name:"?"};const me=ME&&a.id===ME.id;
+        return "<tr class='"+(me?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+playerCell(p,!me&&canCmp)+"</td><td class='mut' style='font-size:12px'>"+a.parts.map(x=>x===null?"–":x).join("·")+"</td><td class='n'>"+a.pts+"</td></tr>";}).join("")+"</table>";
+      if(!rows.length)html="<div class='empty'>Ingen har spelat idag än. Bli först!</div>";
+      else if(!canCmp)html+="<p class='mut' style='font-size:12px'>Spela en vers för att kunna jämföra dina gissningar med andras.</p>";
+      else html+="<p class='mut' style='font-size:12px'>Tryck på ett namn för att jämföra gissningar.</p>";
+    } else {
+      html=rows.length?"<table><tr><th></th><th>Namn</th><th class='n'>Verser</th><th class='n'>Poäng</th></tr>"+rows.map((a,i)=>{const p=PROFILES[a.id]||{name:"?"};
+        return "<tr class='"+(ME&&a.id===ME.id?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+playerCell(p,false)+"</td><td class='n'>"+a.n+"</td><td class='n'>"+a.pts+"</td></tr>";}).join("")+"</table>":"<div class='empty'>Inga resultat än.</div>";
+    }
+  }
+  $("boardBody").innerHTML=html;
+}
+$("scopes").onclick=e=>{const b=e.target.closest("button[data-s]");if(!b)return;BOARD.scope=b.dataset.s;renderBoard();};
+$("ptabs").onclick=e=>{const b=e.target.closest("button[data-t]");if(!b)return;BOARD.period=b.dataset.t;renderBoard();};
+$("boardBack").onclick=()=>go(BOARD.back==="board"?"home":BOARD.back||"home");
+$("boardBody").addEventListener("click",e=>{const b=e.target.closest(".pname");if(b)openCompare(b.dataset.p);});
+
+/* jämför */
+let CMP={p:null,r:0};
+function openCompare(pid){const mine=[0,1,2].filter(r=>loadSt(r).done);if(!mine.length)return;CMP={p:pid,r:mine.includes(R)?R:mine[mine.length-1]};renderCompare();$("cmpModal").classList.add("on");}
+function renderCompare(){
+  const {p,r}=CMP,a=ansFor(r),prof=PROFILES[p]||{name:"?"};
+  $("cmpTabs").innerHTML=[0,1,2].map(i=>{const mine=loadSt(i),ok=mine.done;const th=SCORES.find(x=>x.profile_id===p&&x.day===TODAY&&x.round===i+1);
+    return "<button data-r='"+i+"' class='ctab"+(i===r?" on":"")+"' "+(ok?"":"disabled")+"><b>Vers "+(i+1)+"</b><small>"+(!ok?"spela först":(th?th.points:"–")+" – "+mine.points)+"</small></button>";}).join("");
+  $("cmpTitle").textContent="Du mot "+prof.name;$("cmpRef").textContent=BOOKS[a.b]+" "+a.c+":"+a.v;
+  const th=SCORES.find(x=>x.profile_id===p&&x.day===TODAY&&x.round===r+1);
+  const box=(label,guesses,pts)=>{const w=document.createElement("div");w.className="cmpbox";
+    const h=document.createElement("div");h.className="cmph";const l=document.createElement("span");l.textContent=label;h.appendChild(l);const b=document.createElement("b");b.textContent=pts==null?"–":pts+" p";h.appendChild(b);w.appendChild(h);
+    const g=document.createElement("div");g.className="grid minig";
+    if(!guesses||!guesses.length){const e=document.createElement("div");e.className="empty";e.textContent=label+" har inte spelat den här versen än.";g.appendChild(e);}
+    else guesses.forEach(x=>g.appendChild(staticRow(x,a)));w.appendChild(g);return w;};
+  const body=$("cmpBody");body.innerHTML="";
+  body.appendChild(box((prof.emoji||"")+" "+prof.name,th?th.guesses:null,th?th.points:null));
+  const me=loadSt(r);body.appendChild(box((ME.emoji||"")+" Du",me.guesses,me.points));
+}
+$("cmpTabs").onclick=e=>{const b=e.target.closest("button[data-r]");if(!b||b.disabled)return;CMP.r=+b.dataset.r;renderCompare();};
+
+/* ===== BIBELRESAN ===== */
+function myHistory(){ // [{day,round,solved,points,b}]
+  const list=myScores().map(s=>({day:s.day,round:s.round,solved:s.solved,points:s.points,b:ansForDay(s.day,s.round-1).b}));
+  for(let r=0;r<ROUNDS;r++){const x=loadSt(r);if(x.done&&!list.some(l=>l.day===TODAY&&l.round===r+1))list.push({day:TODAY,round:r+1,solved:!!x.won,points:x.points,b:ansFor(r).b});}
+  return list;
+}
+function bookStatus(){const st=Array(66).fill(0);myHistory().forEach(h=>{st[h.b]=Math.max(st[h.b],h.solved?2:1);});return st}
+function renderJourney(){
+  const bs=bookStatus(),found=bs.filter(x=>x===2).length;
+  const cell=i=>"<button class='"+(bs[i]===2?"g":bs[i]===1?"y":"")+"' data-b='"+i+"'>"+SHORT[i]+"</button>";
+  let h="<div class='card' style='margin-top:14px'><h2 class='t' style='margin:0 0 4px'>Din bibelresa</h2><div class='mut'>"+found+" av 66 böcker upptäckta</div><div class='bar'><div style='width:"+Math.round(found/66*100)+"%'></div></div>";
+  h+="<div class='sec'>Gamla testamentet</div><div class='jb'>";for(let i=0;i<39;i++)h+=cell(i);
+  h+="</div><div class='sec'>Nya testamentet</div><div class='jb'>";for(let i=39;i<66;i++)h+=cell(i);
+  h+="</div><div class='lg'><span><i style='background:var(--green)'></i>Klarad</span><span><i style='background:#6b5a2c'></i>Gissad men ej klarad</span><span><i style='background:var(--cell)'></i>Ej upptäckt</span></div></div>";
+  h+="<p class='mut' style='text-align:center'>Tryck på en bok för att läsa om den.</p>";
+  $("journeyBody").innerHTML=h;
+}
+$("journeyBody").addEventListener("click",e=>{const b=e.target.closest("button[data-b]");if(!b)return;const i=+b.dataset.b,info=BOOKINFO[i];
+  $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div>"+
+  "<a class='btn ghost' href='https://www.biblegateway.com/passage/?search="+encodeURIComponent(OSIS[i]+" 1")+"&version=SFB15' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
+  $("ctxModal").classList.add("on");});
+
+/* ===== MÄRKEN ===== */
+const BADGES=[
+  {id:"first",e:"🎯",name:"Rätt på första",test:h=>h.some(x=>x.points===50)},
+  {id:"gospels",e:"🕊️",name:"Evangelierna",prog:h=>new Set(h.filter(x=>x.solved&&x.b>=39&&x.b<=42).map(x=>x.b)).size,of:4},
+  {id:"prophets",e:"📜",name:"Profeterna",prog:h=>new Set(h.filter(x=>x.solved&&x.b>=22&&x.b<=38).map(x=>x.b)).size,of:5},
+  {id:"paul",e:"✉️",name:"Paulus brev",prog:h=>new Set(h.filter(x=>x.solved&&x.b>=44&&x.b<=56).map(x=>x.b)).size,of:13},
+  {id:"psalms",e:"🎵",name:"Psaltaren",prog:h=>h.filter(x=>x.solved&&x.b===18).length,of:5},
+  {id:"moses",e:"🔥",name:"Moseböckerna",prog:h=>new Set(h.filter(x=>x.solved&&x.b<=4).map(x=>x.b)).size,of:5},
+  {id:"perfect",e:"💯",name:"Perfekt dag",test:h=>{const d={};h.forEach(x=>d[x.day]=(d[x.day]||0)+x.points);return Object.values(d).some(v=>v===150)}},
+  {id:"week",e:"📅",name:"7 dagar i rad",prog:()=>streakInfo().best,of:7},
+  {id:"explorer",e:"🗺️",name:"Upptäckare",prog:()=>bookStatus().filter(x=>x===2).length,of:20}];
+function badgeState(b,h){if(b.test)return {done:b.test(h),txt:""};const p=Math.min(b.prog(h),b.of);return {done:p>=b.of,txt:p+"/"+b.of}}
+function earnedBadges(){const h=myHistory();return BADGES.filter(b=>badgeState(b,h).done).map(b=>b.id)}
+
+/* ===== PROFIL ===== */
+function renderProfile(){
+  const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
+  let html="<div class='hello'>"+avatar(ME,60)+"<div><b style='font-size:20px'>"+esc(ME.name)+"</b><small>"+esc(ME.church||"Ingen församling angiven")+"</small></div></div>";
+  html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+"</b><div class='mut'>i rad · ditt rekord: "+sk.best+"</div></div></div></div>";
+  html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
+  html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
+  html+="<div class='card'><div class='mut'>Din personliga kod – använd den för att logga in på en annan telefon:</div><div class='code'>"+esc(ME.code)+"</div><p class='mut' style='font-size:12px;margin:0'>Dela inte koden med andra, den fungerar som ett lösenord.</p></div>";
+  html+="<button class='btn ghost' id='editProfile'>✏️ Ändra namn, församling eller figur</button><button class='linkbtn' id='logout' style='display:block;margin:12px auto'>Logga ut från den här telefonen</button>";
+  $("profileBody").innerHTML=html;
+  $("editProfile").onclick=()=>{EDIT=true;go("onboard");};
+  $("logout").onclick=()=>{if(confirmLogout()){store.del("vjb_profile");ME=null;MYGROUPS=[];go("onboard");}};
+}
+function confirmLogout(){return window.confirm("Logga ut? Skriv upp din kod först: "+ME.code)}
+
+/* ===== VÄLKOMMEN / PROFIL ===== */
+let EDIT=false, PICK=EMOJIS[0];
+function renderOnboard(){
+  $("obTitle").textContent=EDIT?"Ändra profil":"Vem är du?";
+  $("obIntro").textContent=EDIT?"Ändringarna syns direkt på topplistorna.":"Skapa din profil. Den syns på topplistan och i dina grupper.";
+  $("obLogin").style.display=EDIT?"none":"";$("obCancel").style.display=EDIT?"":"none";
+  if(EDIT&&ME){$("obName").value=ME.name;$("obChurch").value=ME.church||"";PICK=ME.emoji||EMOJIS[0];}
+  $("obEmo").innerHTML=EMOJIS.map(e=>"<button data-e='"+e+"' class='"+(e===PICK?"on":"")+"'>"+e+"</button>").join("");
+  $("obSave").textContent=EDIT?"Spara ändringar":"Spara profil";
+}
+$("obEmo").onclick=e=>{const b=e.target.closest("button[data-e]");if(!b)return;PICK=b.dataset.e;[...$("obEmo").children].forEach(x=>x.classList.toggle("on",x===b));};
+function churches(){const m={};Object.values(PROFILES).forEach(p=>{if(hidden(p)||!p.church)return;const k=p.church.trim().toLowerCase();m[k]=m[k]||{name:p.church.trim(),n:0};m[k].n++;});return Object.values(m)}
+$("obChurch").oninput=()=>{const q=$("obChurch").value.trim().toLowerCase();const s=$("obSugg");
+  if(q.length<2){s.style.display="none";return;}
+  const hits=churches().filter(c=>c.name.toLowerCase().includes(q)&&c.name.toLowerCase()!==q).sort((a,b)=>b.n-a.n).slice(0,4);
+  s.innerHTML=hits.map(c=>"<button data-c='"+esc(c.name)+"'>"+esc(c.name)+"<small>"+c.n+" spelare</small></button>").join("");s.style.display=hits.length?"block":"none";};
+$("obSugg").onclick=e=>{const b=e.target.closest("button[data-c]");if(!b)return;$("obChurch").value=b.dataset.c;$("obSugg").style.display="none";};
+$("obCancel").onclick=()=>{EDIT=false;go("profile");};
+$("obSave").onclick=async()=>{
+  const name=$("obName").value.trim().replace(/\s+/g," "),church=$("obChurch").value.trim().replace(/\s+/g," ");
+  if(name.length<2){toast("Skriv minst 2 tecken i namnet");return;}
+  if(!DB_ON){toast("Ingen kontakt med servern");return;}
+  $("obSave").disabled=true;
+  try{
+    if(EDIT){await rpc("update_profile",{p_code:ME.code,p_name:name,p_church:church,p_emoji:PICK});ME={...ME,name,church:church||null,emoji:PICK};store.set("vjb_profile",ME);EDIT=false;toast("Profilen är sparad");await loadAll();go("profile");}
+    else{const r=await rpc("create_profile",{p_name:name,p_church:church,p_emoji:PICK});ME={id:r[0].id,code:r[0].code,name,church:church||null,emoji:PICK};store.set("vjb_profile",ME);
+      await loadAll();await joinFromUrl();toast("Välkommen "+name+"! Din kod är "+ME.code,4000);go("home");}
+  }catch(e){toast(e.message);}
+  $("obSave").disabled=false;
+};
+$("obLoginBtn").onclick=()=>{$("loginModal").classList.add("on");setTimeout(()=>$("loginCode").focus(),50);};
+$("loginGo").onclick=async()=>{
+  const c=$("loginCode").value.trim().toUpperCase();if(c.length<5){toast("Skriv hela koden");return;}
+  try{const r=await rpc("login_profile",{p_code:c});if(!r.length){toast("Hittade ingen profil med den koden");return;}
+    ME=r[0];store.set("vjb_profile",ME);$("loginModal").classList.remove("on");await loadAll();await joinFromUrl();toast("Inloggad som "+ME.name);go("home");}
+  catch(e){toast(e.message);}
+};
+
+/* ===== GRUPPER ===== */
+function renderGroups(){
+  const sc=scopeList();
+  let h="<h2 class='t'>Mina grupper</h2><div class='card'>";
+  h+=sc.map(s=>{const r=rankIn(s,"day");let sub="";
+    if(s.key==="all")sub=r.total+" har spelat idag";
+    else if(s.key==="church")sub="Din församling · "+playersIn("church").size+" spelare";
+    else{const g=MYGROUPS.find(x=>"g"+x.id===s.key);sub="Kod "+(g?g.code:"")+" · "+playersIn(s.key).size+" medlemmar";}
+    return "<button class='grp' data-scope='"+esc(s.key)+"'><span class='ic'>"+esc(s.icon)+"</span><span><b>"+esc(s.label)+"</b><small>"+esc(sub)+"</small></span><span class='rk'>"+(r.rank?r.rank+":a":"–")+"</span></button>";}).join("");
+  h+="</div>";
+  if(!MYGROUPS.length)h+="<p class='mut'>Du är inte med i någon egen grupp än. Skapa en för ditt kompisgäng eller din ungdomsgrupp, eller gå med med en kod du har fått.</p>";
+  h+="<button class='btn' id='joinBtn'>＋ Gå med i grupp (ange kod)</button><button class='btn ghost' id='createBtn'>Skapa ny grupp</button>";
+  if(MYGROUPS.length)h+="<p class='mut' style='font-size:12px;margin-top:14px'>Tryck på en grupp för topplistan. Bjud in fler via topplistan.</p>";
+  $("groupsBody").innerHTML=h;
+  $("joinBtn").onclick=()=>{$("joinCode").value="";$("joinModal").classList.add("on");setTimeout(()=>$("joinCode").focus(),50);};
+  $("createBtn").onclick=()=>{$("newGroupName").value="";GPICK=GEMOJIS[0];$("grpEmo").innerHTML=GEMOJIS.map(e=>"<button data-e='"+e+"' class='"+(e===GPICK?"on":"")+"'>"+e+"</button>").join("");$("createModal").classList.add("on");};
+}
+$("groupsBody").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(b){BOARD.scope=b.dataset.scope;BOARD.back="groups";go("board");}});
+let GPICK=GEMOJIS[0];
+$("grpEmo").onclick=e=>{const b=e.target.closest("button[data-e]");if(!b)return;GPICK=b.dataset.e;[...$("grpEmo").children].forEach(x=>x.classList.toggle("on",x===b));};
+$("createGo").onclick=async()=>{const n=$("newGroupName").value.trim();if(n.length<2){toast("Skriv ett namn på gruppen");return;}
+  try{const r=await rpc("create_group",{p_code:ME.code,p_name:n,p_emoji:GPICK});$("createModal").classList.remove("on");await loadAll();renderGroups();openShare(r[0].id);}catch(e){toast(e.message);}};
+$("joinGo").onclick=async()=>{const c=$("joinCode").value.trim().toUpperCase();if(c.length<5){toast("Skriv hela koden");return;}
+  try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:c});$("joinModal").classList.remove("on");await loadAll();toast("Du är med i "+r[0].name+"!");renderGroups();}catch(e){toast(e.message);}};
+function inviteUrl(code){return location.origin+location.pathname+"?grupp="+encodeURIComponent(code)}
+let SHARE=null;
+function openShare(gid){const g=MYGROUPS.find(x=>x.id===gid);if(!g)return;SHARE=g;
+  $("shareTitle").textContent="Bjud in till "+g.name;$("shareCode").textContent=g.code;
+  const txt="Häng med och spela Versjakten i gruppen \""+g.name+"\"! Tre bibelverser om dagen – gissa var de står. "+inviteUrl(g.code);
+  $("shareWa").href="https://wa.me/?text="+encodeURIComponent(txt);$("shareModal").classList.add("on");}
+$("shareCopy").onclick=async()=>{try{await navigator.clipboard.writeText(inviteUrl(SHARE.code));toast("Länken är kopierad");}catch(e){toast(inviteUrl(SHARE.code),5000);}};
+$("shareLeave").onclick=async()=>{if(!SHARE||!window.confirm("Lämna "+SHARE.name+"?"))return;try{await rpc("leave_group",{p_code:ME.code,p_group_id:SHARE.id});$("shareModal").classList.remove("on");await loadAll();BOARD.scope="all";go("groups");toast("Du har lämnat gruppen");}catch(e){toast(e.message);}};
+// bjud in-knapp på grupptopplistan
+const _rb=renderBoard;
+renderBoard=function(){_rb();if(BOARD.scope.startsWith("g")){const gid=+BOARD.scope.slice(1);const b=document.createElement("button");b.className="btn ghost";b.textContent="📨 Bjud in till gruppen";b.onclick=()=>openShare(gid);$("boardBody").appendChild(b);}};
+async function joinFromUrl(){
+  const code=new URLSearchParams(location.search).get("grupp");if(!code||!ME)return;
+  try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:code});await loadAll();toast("Du är med i "+r[0].name+"!",3500);}catch(e){toast(e.message);}
+  history.replaceState(null,"",location.pathname);
+}
+
+/* ===== START ===== */
+buildPad();
+document.addEventListener("dblclick",e=>e.preventDefault());
+setInterval(tick,1000);
+(async()=>{
+  go(ME?"home":"onboard");
+  await loadAll();
+  if(ME){
+    // kontrollera att profilen finns kvar
+    if(!PROFILES[ME.id]){try{const r=await rpc("login_profile",{p_code:ME.code});if(!r.length){store.del("vjb_profile");ME=null;go("onboard");return;}}catch(e){}}
+    else{const p=PROFILES[ME.id];ME={...ME,name:p.name,church:p.church,emoji:p.emoji};store.set("vjb_profile",ME);}
+    await joinFromUrl();saveScores();
+  } else {
+    const code=new URLSearchParams(location.search).get("grupp");if(code)$("obIntro").textContent="Skapa din profil så går du med i gruppen direkt.";
+  }
+  if(SCREEN!=="play")go(SCREEN);
+  document.fonts&&document.fonts.ready.then(()=>{if(SCREEN==="play")fitVerse()});
+})();
+</script>
+</body>
+</html>
