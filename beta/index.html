@@ -105,7 +105,8 @@ h2.t{font-family:var(--serif);font-size:22px;margin:14px 0 10px}
 .donebar .l1{font-family:var(--serif);font-size:17px}.donebar .l1 b{color:var(--accent)}
 .donebar .l2{font-size:12px;color:var(--muted);margin-top:2px}.donebar .l2 b{color:var(--text);font-variant-numeric:tabular-nums}
 .legend{position:absolute;left:0;right:0;top:4px;z-index:5;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;font-size:13px;text-align:left;box-shadow:0 8px 24px #000a}
-.legend .lx{position:absolute;right:6px;top:4px;background:none;border:none;color:var(--muted);font-size:18px;padding:4px 8px}
+.legend .lx{position:absolute;right:4px;top:2px;background:var(--cell);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:20px;width:40px;height:40px;display:grid;place-items:center;padding:0}
+.legend .lbtns{display:flex;gap:6px;margin-top:8px}.legend .lbtns button{flex:1;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--cell);font-size:13.5px;font-weight:600}.legend .lbtns .pri{background:var(--accent);color:#1c160d;border-color:var(--accent)}
 .legend .li{display:flex;align-items:center;gap:8px;margin:5px 0}
 .legend i{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:5px;font-style:normal;font-weight:700;font-size:13px;flex:none}
 .legend .tag{background:var(--red);color:#fff;font-size:10px;border-radius:4px;padding:2px 4px;font-weight:700;flex:none}
@@ -191,6 +192,10 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .grp .ic{width:38px;height:38px;border-radius:10px;background:var(--cell);display:grid;place-items:center;font-size:20px;flex:none}
 .grp b{display:block;font-size:14.5px}.grp small{color:var(--muted);font-size:12px}
 .grp .rk{margin-left:auto;color:var(--accent);font-weight:700;font-size:14px;white-space:nowrap}
+.ad{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#3a1f3d,#5b2a4a);border:1px solid #7a3f66;border-radius:14px;padding:12px 14px;margin:0 0 12px;position:relative;color:#fff;text-align:left}
+.ad .ae{font-size:34px}
+.ad b{display:block;font-size:16px}.ad span.at{font-size:12.5px;opacity:.85}
+.ad .al{position:absolute;right:8px;top:6px;font-size:9px;letter-spacing:1px;opacity:.7}
 .linkbtn{background:none;border:none;color:var(--muted);text-decoration:underline;font-size:12px;padding:6px 0}
 </style>
 </head>
@@ -209,10 +214,11 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
     <div class="count" id="countToday"></div>
     <div class="menu">
       <button data-go="profile"><span>👤</span>Min profil</button>
-      <button data-go="journey"><span>🗺️</span>Bibelresan</button>
+      <button data-go="stats"><span>📊</span>Min statistik</button>
       <button data-go="groups"><span>👥</span>Grupper</button>
     </div>
     <div class="card" id="homeGroups"></div>
+    <div class="ad"><span class="al">ANNONS · EXEMPEL</span><span class="ae">🍬</span><span><b>Godispengen</b><span class="at">Tjäna pengar till din klass och förening</span></span></div>
     <p class="mut" style="text-align:center;font-size:11px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
   </div>
 </section>
@@ -246,14 +252,14 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
   <div class="scroll" id="profileBody"></div>
 </section>
 
-<!-- ===== BIBELRESAN ===== -->
-<section class="screen" id="s-journey">
+<!-- ===== STATISTIK ===== -->
+<section class="screen" id="s-stats">
   <header>
     <button class="iconbtn" data-go="home">←</button>
-    <h1>Bibelresan</h1>
+    <h1>Min statistik</h1>
     <button class="iconbtn ghost"></button>
   </header>
-  <div class="scroll" id="journeyBody"></div>
+  <div class="scroll" id="statsBody"></div>
 </section>
 
 <!-- ===== GRUPPER ===== -->
@@ -537,7 +543,7 @@ function go(name){
   if(name==="home") renderHome();
   if(name==="play") loadRound(firstOpen());
   if(name==="profile") renderProfile();
-  if(name==="journey") renderJourney();
+  if(name==="stats") renderStats();
   if(name==="groups") renderGroups();
   if(name==="board") renderBoard();
   if(name==="onboard") renderOnboard();
@@ -687,10 +693,13 @@ function legendHTML(){return "<div class='legend'><button class='lx' aria-label=
   "<div class='li'><i style='background:var(--green);color:#fff'>1</i>Rätt siffra på <b>rätt plats</b></div>"+
   "<div class='li'><i style='background:var(--yellow);color:#1c160d'>4</i>Siffran <b>finns</b> i svaret, men på <b>fel plats</b></div>"+
   "<div class='li'><i style='background:var(--gray);color:#fff'>0</i>Siffran finns inte (där)</div>"+
-  "<div class='li'><span class='tag'>✗ fel bok</span>Det är inte den här boken</div></div>"}
+  "<div class='li'><span class='tag'>✗ fel bok</span>Det är inte den här boken</div>"+
+  "<div class='lbtns'><button class='pri lshow'>Visa bibelordet</button><button class='lnever'>Visa inte igen</button></div></div>"}
 function showLegend(){$("legendBox").innerHTML=legendHTML();}
 function maybeLegend(){const n=store.get("vjb_legend_n")||0;if(n<3){store.set("vjb_legend_n",n+1);showLegend();}}
-$("legendBox").addEventListener("click",e=>{if(e.target.closest(".lx")||e.target.closest(".legend"))$("legendBox").innerHTML="";});
+$("legendBox").addEventListener("click",e=>{
+  if(e.target.closest(".lnever")){store.set("vjb_legend_n",99);$("legendBox").innerHTML="";toast("Okej! Du hittar förklaringen under ? om du behöver den.");return;}
+  if(e.target.closest(".lx")||e.target.closest(".lshow"))$("legendBox").innerHTML="";});
 $("showLegendBtn").onclick=()=>{$("infoModal").classList.remove("on");if(SCREEN!=="play")go("play");showLegend();};
 
 function renderRounds(){
@@ -750,6 +759,7 @@ function openRes(){
   const title=!allDone()?"Dagens verser":t>=100?"Fantastisk dag!":t>=50?"Bra jobbat!":t>0?"Det blev några poäng":"Inte idag";
   $("resBody").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin:10px 0'>"+parts.join("")+"</table>"+
     "<p class='mut' style='text-align:center'>Nya verser om <b class='cd' style='color:var(--text)'></b></p>"+
+    "<div class='ad'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>"+
     "<button class='btn' id='resBoard'>🏆 Topplistan</button><button class='btn ghost' id='resPlay'>Visa mina gissningar</button><button class='btn ghost' id='resHome'>Till startsidan</button>";
   $("resModal").classList.add("on");tick();
   $("resBoard").onclick=()=>{$("resModal").classList.remove("on");BOARD.back=SCREEN;go("board");};
@@ -855,17 +865,25 @@ function myHistory(){ // [{day,round,solved,points,b}]
   return list;
 }
 function bookStatus(){const st=Array(66).fill(0);myHistory().forEach(h=>{st[h.b]=Math.max(st[h.b],h.solved?2:1);});return st}
-function renderJourney(){
+function journeyHTML(){
   const bs=bookStatus(),found=bs.filter(x=>x===2).length;
   const cell=i=>"<button class='"+(bs[i]===2?"g":bs[i]===1?"y":"")+"' data-b='"+i+"'>"+SHORT[i]+"</button>";
-  let h="<div class='card' style='margin-top:14px'><h2 class='t' style='margin:0 0 4px'>Din bibelresa</h2><div class='mut'>"+found+" av 66 böcker upptäckta</div><div class='bar'><div style='width:"+Math.round(found/66*100)+"%'></div></div>";
+  let h="<div class='card'><h2 class='t' style='margin:0 0 4px;font-size:19px'>🗺️ Din bibelresa</h2><div class='mut'>"+found+" av 66 böcker upptäckta. En bok blir grön när du klarar en vers i den.</div><div class='bar'><div style='width:"+Math.round(found/66*100)+"%'></div></div>";
   h+="<div class='sec'>Gamla testamentet</div><div class='jb'>";for(let i=0;i<39;i++)h+=cell(i);
   h+="</div><div class='sec'>Nya testamentet</div><div class='jb'>";for(let i=39;i<66;i++)h+=cell(i);
   h+="</div><div class='lg'><span><i style='background:var(--green)'></i>Klarad</span><span><i style='background:#6b5a2c'></i>Gissad men ej klarad</span><span><i style='background:var(--cell)'></i>Ej upptäckt</span></div></div>";
-  h+="<p class='mut' style='text-align:center'>Tryck på en bok för att läsa om den.</p>";
-  $("journeyBody").innerHTML=h;
+  h+="<p class='mut' style='text-align:center;font-size:12px;margin:0 0 12px'>Tryck på en bok för att läsa om den.</p>";
+  return h;
 }
-$("journeyBody").addEventListener("click",e=>{const b=e.target.closest("button[data-b]");if(!b)return;const i=+b.dataset.b,info=BOOKINFO[i];
+function renderStats(){
+  const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
+  let html="<div style='height:14px'></div><div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div></div>";
+  html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
+  html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>🏅 Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
+  html+=journeyHTML();
+  $("statsBody").innerHTML=html;
+}
+$("statsBody").addEventListener("click",e=>{const b=e.target.closest("button[data-b]");if(!b)return;const i=+b.dataset.b,info=BOOKINFO[i];
   $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div>"+
   "<a class='btn ghost' href='"+yvUrl(i,1)+"' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
   $("ctxModal").classList.add("on");});
@@ -888,9 +906,7 @@ function earnedBadges(){const h=myHistory();return BADGES.filter(b=>badgeState(b
 function renderProfile(){
   const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
   let html="<div class='hello'>"+avatar(ME,60)+"<div><b style='font-size:20px'>"+esc(ME.name)+"</b><small>"+esc(ME.church||"Ingen församling angiven")+"</small></div></div>";
-  html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+"</b><div class='mut'>i rad · ditt rekord: "+sk.best+"</div></div></div></div>";
-  html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
-  html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
+  html+="<button class='card r2' data-go='stats' style='width:100%;color:var(--text)'><span>🔥 "+sk.cur+" dagar i rad · "+earnedBadges().length+" märken · "+bookStatus().filter(x=>x===2).length+" böcker</span><b>Statistik ›</b></button>";
   html+="<div class='card'><div class='mut'>Din personliga kod – använd den för att logga in på en annan telefon:</div><div class='code'>"+esc(ME.code)+"</div><p class='mut' style='font-size:12px;margin:0'>Dela inte koden med andra, den fungerar som ett lösenord.</p></div>";
   html+="<button class='btn ghost' id='editProfile'>✏️ Ändra namn, församling eller figur</button><button class='linkbtn' id='logout' style='display:block;margin:12px auto'>Logga ut från den här telefonen</button>";
   $("profileBody").innerHTML=html;
