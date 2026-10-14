@@ -197,6 +197,42 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .ad b{display:block;font-size:16px}.ad span.at{font-size:12.5px;opacity:.85}
 .ad .al{position:absolute;right:8px;top:6px;font-size:9px;letter-spacing:1px;opacity:.7}
 .linkbtn{background:none;border:none;color:var(--muted);text-decoration:underline;font-size:12px;padding:6px 0}
+/* startsida B */
+.streakbig{text-align:center;margin:22px 0 4px}
+.streakbig .n{font-family:var(--serif);font-size:64px;font-weight:800;color:var(--accent);line-height:1}
+.streakbig .l{font-size:14px;color:var(--muted);margin-top:6px}
+.week{display:flex;justify-content:space-between;gap:4px;margin:16px 0 18px}
+.week div{flex:1;max-width:46px;text-align:center;font-size:11px;color:var(--muted)}
+.week i{display:grid;place-items:center;aspect-ratio:1;border-radius:12px;background:var(--cell);font-style:normal;font-size:18px;margin-bottom:4px}
+.week i.f{background:#3b2a16;border:1px solid var(--accent)}
+.week i.t{background:var(--accent);color:#1c160d;font-weight:800;font-size:14px}
+.week div.today{color:var(--text);font-weight:700}
+.bigbtn{display:block;width:100%;border:none;background:linear-gradient(160deg,#e0b066,#c48c3e);color:#1c160d;border-radius:18px;padding:18px;text-align:center;font-family:var(--serif);font-size:22px;font-weight:800}
+.bigbtn small{display:block;font-family:var(--sans);font-size:12.5px;font-weight:600;opacity:.8;margin-top:3px}
+.mrow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-size:14px;margin-top:10px;width:100%;text-align:left;color:var(--text)}
+.mrow b{color:var(--accent)}.mrow .arr{margin-left:auto;color:var(--accent);font-size:20px}.mrow .ic{font-size:26px}
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;background:#181411;border-top:1px solid var(--line);padding:6px 0 max(10px,env(safe-area-inset-bottom))}
+#nav .in{max-width:440px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+#nav button{background:none;border:none;font-size:11px;color:var(--muted);padding:2px 0}
+#nav button span{display:block;font-size:22px;margin-bottom:1px;filter:grayscale(1);opacity:.6}
+#nav button.on{color:var(--accent)}#nav button.on span{filter:none;opacity:1}
+body.nav-on #nav{display:block}
+body.nav-on .screen{padding-bottom:72px}
+body.nav-on .navback{visibility:hidden}
+/* maraton */
+.mcount{display:flex;align-items:center;justify-content:center;gap:10px}
+.mcount .n{font-family:var(--serif);font-size:38px;font-weight:800;color:var(--accent);line-height:1}
+.mcount .l{font-size:12px;color:var(--muted);line-height:1.2;text-align:left}
+.mcount .rb{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin-left:6px}
+.over{text-align:center}
+.over .big{font-family:var(--serif);font-size:64px;font-weight:800;color:var(--accent);line-height:1}
+.over h2{margin:6px 0 2px}
+.over .died{font-size:13px;color:var(--muted)}.over .died b{color:var(--text)}
+.over .rec{display:inline-block;background:#2c2418;border:1px solid var(--accent);border-radius:999px;padding:5px 12px;font-size:13px;margin:8px 0 0}
+.mlb{background:var(--cell);border-radius:12px;padding:10px 12px;margin-top:12px;text-align:left}
+.mlb h3{font-family:var(--serif);font-size:16px;margin:0 0 4px}
+.mlb .row2{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.mlb .row2:last-child{border:none}
+.mlb .row2 .rk{width:20px;color:var(--muted)}.mlb .row2 b{margin-left:auto;color:var(--accent)}.mlb .row2.me{color:var(--accent);font-weight:700}
 </style>
 </head>
 <body>
@@ -206,28 +242,23 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
   <header>
     <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
     <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
-    <button class="iconbtn" data-go="profile" aria-label="Profil">👤</button>
+    <button class="iconbtn" id="homeAv" data-go="stats" aria-label="Jag" style="border-radius:50%;border:2px solid var(--accent);font-size:20px">👤</button>
   </header>
   <div class="scroll">
-    <div class="hello" id="hello"></div>
-    <button class="play" id="playCard"></button>
-    <div class="count" id="countToday"></div>
-    <div class="menu">
-      <button data-go="profile"><span>👤</span>Min profil</button>
-      <button data-go="stats"><span>📊</span>Min statistik</button>
-      <button data-go="groups"><span>👥</span>Grupper</button>
-    </div>
-    <div class="card" id="homeGroups"></div>
-    <div class="ad"><span class="al">ANNONS · EXEMPEL</span><span class="ae">🍬</span><span><b>Godispengen</b><span class="at">Tjäna pengar till din klass och förening</span></span></div>
-    <p class="mut" style="text-align:center;font-size:11px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
+    <div class="streakbig" id="streakBig"></div>
+    <div class="week" id="week"></div>
+    <button class="bigbtn" id="playCard"></button>
+    <button class="mrow" id="maraRow"></button>
+    <button class="mrow" id="groupRow" style="display:none"></button>
+    <p class="mut" style="text-align:center;font-size:11px;margin-top:22px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
   </div>
 </section>
 
 <!-- ===== SPELET ===== -->
 <section class="screen" id="s-play">
   <header>
-    <button class="iconbtn" data-go="home" aria-label="Hem">🏠</button>
-    <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn" id="playHome" aria-label="Hem">🏠</button>
+    <h1 id="playTitle">Vers<span>jakten</span><i class="beta">BETA</i></h1>
     <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
   </header>
   <div class="rounds" id="rounds"></div>
@@ -245,7 +276,7 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 <!-- ===== PROFIL ===== -->
 <section class="screen" id="s-profile">
   <header>
-    <button class="iconbtn" data-go="home">←</button>
+    <button class="iconbtn" data-go="stats">←</button>
     <h1>Min profil</h1>
     <button class="iconbtn ghost"></button>
   </header>
@@ -255,9 +286,9 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 <!-- ===== STATISTIK ===== -->
 <section class="screen" id="s-stats">
   <header>
-    <button class="iconbtn" data-go="home">←</button>
-    <h1>Min statistik</h1>
     <button class="iconbtn ghost"></button>
+    <h1>Jag</h1>
+    <button class="iconbtn" data-go="profile" aria-label="Inställningar">⚙️</button>
   </header>
   <div class="scroll" id="statsBody"></div>
 </section>
@@ -265,7 +296,7 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 <!-- ===== GRUPPER ===== -->
 <section class="screen" id="s-groups">
   <header>
-    <button class="iconbtn" data-go="home">←</button>
+    <button class="iconbtn ghost"></button>
     <h1>Grupper</h1>
     <button class="iconbtn ghost"></button>
   </header>
@@ -275,13 +306,13 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 <!-- ===== TOPPLISTA ===== -->
 <section class="screen" id="s-board">
   <header>
-    <button class="iconbtn" id="boardBack">←</button>
+    <button class="iconbtn navback" id="boardBack">←</button>
     <h1>Topplista</h1>
     <button class="iconbtn ghost"></button>
   </header>
   <div class="scroll">
     <div class="scopes" id="scopes"></div>
-    <div class="tabs" id="ptabs"><button data-t="day" class="on">Idag</button><button data-t="week">Veckan</button><button data-t="all">Totalt</button></div>
+    <div class="tabs" id="ptabs"><button data-t="day" class="on">Idag</button><button data-t="week">Veckan</button><button data-t="all">Totalt</button><button data-t="mara">Maraton</button></div>
     <div id="boardBody"></div>
   </div>
 </section>
@@ -312,7 +343,16 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
   </div>
 </section>
 
+<nav id="nav"><div class="in">
+  <button data-nav="home"><span>🏠</span>Spela</button>
+  <button data-nav="board"><span>🏆</span>Topplista</button>
+  <button data-nav="groups"><span>👥</span>Grupper</button>
+  <button data-nav="stats"><span>📊</span>Jag</button>
+</div></nav>
+
 <div class="toast" id="toast"></div>
+
+<div class="modal" id="maraModal"><div class="sheet" id="maraBody"></div></div>
 
 <div class="modal" id="bookModal"><div class="sheet books" id="bookSheet"><div class="head">Välj bok</div><div id="bookList"></div></div></div>
 
@@ -498,7 +538,7 @@ async function get(path){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{head
 
 /* ---- data i minnet ---- */
 let ME=store.get("vjb_profile");      // {id,code,name,church,emoji}
-let PROFILES={}, SCORES=[], MEMBERS=[], GROUPS={}, MYGROUPS=[];
+let PROFILES={}, SCORES=[], MEMBERS=[], GROUPS={}, MYGROUPS=[], MRUNS=[];
 const hidden=p=>!p||String(p.name||"").startsWith("__");
 async function loadAll(){
   if(!DB_ON) return;
@@ -512,6 +552,7 @@ async function loadAll(){
     SCORES=sc.filter(s=>!hidden(PROFILES[s.profile_id]));
     MEMBERS=mem; GROUPS={}; gr.forEach(g=>GROUPS[g.id]=g);
     if(ME){ MYGROUPS=await rpc("my_groups",{p_code:ME.code}).catch(()=>MYGROUPS); }
+    MRUNS=(await get("marathon_runs?select=profile_id,length&length=gt.0&order=length.desc&limit=5000").catch(()=>[])).filter(m=>!hidden(PROFILES[m.profile_id]));
   }catch(e){ console.warn(e); }
 }
 
@@ -519,6 +560,8 @@ async function loadAll(){
 const skey=(r,day=TODAY)=>"vjb_game_"+day+"_"+r;
 const loadSt=r=>store.get(skey(r))||{guesses:[],done:false,saved:false};
 let R=0, ANS=ansFor(0), st=loadSt(0), cur={b:null,d:""}, busy=false;
+let MODE="day", RUN=null; // RUN = maraton {n, used:[index], cur:index, st:{guesses,done,won}, over}
+function saveSt(){ if(MODE==="mara"){RUN.st=st;store.set("vjb_mara",RUN);} else store.set(skey(R),st); }
 
 function score(g,a=ANS){
   const ad=(pad2(a.c)+pad2(a.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
@@ -536,12 +579,16 @@ function possibleBooks(){
 
 /* ---- navigering ---- */
 let SCREEN="home";
+const NAV_SCREENS=["home","board","groups","stats"];
 function go(name){
   if(!ME && name!=="onboard"){ name="onboard"; }
+  let mara=false; if(name==="mara"){name="play";mara=true;}
   SCREEN=name;
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-"+name));
+  document.body.classList.toggle("nav-on",NAV_SCREENS.includes(name));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.nav===name));
   if(name==="home") renderHome();
-  if(name==="play") loadRound(firstOpen());
+  if(name==="play"){ if(mara) loadMara(); else loadRound(firstOpen()); }
   if(name==="profile") renderProfile();
   if(name==="stats") renderStats();
   if(name==="groups") renderGroups();
@@ -549,6 +596,7 @@ function go(name){
   if(name==="onboard") renderOnboard();
 }
 document.addEventListener("click",e=>{
+  const nv=e.target.closest("[data-nav]"); if(nv){ if(nv.dataset.nav==="board")BOARD.back="home"; go(nv.dataset.nav); return; }
   const g=e.target.closest("[data-go]"); if(g){ go(g.dataset.go); return; }
   const o=e.target.closest("[data-open]"); if(o){ $(o.dataset.open).classList.add("on"); return; }
 });
@@ -575,22 +623,32 @@ function avatar(p,size){return "<span class='av' style='width:"+size+"px;height:
 
 function renderHome(){
   if(!ME) return;
-  const sk=streakInfo();
-  $("hello").innerHTML=avatar(ME,50)+"<div><b>Hej "+esc(ME.name)+"!</b><small>"+(ME.church?esc(ME.church)+" · ":"")+"🔥 "+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</small></div>";
-  const n=doneCount(), done=n===ROUNDS;
-  $("playCard").innerHTML="<div class='t'>Dagens verser</div><div class='s'>"+prettyDate(TODAY)+" · "+(done?"Klar! "+dayTotal()+" p":n+" av 3 klara")+"</div><div class='dots'>"+[0,1,2].map(r=>"<i class='"+(loadSt(r).done?"d":"")+"'></i>").join("")+"</div><div class='go'>"+(done?"Se dina verser & topplistan":n?"Fortsätt spela →":"Spela →")+"</div>";
+  $("homeAv").textContent=ME.emoji||"👤";
+  const sk=streakInfo(), n=doneCount(), done=n===ROUNDS, playedToday=sk.days.has(TODAY);
+  $("streakBig").innerHTML="<div class='n'>🔥 "+sk.cur+"</div><div class='l'>"+
+    (sk.cur===0?"Spela idag och tänd elden!":!playedToday?(sk.cur===1?"dag":"dagar")+" i rad – spela idag så brinner elden vidare!":(sk.cur===1?"dag":"dagar")+" i rad – håll elden vid liv!")+"</div>";
+  const ws=weekStart(TODAY),names=["Mån","Tis","Ons","Tor","Fre","Lör","Sön"];
+  $("week").innerHTML=names.map((nm,i)=>{const d=addDays(ws,i);let cls="",inner="";
+    if(d===TODAY){ if(done){cls="f";inner="🔥";} else {cls="t";inner=n+"/3";} }
+    else if(d<TODAY&&sk.days.has(d)){cls="f";inner="🔥";}
+    return "<div class='"+(d===TODAY?"today":"")+"'><i class='"+cls+"'>"+inner+"</i>"+nm+"</div>";}).join("");
   const today=new Set(SCORES.filter(s=>s.day===TODAY).map(s=>s.profile_id));
-  if(ME&&n) today.add(ME.id);
-  $("countToday").innerHTML="📖 <b>"+today.size+"</b> "+(today.size===1?"har":"har")+" spelat idag";
-  // grupper
-  const rows=scopeList().map(sc=>{
-    const r=rankIn(sc,"day");
-    return "<button class='r2' data-scope='"+esc(sc.key)+"'><span>"+esc(sc.icon+" "+sc.label)+"</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total:"<span class='mut'>"+r.total+" har spelat</span>")+"</span></button>";
-  }).join("");
-  $("homeGroups").innerHTML="<div class='mut' style='margin-bottom:2px'>Idag i dina grupper</div>"+rows;
+  if(n) today.add(ME.id);
+  const cnt=today.size+" har spelat idag";
+  $("playCard").innerHTML=done?"Dagens verser klara ✓<small>"+dayTotal()+" p · se resultat & topplista · "+cnt+"</small>"
+    :(n?"Fortsätt dagens verser":"Spela dagens verser")+"<small>"+n+" av 3 klar · "+cnt+"</small>";
+  const run=store.get("vjb_mara"), best=maraBest();
+  $("maraRow").innerHTML="<span class='ic'>🏃</span><span>"+(run&&!run.over&&run.n>0?"Fortsätt maraton · <b>"+run.n+"</b> i rad":"Maraton · "+(best?"rekord <b>"+best+"</b> i rad":"hur många verser klarar du i rad?"))+"</span><span class='arr'>›</span>";
+  // bästa placering idag i en grupp
+  const sc=scopeList().filter(s=>s.key.startsWith("g"));const pick=sc[0]||scopeList()[0];
+  const r=rankIn(pick,"day");const gr=$("groupRow");
+  if(r.total){gr.style.display="";gr.dataset.scope=pick.key;
+    gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
+  else gr.style.display="none";
 }
 $("playCard").onclick=()=>{ if(allDone()) openRes(); else go("play"); };
-$("homeGroups").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(b){BOARD.scope=b.dataset.scope;BOARD.back="home";go("board");}});
+$("maraRow").onclick=()=>go("mara");
+$("groupRow").onclick=()=>{BOARD.scope=$("groupRow").dataset.scope;BOARD.period="day";BOARD.back="home";go("board");};
 
 /* ===== SPELET ===== */
 function fillBookCell(bc,bookIdx,cls){
@@ -634,7 +692,7 @@ function renderHint(){
   const h=$("hint"),cb=$("chooseBtn"),bookCell=document.querySelector(".row.active .c.book");
   cb.classList.remove("pulse");bookCell&&bookCell.classList.remove("pulse");
   if(st.done||busy){h.innerHTML="&nbsp;";lastHintKey="";return;}
-  if(last){const earlier=cmp(last)<0,key="d"+R+"_"+st.guesses.length;
+  if(last){const earlier=cmp(last)<0,key="d"+MODE+(MODE==="mara"?RUN.n:R)+"_"+st.guesses.length;
     h.innerHTML="<span class='dir"+(key!==lastHintKey?" pop":"")+"'><span class='arr'>"+(earlier?"⬆":"⬇")+"</span>Versen står <b>"+(earlier?"TIDIGARE":"SENARE")+"</b> i Bibeln</span>";lastHintKey=key;return;}
   lastHintKey="";
   if(cur.b===null){h.innerHTML="<span class='guide'>👇 Börja med att trycka på <b>Välj bok</b></span>";cb.classList.add("pulse");bookCell&&bookCell.classList.add("pulse");}
@@ -667,13 +725,13 @@ function submit(){
   st.guesses.push(g);
   const won=cmp(g)===0;
   if(won||st.guesses.length>=MAX){st.done=true;st.won=won;st.points=calcPoints();}
-  store.set(skey(R),st);
+  saveSt();
   cur={b:possibleBooks()[cur.b]?cur.b:null,d:""};
   busy=true;renderGrid({row:st.guesses.length-1,win:won});
   const wait=won?650:4*STAGGER+DROP_MS;
   setTimeout(()=>{busy=false;renderGrid();renderRounds();
     if(st.guesses.length===1&&!st.done)maybeLegend();
-    if(st.done){finish(true);const nb=earnedBadges().filter(b=>!badgesBefore.includes(b));if(nb.length){const b=BADGES.find(x=>x.id===nb[0]);setTimeout(()=>toast("🏅 Nytt märke: "+b.e+" "+b.name+"!",3200),900);}}
+    if(st.done){if(MODE==="mara")maraDone(true);else finish(true);const nb=earnedBadges().filter(b=>!badgesBefore.includes(b));if(nb.length){const b=BADGES.find(x=>x.id===nb[0]);setTimeout(()=>toast("🏅 Nytt märke: "+b.e+" "+b.name+"!",3200),900);}}
   },wait);
 }
 function openBooks(){
@@ -704,11 +762,19 @@ $("showLegendBtn").onclick=()=>{$("infoModal").classList.remove("on");if(SCREEN!
 
 function renderRounds(){
   const el=$("rounds");el.innerHTML="";
+  if(MODE==="mara"){el.innerHTML="<div class='mcount'><span class='n'>"+RUN.n+"</span><span class='l'>"+(RUN.n===1?"vers":"verser")+"<br>i rad</span><span class='rb'>Rekord "+maraBest()+"</span></div>";return;}
   for(let r=0;r<ROUNDS;r++){const x=loadSt(r),b=document.createElement("button");const unlocked=r===0||loadSt(r-1).done;
     b.className=(r===R?"cur ":"")+(x.done?"done":"");b.innerHTML="Vers "+(r+1)+(x.done?" · <b>"+x.points+" p</b>":"");
     b.disabled=!unlocked;b.onclick=()=>{if(!busy&&unlocked&&r!==R)loadRound(r);};el.appendChild(b);}
 }
+function setPlayHeader(){
+  $("playTitle").innerHTML=MODE==="mara"?"🏃 Maraton":"Vers<span>jakten</span><i class='beta'>BETA</i>";
+  $("playTitle").style.fontSize=MODE==="mara"?"21px":"";
+  $("playHome").textContent=MODE==="mara"?"✕":"🏠";
+}
+$("playHome").onclick=()=>go("home");
 function loadRound(r){
+  MODE="day";setPlayHeader();
   R=r;ANS=ansFor(r);st=loadSt(r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
   $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
   if(st.done)finish(false);else{$("controls").style.display="";$("donebar").style.display="none";}
@@ -717,15 +783,15 @@ function loadRound(r){
 function finish(fresh){
   $("controls").style.display="none";$("hint").innerHTML="&nbsp;";renderRounds();
   const d=$("donebar");d.style.display="block";const done=allDone();
-  let h="<div class='l1'>"+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
+  const cheer=st.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][st.guesses.length-1]:"Inte den här gången.";
+  let h="<div class='l1'>"+cheer+" "+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
   h+=done?"<div class='l2'>Dagens total <b>"+dayTotal()+" p</b> · Nya verser om <b class='cd'></b></div>":"<div class='l2'>Dagens total hittills <b>"+dayTotal()+" p</b></div>";
-  h+="<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Om versen</button>"+(done?"<button class='btn' id='resBtn'>Resultat</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
+  h+="<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(done?"<button class='btn' id='resBtn'>Resultat</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
   d.innerHTML=h;
-  $("ctxBtn").onclick=()=>openCtx(R);
+  $("ctxBtn").onclick=()=>openCtx(ANS);
   if(done)$("resBtn").onclick=openRes;else $("nextBtn").onclick=()=>loadRound(firstOpen());
   tick();fitVerse();
   saveScores();
-  if(fresh) setTimeout(()=>openCtx(R,true),500);
 }
 async function saveScores(){
   if(!DB_ON||!ME)return;
@@ -741,16 +807,15 @@ async function saveScores(){
 
 /* ---- om versen (sammanhang + bokfakta) ---- */
 function chapterUrl(a){return yvUrl(a.b,a.c)}
-function openCtx(r,auto){
-  const a=ansFor(r),x=loadSt(r),info=BOOKINFO[a.b];
-  const head=auto?"<div class='res'><h2>"+(x.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][x.guesses.length-1]:"Inte den här gången")+"</h2><div class='pts'>"+x.points+" p</div></div>":"";
-  $("ctxBody").innerHTML=head+"<h2 style='margin-top:10px'>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</h2><div class='ctx'>"+esc(a.t)+"</div>"+
+function openCtx(a){
+  const info=BOOKINFO[a.b];
+  $("ctxBody").innerHTML="<h2>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</h2><div class='ctx'>"+esc(a.t)+"</div>"+
     "<a class='btn ghost' href='"+chapterUrl(a)+"' target='_blank' rel='noopener'>📖 Läs hela kapitel "+a.c+"</a><p class='mut' style='font-size:11.5px;text-align:center;margin:4px 0 0'>Öppnas i YouVersion-appen om du har den, annars på bible.com</p>"+
     "<div class='card' style='margin-top:12px'><h2 style='font-size:18px'>Om "+esc(BOOKS[a.b])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div></div>"+
-    (allDone()?"<button class='btn' data-close id='ctxRes'>Se resultat</button>":"<button class='btn' data-close id='ctxNext'>Nästa vers →</button>")+
+    (MODE==="mara"?(RUN&&!RUN.over?"<button class='btn' id='ctxNext'>Nästa vers →</button>":""):allDone()?"<button class='btn' data-close id='ctxRes'>Se resultat</button>":"<button class='btn' data-close id='ctxNext'>Nästa vers →</button>")+
     "<button class='btn ghost' data-close>Stäng</button>";
   $("ctxModal").classList.add("on");
-  const n=$("ctxNext");if(n)n.onclick=()=>{$("ctxModal").classList.remove("on");loadRound(firstOpen());};
+  const n=$("ctxNext");if(n)n.onclick=()=>{$("ctxModal").classList.remove("on");if(MODE==="mara")maraNext();else loadRound(firstOpen());};
   const rr=$("ctxRes");if(rr)rr.onclick=()=>{$("ctxModal").classList.remove("on");openRes();};
 }
 function openRes(){
@@ -773,6 +838,77 @@ function tick(){
     const g=t=>+p.find(x=>x.type===t).value;const left=86400-(g("hour")*3600+g("minute")*60+g("second"));
     txt=pad2(Math.floor(left/3600))+":"+pad2(Math.floor(left%3600/60))+":"+pad2(left%60);}
   document.querySelectorAll(".cd").forEach(e=>e.textContent=txt);
+}
+
+/* ===== MARATON ===== */
+function maraBest(){const loc=store.get("vjb_mara_best")||0;let srv=0;if(ME)MRUNS.forEach(m=>{if(m.profile_id===ME.id&&m.length>srv)srv=m.length;});return Math.max(loc,srv)}
+function verseObj(i){const [b,c,v,t]=VERSES[i];return {b,c,v,t}}
+function todayIdx(){const dn=dayNum(TODAY)-dayNum(START_DAY);return [0,1,2].map(r=>((dn*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length)}
+function pickMaraVerse(used){
+  const ban=new Set(todayIdx().concat(used));let i,tries=0;
+  do{i=Math.floor(Math.random()*VERSES.length);tries++;}while(ban.has(i)&&tries<1000);
+  return i;
+}
+function newRun(){const c=pickMaraVerse([]);RUN={n:0,used:[c],cur:c,st:{guesses:[],done:false},over:false,startBest:maraBest()};store.set("vjb_mara",RUN);}
+function loadMara(){
+  MODE="mara";setPlayHeader();
+  RUN=store.get("vjb_mara");
+  if(!RUN||RUN.over||!RUN.st)newRun();
+  ANS=verseObj(RUN.cur);st=RUN.st;cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  if(st.done&&st.won)maraDone(false);else{$("controls").style.display="";$("donebar").style.display="none";}
+  fitVerse();
+}
+function maraNext(){
+  const c=pickMaraVerse(RUN.used.slice(-350));RUN.cur=c;RUN.used.push(c);if(RUN.used.length>350)RUN.used=RUN.used.slice(-350);
+  RUN.st={guesses:[],done:false};store.set("vjb_mara",RUN);loadMara();
+}
+function maraDone(fresh){
+  $("controls").style.display="none";$("hint").innerHTML="&nbsp;";
+  const ref=esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v),d=$("donebar");d.style.display="block";
+  if(st.won){
+    if(fresh){RUN.n++;store.set("vjb_mara",RUN);if(RUN.n>(store.get("vjb_mara_best")||0))store.set("vjb_mara_best",RUN.n);}
+    renderRounds();
+    d.innerHTML="<div class='l1'>✓ "+ref+" · <b>"+RUN.n+" i rad</b></div><div class='l2'>"+(RUN.n>RUN.startBest?"🎉 Nytt rekord!":"Rekord: <b>"+maraBest()+"</b> · "+(maraBest()-RUN.n+1)+" kvar till nytt rekord")+"</div>"+
+      "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button><button class='btn' id='nextBtn'>Nästa vers →</button></div>";
+    $("ctxBtn").onclick=()=>openCtx(ANS);$("nextBtn").onclick=maraNext;
+  } else {
+    d.innerHTML="<div class='l1'>Slut! Rätt svar: "+ref+"</div><div class='l2'>Du klarade <b>"+RUN.n+"</b> i rad</div>"+
+      "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button><button class='btn' id='againBtn'>Kör igen</button></div>";
+    $("ctxBtn").onclick=()=>openCtx(ANS);$("againBtn").onclick=()=>{newRun();loadMara();};
+    if(fresh)maraOver();
+  }
+  fitVerse();
+}
+function maraRows(scope){
+  const set=playersIn(scope),best={};
+  MRUNS.forEach(m=>{if(set&&!set.has(m.profile_id))return;if(!best[m.profile_id]||m.length>best[m.profile_id])best[m.profile_id]=m.length;});
+  if(ME&&(!set||set.has(ME.id))){const b=maraBest();if(b>0&&(!best[ME.id]||b>best[ME.id]))best[ME.id]=b;}
+  return Object.entries(best).map(([id,len])=>({id,len})).sort((a,b)=>b.len-a.len);
+}
+function maraTable(rows,limit){
+  const meI=ME?rows.findIndex(r=>r.id===ME.id):-1;
+  const row=(r,i)=>{const p=PROFILES[r.id]||(ME&&r.id===ME.id?ME:{name:"?"});return "<div class='row2"+(ME&&r.id===ME.id?" me":"")+"'><span class='rk'>"+(i+1)+"</span>"+esc((p.emoji||"🙂")+" "+p.name)+"<b>"+r.len+" i rad</b></div>";};
+  let h=rows.slice(0,limit).map(row).join("");
+  if(meI>=limit)h+="<div class='row2' style='justify-content:center;color:var(--muted)'>…</div>"+row(rows[meI],meI);
+  return h||"<div class='empty'>Ingen har sprungit maraton här än.</div>";
+}
+async function maraOver(){
+  RUN.over=true;store.set("vjb_mara",RUN);
+  const n=RUN.n,rec=n>0&&n>RUN.startBest;
+  if(DB_ON&&ME&&n>0){try{await rpc("submit_marathon",{p_code:ME.code,p_length:n,p_fell_on:RUN.cur});MRUNS.push({profile_id:ME.id,length:n});}catch(e){console.warn("maraton",e);}}
+  const sc=scopeList().filter(s=>s.key.startsWith("g"))[0]||scopeList()[0];
+  const ref=esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v);
+  $("maraBody").innerHTML="<div class='over'><div class='big'>"+n+"</div><h2>"+(rec?"Nytt rekord! 🎉":n===0?"Oj, ute direkt!":n<5?"Bra försök!":"Starkt lopp!")+"</h2>"+
+    "<div class='died'>Du föll på <b>"+ref+"</b></div>"+(rec?"":"<div class='rec'>Ditt rekord: "+maraBest()+" i rad</div>")+"</div>"+
+    "<div class='mlb'><h3>Längsta maraton · "+esc(sc.label)+"</h3>"+maraTable(maraRows(sc.key),5)+"</div>"+
+    "<button class='btn' id='maraAgain'>Kör igen</button><button class='btn ghost' id='maraCtx'>📖 Läs om "+ref+"</button>"+
+    "<div class='ad' style='margin-top:12px'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>"+
+    "<button class='btn ghost' data-close>Visa mina gissningar</button><button class='btn ghost' id='maraHome'>Till startsidan</button>";
+  setTimeout(()=>$("maraModal").classList.add("on"),700);
+  $("maraAgain").onclick=()=>{$("maraModal").classList.remove("on");newRun();loadMara();};
+  $("maraCtx").onclick=()=>{$("maraModal").classList.remove("on");openCtx(ANS);};
+  $("maraHome").onclick=()=>{$("maraModal").classList.remove("on");go("home");};
 }
 
 /* ===== TOPPLISTOR ===== */
@@ -809,7 +945,10 @@ function renderBoard(){
   $("scopes").innerHTML=scopes.map(s=>"<button data-s='"+esc(s.key)+"' class='"+(s.key===BOARD.scope?"on":"")+"'>"+esc(s.icon+" "+s.label)+"</button>").join("");
   [...$("ptabs").children].forEach(b=>b.classList.toggle("on",b.dataset.t===BOARD.period));
   let html="";
-  if(BOARD.scope==="league"){
+  if(BOARD.period==="mara"){
+    html="<div class='mlb' style='margin-top:4px'><h3>🏃 Längsta maraton</h3>"+maraTable(maraRows(BOARD.scope==="league"?"all":BOARD.scope),50)+"</div>"+
+      "<button class='btn' data-go='mara'>Spring ett maraton</button>";
+  } else if(BOARD.scope==="league"){
     const from=BOARD.period==="day"?TODAY:BOARD.period==="week"?weekStart(TODAY):"0000";
     const per={};
     SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;const p=PROFILES[s.profile_id];if(!p||!p.church)return;
@@ -877,7 +1016,9 @@ function journeyHTML(){
 }
 function renderStats(){
   const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
-  let html="<div style='height:14px'></div><div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div></div>";
+  let html="<button class='hello' data-go='profile' style='background:none;border:none;width:100%;text-align:left;color:var(--text);padding:0'>"+avatar(ME,54)+"<div><b>"+esc(ME.name)+"</b><small>"+esc(ME.church||"Ingen församling angiven")+" · Ändra profil ›</small></div></button>";
+  html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div>"+
+    "<div class='streak' style='margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'><span class='f'>🏃</span><div><b>"+maraBest()+" i rad</b><div class='mut'>Längsta maraton</div></div></div></div>";
   html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
   html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>🏅 Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
   html+=journeyHTML();
@@ -898,7 +1039,8 @@ const BADGES=[
   {id:"moses",e:"🔥",name:"Moseböckerna",prog:h=>new Set(h.filter(x=>x.solved&&x.b<=4).map(x=>x.b)).size,of:5},
   {id:"perfect",e:"💯",name:"Perfekt dag",test:h=>{const d={};h.forEach(x=>d[x.day]=(d[x.day]||0)+x.points);return Object.values(d).some(v=>v===150)}},
   {id:"week",e:"📅",name:"7 dagar i rad",prog:()=>streakInfo().best,of:7},
-  {id:"explorer",e:"🗺️",name:"Upptäckare",prog:()=>bookStatus().filter(x=>x===2).length,of:20}];
+  {id:"explorer",e:"🗺️",name:"Upptäckare",prog:()=>bookStatus().filter(x=>x===2).length,of:20},
+  {id:"mara",e:"🏃",name:"Maratonlöpare",prog:()=>maraBest(),of:20}];
 function badgeState(b,h){if(b.test)return {done:b.test(h),txt:""};const p=Math.min(b.prog(h),b.of);return {done:p>=b.of,txt:p+"/"+b.of}}
 function earnedBadges(){const h=myHistory();return BADGES.filter(b=>badgeState(b,h).done).map(b=>b.id)}
 
