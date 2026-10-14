@@ -906,7 +906,7 @@ function earnedBadges(){const h=myHistory();return BADGES.filter(b=>badgeState(b
 function renderProfile(){
   const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
   let html="<div class='hello'>"+avatar(ME,60)+"<div><b style='font-size:20px'>"+esc(ME.name)+"</b><small>"+esc(ME.church||"Ingen församling angiven")+"</small></div></div>";
-  html+="<button class='card r2' data-go='stats' style='width:100%;color:var(--text)'><span>🔥 "+sk.cur+" dagar i rad · "+earnedBadges().length+" märken · "+bookStatus().filter(x=>x===2).length+" böcker</span><b>Statistik ›</b></button>";
+  html+="<button class='card r2' data-go='stats' style='width:100%;color:var(--text)'><span>🔥 "+sk.cur+(sk.cur===1?" dag":" dagar")+" i rad · "+earnedBadges().length+(earnedBadges().length===1?" märke":" märken")+" · "+bookStatus().filter(x=>x===2).length+(bookStatus().filter(x=>x===2).length===1?" bok":" böcker")+"</span><b>Statistik ›</b></button>";
   html+="<div class='card'><div class='mut'>Din personliga kod – använd den för att logga in på en annan telefon:</div><div class='code'>"+esc(ME.code)+"</div><p class='mut' style='font-size:12px;margin:0'>Dela inte koden med andra, den fungerar som ett lösenord.</p></div>";
   html+="<button class='btn ghost' id='editProfile'>✏️ Ändra namn, församling eller figur</button><button class='linkbtn' id='logout' style='display:block;margin:12px auto'>Logga ut från den här telefonen</button>";
   $("profileBody").innerHTML=html;
