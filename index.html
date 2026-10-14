@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>Versjakten</title>
 <meta name="theme-color" content="#14110f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,8 @@
   --key:clamp(40px,6dvh,52px);
   color-scheme:dark;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,.c,.pad,.choose,.rounds{-webkit-user-select:none;user-select:none}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer}
 .app{max-width:440px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;padding:0 14px max(10px,env(safe-area-inset-bottom))}
@@ -29,6 +30,12 @@ header h1 span{color:var(--accent)}
 .iconbtn{background:none;border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:17px}
 .who{flex:none;font-size:12px;color:var(--muted);text-align:center;margin:6px 0 0}
 .who b{color:var(--text)}
+.rounds{flex:none;display:flex;justify-content:center;gap:6px;margin-top:6px}
+.rounds button{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
+.rounds button.done{background:var(--cell);color:var(--text)}
+.rounds button.cur{border-color:var(--accent);color:var(--text)}
+.rounds button b{color:var(--accent)}
+.rounds button:disabled{opacity:.4}
 .verseBox{flex:1 1 auto;min-height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px 2px}
 .verse{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.4;text-align:center;margin:0;text-wrap:balance}
 .grid{flex:none;display:flex;flex-direction:column;gap:5px}
@@ -118,6 +125,7 @@ tr.me td{color:var(--accent);font-weight:700}
     <button class="iconbtn" id="lbBtn" aria-label="Topplista">🏆</button>
   </header>
   <p class="who" id="who"></p>
+  <div class="rounds" id="rounds"></div>
   <div class="verseBox" id="verseBox"><p class="verse" id="verse"></p></div>
   <div class="grid" id="grid"></div>
   <div class="hint" id="hint"></div>
@@ -157,7 +165,7 @@ tr.me td{color:var(--accent);font-weight:700}
 
 <div class="modal" id="infoModal"><div class="sheet">
   <h2>Så spelar du</h2>
-  <p>Varje dag kommer en ny vers. Gissa <b>bok, kapitel och vers</b> på 5 försök.</p>
+  <p>Varje dag kommer <b>tre nya verser</b>. Gissa <b>bok, kapitel och vers</b> på 5 försök per vers. Poängen för alla tre läggs ihop, max 150 p per dag.</p>
   <ul>
     <li>Välj bok och skriv kapitel och vers med två siffror var. Kapitel 6 vers 3 skrivs <b>06:03</b>.</li>
     <li><b style="color:var(--green)">Grönt</b>: rätt bok, eller rätt siffra på rätt plats.</li>
@@ -175,7 +183,7 @@ tr.me td{color:var(--accent);font-weight:700}
     <tr><td>Ej klarat, men rätt bok</td><td class="n">5 p</td></tr>
     <tr><td>Ej klarat</td><td class="n">0 p</td></tr>
   </table>
-  <p>Ny vers varje dag vid midnatt.</p>
+  <p>Nya verser varje dag vid midnatt.</p>
   <button class="btn ghost" data-close>Stäng</button>
 </div></div>
 
@@ -205,23 +213,26 @@ function dayNum(s){const [y,m,d]=s.split("-").map(Number);return Math.round(Date
 function addDays(s,n){return new Date((dayNum(s)+n)*864e5).toISOString().slice(0,10)}
 const TODAY = sthlmDate();
 const DAYNO = dayNum(TODAY) - dayNum(START_DAY) + 1;
-const ANS = (()=>{const i=((DAYNO-1)%VERSES.length+VERSES.length)%VERSES.length;const [b,c,v,t]=VERSES[i];return {b,c,v,t}})();
+const ROUNDS = 3;
+function ansFor(r){const i=(((DAYNO-1)*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length;const [b,c,v,t]=VERSES[i];return {b,c,v,t}}
+let R = 0, ANS = ansFor(0);
 function weekStart(s){const wd=(new Date(dayNum(s)*864e5).getUTCDay()+6)%7;return addDays(s,-wd)}
 
 /* ---- state ---- */
 let name = store.get("vj_name");
-const SKEY = "vj_game_"+TODAY;
-let st = store.get(SKEY) || {guesses:[], done:false, saved:false};
+const skey = r => "vj_game_"+TODAY+(r?"_"+r:"");
+const loadSt = r => store.get(skey(r)) || {guesses:[], done:false, saved:false};
+let st = loadSt(0);
 let cur = {b:null, d:""};
 let busy = false; // under animation
 
 const pad2 = n => String(n).padStart(2,"0");
-function score(g){
-  const ad=(pad2(ANS.c)+pad2(ANS.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
+function score(g,a=ANS){
+  const ad=(pad2(a.c)+pad2(a.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
   const res=Array(4).fill("x"), left={};
   gd.forEach((d,i)=>{ if(d===ad[i]) res[i]="g"; else left[ad[i]]=(left[ad[i]]||0)+1; });
   gd.forEach((d,i)=>{ if(res[i]!=="g" && left[d]>0){res[i]="y";left[d]--;} });
-  return {book: g.b===ANS.b ? "g":"x", digits:res};
+  return {book: g.b===a.b ? "g":"x", digits:res};
 }
 function cmp(g){ // -1: svaret står tidigare, 1: senare, 0: rätt
   const a=[ANS.b,ANS.c,ANS.v], b=[g.b,g.c,g.v];
@@ -327,12 +338,12 @@ function submit(){
   st.guesses.push(g);
   const won = cmp(g)===0;
   if(won || st.guesses.length>=MAX){ st.done=true; st.won=won; st.points=calcPoints(); }
-  store.set(SKEY,st);
+  store.set(skey(R),st);
   cur={b:possibleBooks()[cur.b]?cur.b:null,d:""};
   busy=true;
   renderGrid({row:st.guesses.length-1, win:won});
   const wait = won ? 650 : 4*STAGGER+DROP_MS;
-  setTimeout(()=>{ busy=false; renderGrid(); if(st.done) finish(true); }, wait);
+  setTimeout(()=>{ busy=false; renderGrid(); renderRounds(); if(st.done) finish(true); }, wait);
 }
 function calcPoints(){
   const n=st.guesses.length;
@@ -375,7 +386,7 @@ function saveName(){
   const v=$("nameInput").value.trim().replace(/\s+/g," ");
   if(v.length<2){toast("Skriv minst 2 tecken");return;}
   name=v; store.set("vj_name",name); $("nameModal").classList.remove("on"); showWho();
-  if(st.done && !st.saved) saveScore();
+  saveScore();
   loadBoard();
 }
 function showWho(){ $("who").innerHTML = name ? "Spelar som <b></b> · Dag "+DAYNO : "Dag "+DAYNO; if(name) $("who").querySelector("b").textContent=name; }
@@ -387,20 +398,24 @@ function headers(extra){
   return Object.assign(h,extra||{});
 }
 async function saveScore(){
-  if(!DB_ON || !name || st.saved) return;
-  try{
-    const r=await fetch(SUPABASE_URL+"/rest/v1/scores",{method:"POST",headers:headers({"Prefer":"return=minimal"}),
-      body:JSON.stringify({player:name,day:TODAY,attempts:st.guesses.length,solved:!!st.won,points:st.points,guesses:st.guesses.map(g=>{const s=score(g);return s.book+s.digits.join("")})})});
-    if(r.ok || r.status===409){ st.saved=true; store.set(SKEY,st); if(r.status===409) toast("Du har redan ett resultat idag"); }
-    else toast("Kunde inte spara resultatet ("+r.status+")");
-  }catch(e){ toast("Ingen kontakt med topplistan"); }
+  if(!DB_ON || !name) return;
+  for(let r=0;r<ROUNDS;r++){
+    const s=loadSt(r); if(!s.done || s.saved) continue;
+    const a=ansFor(r);
+    try{
+      const res=await fetch(SUPABASE_URL+"/rest/v1/scores",{method:"POST",headers:headers({"Prefer":"return=minimal"}),
+        body:JSON.stringify({player:name,day:TODAY,round:r+1,attempts:s.guesses.length,solved:!!s.won,points:s.points,guesses:s.guesses.map(g=>{const x=score(g,a);return x.book+x.digits.join("")})})});
+      if(res.ok || res.status===409){ s.saved=true; store.set(skey(r),s); if(r===R) st.saved=true; if(res.status===409) toast("Du har redan ett resultat för vers "+(r+1)); }
+      else toast("Kunde inte spara resultatet ("+res.status+")");
+    }catch(e){ toast("Ingen kontakt med topplistan"); break; }
+  }
   loadBoard();
 }
 let ROWS=[], TAB="day";
 async function loadBoard(){
   if(!DB_ON){ $("lbBody").innerHTML="<div class='empty'>Topplistan är inte kopplad än.</div>"; return; }
   try{
-    const r=await fetch(SUPABASE_URL+"/rest/v1/scores?select=player,day,attempts,solved,points&day=gte."+START_DAY+"&order=day.desc&limit=5000",{headers:headers()});
+    const r=await fetch(SUPABASE_URL+"/rest/v1/scores?select=player,day,round,attempts,solved,points&day=gte."+START_DAY+"&order=day.desc&limit=5000",{headers:headers()});
     if(!r.ok) throw new Error(r.status);
     ROWS=await r.json();
     renderBoard(); renderRes();
@@ -413,9 +428,11 @@ function renderBoard(){
   if(!DB_ON) return;
   let rows=[], head="";
   if(TAB==="day"){
-    rows=ROWS.filter(r=>r.day===TODAY).sort((a,b)=>b.points-a.points||a.attempts-b.attempts);
-    head="<tr><th></th><th>Namn</th><th>Försök</th><th class='n'>Poäng</th></tr>";
-    rows=rows.map((r,i)=>"<tr class='"+(r.player===name?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+esc(r.player)+"</td><td>"+(r.solved?r.attempts:"X")+"/5</td><td class='n'>"+r.points+"</td></tr>");
+    const agg={};
+    ROWS.filter(r=>r.day===TODAY).forEach(r=>{const a=agg[r.player]||(agg[r.player]={p:r.player,pts:0,parts:Array(ROUNDS).fill(null)});a.pts+=r.points;a.parts[(r.round||1)-1]=r.points;});
+    rows=Object.values(agg).sort((a,b)=>b.pts-a.pts);
+    head="<tr><th></th><th>Namn</th><th>Vers 1·2·3</th><th class='n'>Poäng</th></tr>";
+    rows=rows.map((a,i)=>"<tr class='"+(a.p===name?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+esc(a.p)+"</td><td style='color:var(--muted)'>"+a.parts.map(x=>x===null?"–":x).join(" · ")+"</td><td class='n'>"+a.pts+"</td></tr>");
   } else {
     const from = TAB==="week" ? weekStart(TODAY) : "0000";
     const agg={};
@@ -424,7 +441,7 @@ function renderBoard(){
       a.pts+=r.points; a.n++; if(r.solved)a.w++;
     });
     rows=Object.values(agg).sort((a,b)=>b.pts-a.pts||b.w-a.w);
-    head="<tr><th></th><th>Namn</th><th class='n'>Spelat</th><th class='n'>Snitt</th><th class='n'>Poäng</th></tr>";
+    head="<tr><th></th><th>Namn</th><th class='n'>Verser</th><th class='n'>Snitt</th><th class='n'>Poäng</th></tr>";
     rows=rows.map((a,i)=>"<tr class='"+(a.p===name?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+esc(a.p)+"</td><td class='n'>"+a.n+"</td><td class='n'>"+Math.round(a.pts/a.n)+"</td><td class='n'>"+a.pts+"</td></tr>");
   }
   $("lbBody").innerHTML = rows.length ? "<table>"+head+rows.join("")+"</table>" : "<div class='empty'>"+(TAB==="day"?"Ingen har spelat idag än. Bli först!":"Inga resultat än.")+"</div>";
@@ -438,28 +455,58 @@ function statsHtml(){
   let s=0, d=days.has(TODAY)?TODAY:addDays(TODAY,-1);
   while(days.has(d)){s++;d=addDays(d,-1);}
   const tot=mine.reduce((a,r)=>a+r.points,0);
-  return "<div class='stats'><div><b>"+mine.length+"</b><span>Spelat</span></div><div><b>"+Math.round(100*won/mine.length)+"%</b><span>Vinst</span></div><div><b>"+s+"</b><span>Streak</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div>";
+  return "<div class='stats'><div><b>"+mine.length+"</b><span>Verser</span></div><div><b>"+Math.round(100*won/mine.length)+"%</b><span>Vinst</span></div><div><b>"+s+"</b><span>Streak</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div>";
 }
-function resTexts(){
-  const n=st.guesses.length;
-  if(st.won) return {title:["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][n-1], sub:"Rätt på försök "+n+" av 5"};
-  return {title:"Inte idag", sub: st.points===PTS_BOOKCH?"Rätt bok och kapitel":st.points===PTS_BOOK?"Rätt bok i alla fall":"Bättre lycka i morgon"};
+function renderRounds(){
+  const el=$("rounds"); el.innerHTML="";
+  for(let r=0;r<ROUNDS;r++){
+    const x=loadSt(r), b=document.createElement("button");
+    const unlocked = r===0 || loadSt(r-1).done;
+    b.className=(r===R?"cur ":"")+(x.done?"done":"");
+    b.innerHTML="Vers "+(r+1)+(x.done?" · <b>"+x.points+" p</b>":"");
+    b.disabled=!unlocked;
+    b.onclick=()=>{ if(!busy && unlocked && r!==R) loadRound(r); };
+    el.appendChild(b);
+  }
+}
+function dayTotal(){let t=0;for(let r=0;r<ROUNDS;r++){const x=loadSt(r);if(x.done)t+=x.points;}return t}
+function allDone(){for(let r=0;r<ROUNDS;r++) if(!loadSt(r).done) return false; return true}
+function firstOpen(){for(let r=0;r<ROUNDS;r++) if(!loadSt(r).done) return r; return ROUNDS-1}
+function loadRound(r){
+  R=r; ANS=ansFor(r); st=loadSt(r); cur={b:null,d:""}; busy=false;
+  $("verse").textContent="”"+ANS.t+"”";
+  renderRounds(); renderGrid();
+  if(st.done) finish(false);
+  else { $("controls").style.display=""; $("donebar").style.display="none"; }
+  fitVerse();
 }
 function renderRes(){
-  if(!st.done){ $("resBox").innerHTML=statsHtml(); return; }
-  const t=resTexts();
-  $("resBox").innerHTML="<div class='res'><h2>"+t.title+"</h2><div class='pts'>"+st.points+" p</div><div class='sub'>"+t.sub+"</div><div class='ref'>"+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+"</div></div>"+statsHtml();
+  const parts=[]; let any=false;
+  for(let r=0;r<ROUNDS;r++){
+    const x=loadSt(r), a=ansFor(r);
+    if(x.done){ any=true; parts.push("<tr><td>Vers "+(r+1)+"</td><td>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</td><td class='n'>"+x.points+" p</td></tr>"); }
+    else parts.push("<tr><td>Vers "+(r+1)+"</td><td style='color:var(--muted)'>Ej spelad</td><td class='n'>–</td></tr>");
+  }
+  if(!any){ $("resBox").innerHTML=statsHtml(); return; }
+  const t=dayTotal();
+  const title = !allDone() ? "Dagens verser" : t>=100 ? "Fantastisk dag!" : t>=50 ? "Bra jobbat!" : t>0 ? "Det blev några poäng" : "Inte idag";
+  $("resBox").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin-top:10px'>"+parts.join("")+"</table>"+statsHtml();
 }
 function finish(fresh){
   $("controls").style.display="none";
   $("hint").innerHTML="&nbsp;";
+  renderRounds();
   const d=$("donebar"); d.style.display="block";
-  d.innerHTML="<div class='l1'>"+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div><div class='l2'>Nästa vers om <b id='cd'></b></div><button class='btn' id='showLb'>Resultat & topplista</button>";
-  $("showLb").onclick=openBoard;
-  tick(); setInterval(tick,1000);
+  const done=allDone();
+  let h="<div class='l1'>"+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
+  if(done) h+="<div class='l2'>Dagens total <b>"+dayTotal()+" p</b> · Nya verser om <b id='cd'></b></div><button class='btn' id='showLb'>Resultat & topplista</button>";
+  else h+="<div class='l2'>Dagens total hittills <b>"+dayTotal()+" p</b></div><button class='btn' id='nextBtn'>Nästa vers →</button>";
+  d.innerHTML=h;
+  if(done){ $("showLb").onclick=openBoard; tick(); }
+  else $("nextBtn").onclick=()=>loadRound(firstOpen());
   fitVerse();
-  if(fresh){ if(name) saveScore(); else $("nameModal").classList.add("on"); setTimeout(openBoard,400); }
-  else if(!st.saved) saveScore();
+  if(fresh){ if(name) saveScore(); else $("nameModal").classList.add("on"); if(done) setTimeout(openBoard,400); }
+  else saveScore();
 }
 function tick(){
   const el=$("cd"); if(!el) return;
@@ -472,10 +519,10 @@ function tick(){
 }
 
 /* ---- start ---- */
-$("verse").textContent = "”"+ANS.t+"”";
-buildPad(); showWho(); renderGrid();
-if(st.done) finish(false);
-fitVerse(); document.fonts && document.fonts.ready.then(fitVerse);
+buildPad(); showWho();
+document.addEventListener("dblclick",e=>e.preventDefault());
+setInterval(tick,1000);
+loadRound(firstOpen()); document.fonts && document.fonts.ready.then(fitVerse);
 if(!name) $("nameModal").classList.add("on");
 loadBoard();
 </script>
