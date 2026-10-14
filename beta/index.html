@@ -694,7 +694,7 @@ function legendHTML(){return "<div class='legend'><button class='lx' aria-label=
   "<div class='li'><i style='background:var(--yellow);color:#1c160d'>4</i>Siffran <b>finns</b> i svaret, men på <b>fel plats</b></div>"+
   "<div class='li'><i style='background:var(--gray);color:#fff'>0</i>Siffran finns inte (där)</div>"+
   "<div class='li'><span class='tag'>✗ fel bok</span>Det är inte den här boken</div>"+
-  "<div class='lbtns'><button class='pri lshow'>Visa bibelordet</button><button class='lnever'>Visa inte igen</button></div></div>"}
+  "<div class='lbtns'><button class='pri lshow'>Fortsätt med bibelordet</button><button class='lnever'>Visa inte igen</button></div></div>"}
 function showLegend(){$("legendBox").innerHTML=legendHTML();}
 function maybeLegend(){const n=store.get("vjb_legend_n")||0;if(n<3){store.set("vjb_legend_n",n+1);showLegend();}}
 $("legendBox").addEventListener("click",e=>{
