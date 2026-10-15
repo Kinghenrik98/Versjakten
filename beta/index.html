@@ -612,7 +612,7 @@ async function loadAll(){
   if(!DB_ON) return;
   try{
     const [pr,sc,mem,gr,ch]=await Promise.all([
-      get("profiles?select=id,name,church,emoji,church_id,city,is_admin&limit=10000"),
+      get("profiles?select=id,name,church,emoji,church_id,city,is_admin,is_tester&limit=10000"),
       get("beta_scores?select=profile_id,day,round,attempts,solved,points,guesses&day=gte."+START_DAY+"&limit=20000"),
       get("group_members?select=group_id,profile_id&limit=20000"),
       get("groups?select=id,name,emoji&limit=5000"),
@@ -1247,9 +1247,9 @@ async function joinFromUrl(){
 /* ===== VERSIONSBYTE (bara för admin) ===== */
 function siteBase(){return location.pathname.replace(/(beta|admin)\/?(index\.html)?$/,"").replace(/index\.html$/,"")}
 function vSwitchHTML(){
-  if(!ME||!PROFILES[ME.id]||!PROFILES[ME.id].is_admin)return "";
+  const p=ME&&PROFILES[ME.id];if(!p||!(p.is_admin||p.is_tester))return "";
   const b=siteBase();
-  return "<div class='vswitch'><a href='"+b+"' class='"+(IS_BETA?"":"on")+"'>Vanlig</a><a href='"+b+"beta/' class='"+(IS_BETA?"on":"")+"'>Beta</a><a href='"+b+"admin/'>Admin</a></div>";
+  return "<div class='vswitch'><a href='"+b+"' class='"+(IS_BETA?"":"on")+"'>Vanlig</a><a href='"+b+"beta/' class='"+(IS_BETA?"on":"")+"'>Beta</a>"+(p.is_admin?"<a href='"+b+"admin/'>Admin</a>":"")+"</div>";
 }
 
 /* ===== UTBILDNING (bara beta) ===== */
