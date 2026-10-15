@@ -76,7 +76,7 @@ const fmtDate=s=>s?new Date(s).toLocaleDateString("sv-SE",{day:"numeric",month:"
 function label(c){return c?(c.name.toLowerCase().includes(c.city.toLowerCase())?c.name:c.name+" "+c.city):""}
 
 let CODE=null, USERS=[], CHURCHES=[], GROUPS=[], MEMBERS=[], TODAYSET=new Set(), TAB="users", Q="";
-function readCode(){try{const p=JSON.parse(localStorage.getItem("vjb_profile"));if(p&&p.code)return p.code}catch(e){}try{return sessionStorage.getItem("vja_code")}catch(e){return null}}
+function readCode(){try{const p=JSON.parse(localStorage.getItem("vjb_profile"));if(p&&p.code)return p.code}catch(e){}try{return localStorage.getItem("vja_code")}catch(e){return null}}
 
 async function load(){
   [USERS,CHURCHES]=await Promise.all([rpc("admin_users",{p_code:CODE}),rpc("admin_churches",{p_code:CODE})]);
@@ -84,8 +84,8 @@ async function load(){
   GROUPS=g;MEMBERS=m;TODAYSET=new Set(t.map(x=>x.profile_id));
 }
 function showLogin(msg){
-  $("app").innerHTML="<div class='login'><h2 style='font-family:var(--serif)'>Logga in</h2><p class='mut'>"+esc(msg||"Öppna sidan på telefonen där du spelar, eller skriv din personliga kod.")+"</p><input class='inp' id='lc' placeholder='Din kod' style='text-transform:uppercase;text-align:center'><button class='b pri' id='lb' style='width:100%;margin-top:10px;height:42px'>Logga in</button></div>";
-  $("lb").onclick=async()=>{CODE=$("lc").value.trim().toUpperCase();try{sessionStorage.setItem("vja_code",CODE)}catch(e){}start();};
+  $("app").innerHTML="<div class='login'><h2 style='font-family:var(--serif)'>Logga in</h2><p class='mut'>"+esc(msg||"Den här webbläsaren har ingen profil sparad. Skriv din personliga kod – den hittar du i appen på telefonen under Jag → ⚙️. Du behöver bara göra det en gång per webbläsare.")+"</p><input class='inp' id='lc' placeholder='Din kod' style='text-transform:uppercase;text-align:center'><button class='b pri' id='lb' style='width:100%;margin-top:10px;height:42px'>Logga in</button></div>";
+  $("lb").onclick=async()=>{CODE=$("lc").value.trim().toUpperCase();try{localStorage.setItem("vja_code",CODE)}catch(e){}start();};
 }
 async function start(){
   if(!CODE){showLogin();return}
