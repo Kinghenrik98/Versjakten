@@ -97,8 +97,8 @@ function render(){
   const pending=CHURCHES.filter(c=>!c.approved).length;
   const week=Date.now()-7*864e5, newW=USERS.filter(u=>new Date(u.created_at)>week).length;
   let h="<div class='tiles'><div class='tile'><b>"+USERS.length+"</b><span>användare totalt</span></div><div class='tile'><b>"+TODAYSET.size+"</b><span>har spelat idag</span></div><div class='tile'><b>"+newW+"</b><span>nya senaste 7 dagarna</span></div><div class='tile"+(pending?" warn":"")+"'><b>"+pending+"</b><span>församlingar väntar</span></div></div>";
-  h+="<div class='tabs'>"+[["users","Användare"],["churches","Församlingar"+(pending?" ("+pending+")":"")],["groups","Grupper"]].map(([k,l])=>"<button data-tab='"+k+"' class='"+(TAB===k?"on":"")+"'>"+l+"</button>").join("")+"</div>";
-  if(TAB==="users")h+=usersHTML();else if(TAB==="churches")h+=churchesHTML();else h+=groupsHTML();
+  h+="<div class='tabs'>"+[["users","Användare"],["churches","Församlingar"+(pending?" ("+pending+")":"")],["groups","Grupper"],["learn","Utbildning"]].map(([k,l])=>"<button data-tab='"+k+"' class='"+(TAB===k?"on":"")+"'>"+l+"</button>").join("")+"</div>";
+  if(TAB==="users")h+=usersHTML();else if(TAB==="churches")h+=churchesHTML();else if(TAB==="learn")h+=learnHTML();else h+=groupsHTML();
   $("app").innerHTML=h;
   const qi=$("q");if(qi){qi.value=Q;qi.oninput=()=>{Q=qi.value;const pos=qi.selectionStart;render();const n=$("q");n.focus();n.setSelectionRange(pos,pos);};}
 }
@@ -118,6 +118,14 @@ function churchesHTML(){
   h+="<div class='sec'>Godkända</div><div class='list'>"+(ok.map(row).join("")||"<div class='empty'>Inga än</div>")+"</div>";
   h+="<button class='b pri' data-edit='new' style='margin-top:12px;height:40px;width:100%'>＋ Lägg till församling</button>";
   return h;
+}
+function learnHTML(){
+  const it=(e,t,d,u)=>"<div class='it'><span class='em'>"+e+"</span><div class='main'><b>"+t+"</b><small style='white-space:normal'>"+d+"</small></div>"+(u?"<a class='b' style='display:inline-flex;align-items:center;text-decoration:none' href='"+u+"' target='_blank' rel='noopener'>Öppna</a>":"")+"</div>";
+  return "<p class='mut' style='margin:0 0 8px'>Fliken <b>Utbildning</b> finns bara i betan än så länge. Här är vad den innehåller.</p>"+
+   "<a class='b pri' style='display:flex;align-items:center;justify-content:center;height:42px;text-decoration:none' href='../beta/' target='_blank' rel='noopener'>Förhandsgranska i betan ›</a>"+
+   "<div class='sec'>Ordningen</div><div class='list'>"+it("🗣️","Ramsan för Paulus brev","Rom-kor-gal-ef, fil-kol, tessalon-timo-tit, fil-hebraios – med knapp som går igenom den bit för bit.")+it("🧩","Sätt böckerna i ordning","Spel i 8 delar: Moseböckerna, Historia GT, Vishet & poesi, Stora/Små profeter, Evangelier & Apg, Paulus brev + Hebr, Övriga brev + Upp.")+"</div>"+
+   "<div class='sec'>Böckerna</div><div class='list'>"+it("📚","Alla 66 böcker","Författare, typ, vad boken handlar om, antal kapitel, kort film från BibleProject och länk för att börja läsa.")+"</div>"+
+   "<div class='sec'>Fördjupning (länkar)</div><div class='list'>"+it("🎓","TELOS – Teologi för folket","Teologikurser och podd på svenska.","https://telos.nu/")+it("📱","Svenska Kärnbibeln – app","App Store och Google Play.","https://www.karnbibeln.se")+it("🎬","BibleProject på svenska","Animerade översiktsfilmer.","https://bibleproject.com/sv/")+"</div>";
 }
 function groupsHTML(){
   const cnt={};MEMBERS.forEach(m=>cnt[m.group_id]=(cnt[m.group_id]||0)+1);

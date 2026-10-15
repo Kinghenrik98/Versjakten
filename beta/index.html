@@ -217,6 +217,36 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .mrow b{color:var(--accent)}.mrow .arr{margin-left:auto;color:var(--accent);font-size:20px}.mrow .ic{font-size:26px}
 #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;background:#181411;border-top:1px solid var(--line);padding:6px 0 max(10px,env(safe-area-inset-bottom))}
 #nav .in{max-width:440px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+#nav.five .in{grid-template-columns:repeat(5,1fr)}
+/* utbildning */
+.lrn-tabs{display:flex;gap:6px;margin:12px 0 10px}
+.lrn-tabs button{flex:1;height:36px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font-size:13.5px}
+.lrn-tabs button.on{background:var(--accent);border-color:var(--accent);color:#1c160d;font-weight:700}
+.bklist{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.bklist button{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:9px 10px;text-align:left;font-size:13.5px}
+.bklist.nt button{border-left-color:var(--green)}
+.bklist button small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+.ramsa{background:#2c2418;border:1px solid var(--accent);border-radius:14px;padding:14px;margin-bottom:12px}
+.ramsa .say{font-family:var(--serif);font-size:21px;line-height:1.35;margin:6px 0 10px}
+.ramsa .say span{display:inline-block;border-radius:6px;padding:0 3px;transition:background .2s}
+.ramsa .say span.hl{background:var(--accent);color:#1c160d}
+.ramsa .map{display:flex;flex-wrap:wrap;gap:5px}
+.ramsa .map i{font-style:normal;font-size:12px;background:var(--cell);border-radius:6px;padding:3px 7px;color:var(--muted)}
+.ramsa .map i.hl{background:var(--green);color:#fff}
+.ord-sec{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none}
+.ord-sec button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--muted)}
+.ord-sec button.on{border-color:var(--accent);color:var(--text);background:var(--cell)}
+.ord-done{display:flex;flex-wrap:wrap;gap:5px;min-height:38px;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:6px;margin:8px 0}
+.ord-done i{font-style:normal;background:var(--green);color:#fff;border-radius:7px;padding:5px 9px;font-size:13.5px;font-weight:600}
+.ord-pool{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.ord-pool button{height:44px;border-radius:9px;border:1px solid var(--line);background:var(--cell);font-size:15px;font-weight:600}
+.ord-pool button.bad{animation:sh .35s;border-color:var(--red)}
+.res-card{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.res-card .ri{font-size:30px;flex:none}
+.res-card b{display:block;font-size:16px}.res-card p{margin:3px 0 8px;font-size:13px;color:#d9cfc2;line-height:1.45}
+.res-card .lnk{display:flex;gap:6px;flex-wrap:wrap}
+.res-card .lnk a{display:inline-flex;align-items:center;height:34px;padding:0 12px;border-radius:8px;background:var(--accent);color:#1c160d;font-weight:700;font-size:13.5px;text-decoration:none}
+.res-card .lnk a.g{background:none;border:1px solid var(--line);color:var(--text)}
 #nav button{background:none;border:none;font-size:11px;font-weight:600;letter-spacing:.2px;color:#7d7266;padding:4px 0 0;display:flex;flex-direction:column;align-items:center;gap:3px}
 #nav button svg{width:24px;height:24px}
 #nav button.on{color:var(--accent)}
@@ -300,6 +330,19 @@ body.nav-on .navback{visibility:hidden}
   <div class="scroll" id="statsBody"></div>
 </section>
 
+<!-- ===== UTBILDNING (beta) ===== -->
+<section class="screen" id="s-learn">
+  <header>
+    <button class="iconbtn ghost"></button>
+    <h1>Utbildning</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll">
+    <div class="lrn-tabs" id="lrnTabs"><button data-l="order" class="on">Ordningen</button><button data-l="books">Böckerna</button><button data-l="tips">Fördjupning</button></div>
+    <div id="learnBody"></div>
+  </div>
+</section>
+
 <!-- ===== GRUPPER ===== -->
 <section class="screen" id="s-groups">
   <header>
@@ -356,6 +399,7 @@ body.nav-on .navback{visibility:hidden}
 <nav id="nav"><div class="in">
   <button data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>Spela</button>
   <button data-nav="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Topplista</button>
+  <button data-nav="learn" id="navLearn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>Utbildning</button>
   <button data-nav="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/></svg>Grupper</button>
   <button data-nav="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Jag</button>
 </div></nav>
@@ -602,7 +646,7 @@ function possibleBooks(){
 
 /* ---- navigering ---- */
 let SCREEN="home";
-const NAV_SCREENS=["home","board","groups","stats"];
+const NAV_SCREENS=["home","board","groups","stats","learn"];
 function go(name){
   if(!ME && name!=="onboard"){ name="onboard"; }
   let mara=false; if(name==="mara"){name="play";mara=true;}
@@ -616,6 +660,7 @@ function go(name){
   if(name==="stats") renderStats();
   if(name==="groups") renderGroups();
   if(name==="board") renderBoard();
+  if(name==="learn") renderLearn();
   if(name==="onboard") renderOnboard();
 }
 document.addEventListener("click",e=>{
@@ -1192,6 +1237,64 @@ async function joinFromUrl(){
   try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:code});await loadAll();toast("Du är med i "+r[0].name+"!",3500);}catch(e){toast(e.message);}
   history.replaceState(null,"",location.pathname);
 }
+
+/* ===== UTBILDNING (bara beta) ===== */
+if(IS_BETA){$("navLearn").style.display="";$("nav").classList.add("five");}
+const LSECT=[
+  {k:"mos",name:"Moseböckerna",from:0,to:4},
+  {k:"hist",name:"Historia GT",from:5,to:16},
+  {k:"poe",name:"Vishet & poesi",from:17,to:21},
+  {k:"sprof",name:"Stora profeter",from:22,to:26},
+  {k:"lprof",name:"Små profeter",from:27,to:38},
+  {k:"ev",name:"Evangelier & Apg",from:39,to:43},
+  {k:"paul",name:"Paulus brev + Hebr",from:44,to:57},
+  {k:"allm",name:"Övriga brev + Upp",from:58,to:65}];
+const RAMSA=[["Rom-",[44]],["kor-",[45,46]],["gal-",[47]],["ef, ",[48]],["fil-",[49]],["kol, ",[50]],["tessalon-",[51,52]],["timo-",[53,54]],["tit, ",[55]],["fil-",[56]],["hebraios",[57]]];
+let LEARN={tab:"order",sec:"paul",done:[],pool:[],errs:0,t0:0,hl:-1};
+function ytOverview(b){return "https://www.youtube.com/results?search_query="+encodeURIComponent("BibleProject Svenska Översikt "+BOOKS[b])}
+function startOrder(k){const sc=LSECT.find(x=>x.k===k);LEARN.sec=k;LEARN.done=[];LEARN.errs=0;LEARN.t0=Date.now();
+  const ids=[];for(let i=sc.from;i<=sc.to;i++)ids.push(i);LEARN.pool=ids.sort(()=>Math.random()-.5);}
+function renderLearn(){
+  [...$("lrnTabs").children].forEach(b=>b.classList.toggle("on",b.dataset.l===LEARN.tab));
+  let h="";
+  if(LEARN.tab==="order"){
+    h+="<div class='ramsa'><div class='mut' style='font-size:11px;letter-spacing:1.5px;text-transform:uppercase'>Ramsan från bibelskolan · Paulus brev</div><div class='say' id='ramsaSay'>"+
+      RAMSA.map((r,i)=>"<span data-ri='"+i+"'>"+r[0]+"</span>").join("")+"</div><div class='map' id='ramsaMap'>"+RAMSA.map((r,i)=>r[1].map(b=>"<i data-ri='"+i+"'>"+SHORT[b]+"</i>").join("")).join("")+"</div>"+
+      "<button class='btn sm' id='ramsaPlay' style='margin-top:10px'>▶ Gå igenom ramsan</button></div>";
+    if(!LEARN.pool.length&&!LEARN.done.length)startOrder(LEARN.sec);
+    const sc=LSECT.find(x=>x.k===LEARN.sec),total=sc.to-sc.from+1;
+    h+="<h2 class='t' style='margin:6px 0 6px;font-size:19px'>Sätt böckerna i ordning</h2><div class='ord-sec' id='ordSec'>"+LSECT.map(x=>"<button data-s='"+x.k+"' class='"+(x.k===LEARN.sec?"on":"")+"'>"+x.name+"</button>").join("")+"</div>";
+    if(LEARN.done.length===total){const sec=Math.round((Date.now()-LEARN.t0)/1000);
+      h+="<div class='card' style='text-align:center'><div style='font-size:40px'>🎉</div><b style='font-size:18px'>"+sc.name+" klara!</b><div class='mut'>"+sec+" sekunder · "+LEARN.errs+(LEARN.errs===1?" fel":" fel")+"</div><div class='ord-done' style='justify-content:center'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><button class='btn' id='ordAgain'>Kör igen</button></div>";
+    } else {
+      h+="<p class='mut' style='margin:0'>Tryck på böckerna i den ordning de står i Bibeln. "+LEARN.done.length+" av "+total+"</p><div class='ord-done'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><div class='ord-pool' id='ordPool'>"+LEARN.pool.map(b=>"<button data-b='"+b+"'>"+esc(BOOKS[b])+"</button>").join("")+"</div>";
+    }
+  } else if(LEARN.tab==="books"){
+    const cell=i=>"<button data-bk='"+i+"'>"+esc(BOOKS[i])+"<small>"+esc(BOOKINFO[i][1])+"</small></button>";
+    let a="",b="";for(let i=0;i<39;i++)a+=cell(i);for(let i=39;i<66;i++)b+=cell(i);
+    h+="<p class='mut' style='margin:0 0 8px'>Tryck på en bok för fakta, en kort film och för att börja läsa.</p><div class='sec'>Gamla testamentet</div><div class='bklist'>"+a+"</div><div class='sec'>Nya testamentet</div><div class='bklist nt'>"+b+"</div><div style='height:10px'></div>";
+  } else {
+    h+="<div class='res-card'><span class='ri'>🎓</span><div><b>TELOS – Teologi för folket</b><p>Kurser och podd i teologi på svenska, med lärare från bl.a. Pingst, ALT och Evangeliska Alliansen.</p><div class='lnk'><a href='https://telos.nu/' target='_blank' rel='noopener'>Besök telos.nu</a></div></div></div>";
+    h+="<div class='res-card'><span class='ri'>📱</span><div><b>Svenska Kärnbibeln – app</b><p>Gratis bibelapp med Kärnbibeln, förklaringar i texten, grekiska och hebreiska ordböcker, läsplaner och dagligt quiz.</p><div class='lnk'><a href='https://apps.apple.com/se/app/svenska-k%C3%A4rnbibeln/id6443848205' target='_blank' rel='noopener'> App Store</a><a href='https://play.google.com/store/search?q=Svenska%20K%C3%A4rnbibeln&c=apps' target='_blank' rel='noopener'>▶ Google Play</a><a class='g' href='https://www.karnbibeln.se' target='_blank' rel='noopener'>karnbibeln.se</a></div></div></div>";
+    h+="<div class='res-card'><span class='ri'>🎬</span><div><b>BibleProject på svenska</b><p>Över 100 korta animerade filmer – en översikt för nästan varje bok i Bibeln, plus teman som nåd och Messias.</p><div class='lnk'><a href='https://bibleproject.com/sv/' target='_blank' rel='noopener'>Se filmerna</a></div></div></div>";
+    h+="<div class='res-card'><span class='ri'>📖</span><div><b>Läs hela kapitlet i YouVersion</b><p>Efter varje vers kan du trycka 📖 Ge kontext → Läs hela kapitlet. Det öppnas i Bibel-appen om du har den.</p></div></div>";
+  }
+  $("learnBody").innerHTML=h;
+}
+$("lrnTabs").onclick=e=>{const b=e.target.closest("button[data-l]");if(!b)return;LEARN.tab=b.dataset.l;renderLearn();$("s-learn").querySelector(".scroll").scrollTop=0;};
+$("learnBody").addEventListener("click",e=>{
+  const s=e.target.closest("#ordSec button[data-s]");if(s){startOrder(s.dataset.s);renderLearn();return;}
+  if(e.target.closest("#ordAgain")){startOrder(LEARN.sec);renderLearn();return;}
+  const pb=e.target.closest("#ordPool button[data-b]");if(pb){const sc=LSECT.find(x=>x.k===LEARN.sec);const want=sc.from+LEARN.done.length,b=+pb.dataset.b;
+    if(b===want){LEARN.done.push(b);LEARN.pool=LEARN.pool.filter(x=>x!==b);renderLearn();}
+    else{LEARN.errs++;pb.classList.remove("bad");void pb.offsetWidth;pb.classList.add("bad");toast("Inte än – "+esc(BOOKS[b])+" kommer senare");}
+    return;}
+  if(e.target.closest("#ramsaPlay")){let i=0;const step=()=>{document.querySelectorAll("#ramsaSay span,#ramsaMap i").forEach(x=>x.classList.toggle("hl",+x.dataset.ri===i));if(i<RAMSA.length){i++;setTimeout(step,850);}};step();return;}
+  const bk=e.target.closest("button[data-bk]");if(bk){const i=+bk.dataset.bk,info=BOOKINFO[i];
+    $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span><b>Kapitel</b><span>"+DATA.counts[i].length+"</span><b>Plats</b><span>Bok "+(i+1)+" av 66</span></div>"+
+      "<a class='btn' href='"+ytOverview(i)+"' target='_blank' rel='noopener'>▶ Kort film om boken (BibleProject)</a><a class='btn ghost' href='"+yvUrl(i,1)+"' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
+    $("ctxModal").classList.add("on");}
+});
 
 /* ===== BJUD IN FLER ===== */
 function appUrl(){return location.origin+location.pathname}
