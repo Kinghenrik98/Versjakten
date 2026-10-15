@@ -217,9 +217,10 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .mrow b{color:var(--accent)}.mrow .arr{margin-left:auto;color:var(--accent);font-size:20px}.mrow .ic{font-size:26px}
 #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;background:#181411;border-top:1px solid var(--line);padding:6px 0 max(10px,env(safe-area-inset-bottom))}
 #nav .in{max-width:440px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-#nav button{background:none;border:none;font-size:11px;color:var(--muted);padding:2px 0}
-#nav button span{display:block;font-size:22px;margin-bottom:1px;filter:grayscale(1);opacity:.6}
-#nav button.on{color:var(--accent)}#nav button.on span{filter:none;opacity:1}
+#nav button{background:none;border:none;font-size:11px;font-weight:600;letter-spacing:.2px;color:#7d7266;padding:4px 0 0;display:flex;flex-direction:column;align-items:center;gap:3px}
+#nav button svg{width:24px;height:24px}
+#nav button.on{color:var(--accent)}
+#nav button.on svg{stroke-width:2.2}
 body.nav-on #nav{display:block}
 body.nav-on .screen{padding-bottom:72px}
 body.nav-on .navback{visibility:hidden}
@@ -353,10 +354,10 @@ body.nav-on .navback{visibility:hidden}
 </section>
 
 <nav id="nav"><div class="in">
-  <button data-nav="home"><span>🏠</span>Spela</button>
-  <button data-nav="board"><span>🏆</span>Topplista</button>
-  <button data-nav="groups"><span>👥</span>Grupper</button>
-  <button data-nav="stats"><span>📊</span>Jag</button>
+  <button data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>Spela</button>
+  <button data-nav="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Topplista</button>
+  <button data-nav="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/></svg>Grupper</button>
+  <button data-nav="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Jag</button>
 </div></nav>
 
 <div class="toast" id="toast"></div>
@@ -393,7 +394,7 @@ body.nav-on .navback{visibility:hidden}
 
 <div class="modal" id="shareModal"><div class="sheet">
   <h2 id="shareTitle">Bjud in</h2>
-  <p>Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.</p>
+  <p id="shareText">Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.</p>
   <div class="code" id="shareCode"></div>
   <a class="btn" id="shareWa" target="_blank" rel="noopener">Dela i WhatsApp</a>
   <button class="btn ghost" id="shareCopy">Kopiera länk</button>
@@ -849,7 +850,7 @@ function openRes(){
   $("resBody").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin:10px 0'>"+parts.join("")+"</table>"+
     "<p class='mut' style='text-align:center'>Nya verser om <b class='cd' style='color:var(--text)'></b></p>"+
     AD_HTML+
-    "<button class='btn' id='resBoard'>🏆 Topplistan</button><button class='btn ghost' id='resPlay'>Visa mina gissningar</button><button class='btn ghost' id='resHome'>Till startsidan</button>";
+    "<button class='btn' id='resBoard'>🏆 Topplistan</button>"+INVITE_BTN+"<button class='btn ghost' id='resPlay'>Visa mina gissningar</button><button class='btn ghost' id='resHome'>Till startsidan</button>";
   $("resModal").classList.add("on");tick();
   $("resBoard").onclick=()=>{$("resModal").classList.remove("on");BOARD.back=SCREEN;go("board");};
   $("resPlay").onclick=()=>{$("resModal").classList.remove("on");go("play");};
@@ -996,7 +997,7 @@ function renderBoard(){
         return "<tr class='"+(ME&&a.id===ME.id?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+playerCell(p,false)+"</td><td class='n'>"+a.n+"</td><td class='n'>"+a.pts+"</td></tr>";}).join("")+"</table>":"<div class='empty'>Inga resultat än.</div>";
     }
   }
-  $("boardBody").innerHTML=html;
+  $("boardBody").innerHTML=html+(BOARD.scope.startsWith("g")?"":INVITE_BTN);
 }
 $("scopes").onclick=e=>{const b=e.target.closest("button[data-s]");if(!b)return;BOARD.scope=b.dataset.s;renderBoard();};
 $("ptabs").onclick=e=>{const b=e.target.closest("button[data-t]");if(!b)return;BOARD.period=b.dataset.t;renderBoard();};
@@ -1045,6 +1046,7 @@ function renderStats(){
   let html="<button class='hello' data-go='profile' style='background:none;border:none;width:100%;text-align:left;color:var(--text);padding:0'>"+avatar(ME,54)+"<div><b>"+esc(ME.name)+"</b><small>"+esc(meLine())+" · Ändra profil ›</small></div></button>";
   html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div>"+
     "<div class='streak' style='margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'><span class='f'>🏃</span><div><b>"+maraBest()+" i rad</b><div class='mut'>Längsta maraton</div></div></div></div>";
+  html+=INVITE_BTN+"<div style='height:12px'></div>";
   html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
   html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>🏅 Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
   html+=journeyHTML();
@@ -1176,11 +1178,11 @@ $("joinGo").onclick=async()=>{const c=$("joinCode").value.trim().toUpperCase();i
   try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:c});$("joinModal").classList.remove("on");await loadAll();toast("Du är med i "+r[0].name+"!");renderGroups();}catch(e){toast(e.message);}};
 function inviteUrl(code){return location.origin+location.pathname+"?grupp="+encodeURIComponent(code)}
 let SHARE=null;
-function openShare(gid){const g=MYGROUPS.find(x=>x.id===gid);if(!g)return;SHARE=g;
+function openShare(gid){const g=MYGROUPS.find(x=>x.id===gid);if(!g)return;SHARE=g;$("shareLeave").style.display="block";$("shareText").textContent="Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.";$("shareCode").style.cssText="";
   $("shareTitle").textContent="Bjud in till "+g.name;$("shareCode").textContent=g.code;
   const txt="Häng med och spela Versjakten i gruppen \""+g.name+"\"! Tre bibelverser om dagen – gissa var de står. "+inviteUrl(g.code);
   $("shareWa").href="https://wa.me/?text="+encodeURIComponent(txt);$("shareModal").classList.add("on");}
-$("shareCopy").onclick=async()=>{try{await navigator.clipboard.writeText(inviteUrl(SHARE.code));toast("Länken är kopierad");}catch(e){toast(inviteUrl(SHARE.code),5000);}};
+$("shareCopy").onclick=async()=>{const u=SHARE&&SHARE.app?appUrl():inviteUrl(SHARE.code);try{await navigator.clipboard.writeText(u);toast("Länken är kopierad");}catch(e){toast(u,5000);}};
 $("shareLeave").onclick=async()=>{if(!SHARE||!window.confirm("Lämna "+SHARE.name+"?"))return;try{await rpc("leave_group",{p_code:ME.code,p_group_id:SHARE.id});$("shareModal").classList.remove("on");await loadAll();BOARD.scope="all";go("groups");toast("Du har lämnat gruppen");}catch(e){toast(e.message);}};
 // bjud in-knapp på grupptopplistan
 const _rb=renderBoard;
@@ -1190,6 +1192,18 @@ async function joinFromUrl(){
   try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:code});await loadAll();toast("Du är med i "+r[0].name+"!",3500);}catch(e){toast(e.message);}
   history.replaceState(null,"",location.pathname);
 }
+
+/* ===== BJUD IN FLER ===== */
+function appUrl(){return location.origin+location.pathname}
+async function inviteApp(){
+  const txt="Häng med och spela Versjakten! Tre bibelverser om dagen – gissa var i Bibeln de står. ";
+  if(navigator.share){try{await navigator.share({title:"Versjakten",text:txt,url:appUrl()});return;}catch(e){if(e&&e.name==="AbortError")return;}}
+  $("shareTitle").textContent="Bjud in fler";$("shareCode").textContent=appUrl().replace(/^https?:\/\//,"");
+  $("shareWa").href="https://wa.me/?text="+encodeURIComponent(txt+appUrl());
+  $("shareLeave").style.display="none";SHARE={code:null,app:true};$("shareText").textContent="Skicka länken till kompisar, familj eller ungdomsgruppen. Alla spelar samma tre verser varje dag.";$("shareCode").style.cssText="font-size:14px;letter-spacing:0;word-break:break-all";$("shareModal").classList.add("on");
+}
+const INVITE_BTN="<button class='btn ghost' data-invite>📨 Bjud in fler</button>";
+document.addEventListener("click",e=>{if(e.target.closest("[data-invite]"))inviteApp();});
 
 /* ===== FLYTT FRÅN GAMLA VERSIONEN ===== */
 function migrateOld(){

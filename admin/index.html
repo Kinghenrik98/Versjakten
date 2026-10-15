@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Versjakten Admin</title>
+<meta name="theme-color" content="#14110f">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14110f;--panel:#1e1a17;--cell:#2a2420;--line:#3a322c;--text:#f2ebe1;--muted:#a39785;--green:#5f8f4e;--accent:#d9a55b;--red:#b0503f;--serif:"Fraunces",Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 40px}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:14px}
+header h1{font-family:var(--serif);font-size:24px;margin:0}header h1 span{color:var(--accent)}
+header a{color:var(--muted);font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile b{display:block;font-family:var(--serif);font-size:28px;color:var(--accent);line-height:1.1}
+.tile span{font-size:12px;color:var(--muted)}
+.tile.warn{border-color:var(--accent)}
+@media(max-width:560px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;height:38px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted)}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#1c160d;font-weight:700}
+.inp{width:100%;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--panel);padding:0 10px}
+.inp:focus{outline:none;border-color:var(--accent)}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.it{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.it:last-child{border-bottom:none}
+.it .em{font-size:22px;width:28px;text-align:center;flex:none}
+.it .main{flex:1;min-width:0}
+.it .main b{font-size:14.5px}.it .main small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .num{text-align:right;font-size:12px;color:var(--muted);flex:none;white-space:nowrap}.it .num b{color:var(--text);font-size:14px}
+.it.click{cursor:pointer}.it.click:hover{background:#252019}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:1px}
+.tag.p{background:var(--accent);color:#1c160d}.tag.ok{background:var(--green);color:#fff}.tag.a{background:var(--red);color:#fff}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.b{height:34px;border-radius:8px;border:1px solid var(--line);background:var(--cell);padding:0 12px;cursor:pointer}
+.b.pri{background:var(--accent);border-color:var(--accent);color:#1c160d;font-weight:700}
+.b.ok{background:var(--green);border-color:var(--green);color:#fff;font-weight:700}
+.b.no{border-color:var(--red);color:#e7a091}
+.sec{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:16px 0 0}
+.mut{color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:100%;max-width:420px;padding:18px;max-height:90vh;overflow:auto}
+.sheet h2{font-family:var(--serif);margin:0 0 10px}
+.sheet label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.sheet .row{display:flex;gap:8px;margin-top:14px}.sheet .row .b{flex:1;height:40px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+.login{max-width:360px;margin:60px auto;text-align:center}
+.empty{padding:16px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>Vers<span>jakten</span> · Admin</h1><a href="../">Till spelet ›</a></header>
+  <div id="app"></div>
+</div>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL="https://qccrlaxzfiddgfsxozim.supabase.co", SUPABASE_KEY="sb_publishable_q_6FHlE8r41gQqtgTwNn7g_1QPN0zbs";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2600)}
+function hdr(){const h={apikey:SUPABASE_KEY,"Content-Type":"application/json"};if(SUPABASE_KEY.startsWith("eyJ"))h.Authorization="Bearer "+SUPABASE_KEY;return h}
+async function rpc(fn,body){const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:hdr(),body:JSON.stringify(body)});const j=await r.json().catch(()=>null);if(!r.ok)throw new Error((j&&j.message)||("Fel "+r.status));return j}
+async function get(path){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:hdr()});if(!r.ok)throw new Error(r.status);return r.json()}
+const TODAY=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+const fmtDate=s=>s?new Date(s).toLocaleDateString("sv-SE",{day:"numeric",month:"short"}):"–";
+function label(c){return c?(c.name.toLowerCase().includes(c.city.toLowerCase())?c.name:c.name+" "+c.city):""}
+
+let CODE=null, USERS=[], CHURCHES=[], GROUPS=[], MEMBERS=[], TODAYSET=new Set(), TAB="users", Q="";
+function readCode(){try{const p=JSON.parse(localStorage.getItem("vjb_profile"));if(p&&p.code)return p.code}catch(e){}try{return sessionStorage.getItem("vja_code")}catch(e){return null}}
+
+async function load(){
+  [USERS,CHURCHES]=await Promise.all([rpc("admin_users",{p_code:CODE}),rpc("admin_churches",{p_code:CODE})]);
+  const [g,m,t]=await Promise.all([get("groups?select=id,name,emoji,created_at&limit=5000"),get("group_members?select=group_id,profile_id&limit=20000"),get("beta_scores?select=profile_id&day=eq."+TODAY+"&limit=20000")]);
+  GROUPS=g;MEMBERS=m;TODAYSET=new Set(t.map(x=>x.profile_id));
+}
+function showLogin(msg){
+  $("app").innerHTML="<div class='login'><h2 style='font-family:var(--serif)'>Logga in</h2><p class='mut'>"+esc(msg||"Öppna sidan på telefonen där du spelar, eller skriv din personliga kod.")+"</p><input class='inp' id='lc' placeholder='Din kod' style='text-transform:uppercase;text-align:center'><button class='b pri' id='lb' style='width:100%;margin-top:10px;height:42px'>Logga in</button></div>";
+  $("lb").onclick=async()=>{CODE=$("lc").value.trim().toUpperCase();try{sessionStorage.setItem("vja_code",CODE)}catch(e){}start();};
+}
+async function start(){
+  if(!CODE){showLogin();return}
+  $("app").innerHTML="<p class='mut'>Laddar…</p>";
+  try{await load();render();}
+  catch(e){showLogin(e.message==="Ingen behörighet"?"Den här profilen har inte adminbehörighet.":"Fel: "+e.message);}
+}
+function render(){
+  const pending=CHURCHES.filter(c=>!c.approved).length;
+  const week=Date.now()-7*864e5, newW=USERS.filter(u=>new Date(u.created_at)>week).length;
+  let h="<div class='tiles'><div class='tile'><b>"+USERS.length+"</b><span>användare totalt</span></div><div class='tile'><b>"+TODAYSET.size+"</b><span>har spelat idag</span></div><div class='tile'><b>"+newW+"</b><span>nya senaste 7 dagarna</span></div><div class='tile"+(pending?" warn":"")+"'><b>"+pending+"</b><span>församlingar väntar</span></div></div>";
+  h+="<div class='tabs'>"+[["users","Användare"],["churches","Församlingar"+(pending?" ("+pending+")":"")],["groups","Grupper"]].map(([k,l])=>"<button data-tab='"+k+"' class='"+(TAB===k?"on":"")+"'>"+l+"</button>").join("")+"</div>";
+  if(TAB==="users")h+=usersHTML();else if(TAB==="churches")h+=churchesHTML();else h+=groupsHTML();
+  $("app").innerHTML=h;
+  const qi=$("q");if(qi){qi.value=Q;qi.oninput=()=>{Q=qi.value;const pos=qi.selectionStart;render();const n=$("q");n.focus();n.setSelectionRange(pos,pos);};}
+}
+function usersHTML(){
+  const q=Q.trim().toLowerCase();
+  const list=USERS.filter(u=>!q||(u.name+" "+(u.church||"")+" "+(u.city||"")).toLowerCase().includes(q));
+  let h="<input class='inp' id='q' placeholder='Sök namn, församling eller ort'>";
+  h+="<div class='list'>"+(list.map(u=>"<div class='it click' data-user='"+u.id+"'><span class='em'>"+esc(u.emoji||"🙂")+"</span><div class='main'><b>"+esc(u.name)+"</b>"+(u.is_admin?"<span class='tag a'>ADMIN</span>":"")+(TODAYSET.has(u.id)?"<span class='tag ok'>IDAG</span>":"")+"<small>"+esc([u.church,u.city&&!(u.church||"").toLowerCase().includes(u.city.toLowerCase())?u.city:""].filter(Boolean).join(" · ")||"Ingen församling/ort")+" · reg. "+fmtDate(u.created_at)+"</small></div><div class='num'><b>"+u.days+"</b> dagar · <b>"+u.points+"</b> p<br>senast "+fmtDate(u.last_day)+(u.mara_best?" · 🏃 "+u.mara_best:"")+"</div></div>").join("")||"<div class='empty'>Inga träffar</div>")+"</div>";
+  return h;
+}
+function churchesHTML(){
+  const pend=CHURCHES.filter(c=>!c.approved),ok=CHURCHES.filter(c=>c.approved);
+  const row=c=>"<div class='it'><span class='em'>⛪</span><div class='main'><b>"+esc(label(c))+"</b>"+(c.approved?"":"<span class='tag p'>VÄNTAR</span>")+"<small>"+c.members+(c.members===1?" medlem":" medlemmar")+(c.created_by_name?" · föreslagen av "+esc(c.created_by_name):"")+" · "+fmtDate(c.created_at)+"</small>"+
+    "<div class='acts'>"+(c.approved?"":"<button class='b ok' data-approve='"+c.id+"'>✓ Godkänn</button>")+"<button class='b' data-edit='"+c.id+"'>Ändra</button><button class='b' data-merge='"+c.id+"'>Slå ihop med…</button>"+(c.approved?"":"<button class='b no' data-reject='"+c.id+"'>Neka</button>")+"</div></div></div>";
+  let h="";
+  if(pend.length)h+="<div class='sec'>Väntar på godkännande</div><div class='list'>"+pend.map(row).join("")+"</div>";
+  h+="<div class='sec'>Godkända</div><div class='list'>"+(ok.map(row).join("")||"<div class='empty'>Inga än</div>")+"</div>";
+  h+="<button class='b pri' data-edit='new' style='margin-top:12px;height:40px;width:100%'>＋ Lägg till församling</button>";
+  return h;
+}
+function groupsHTML(){
+  const cnt={};MEMBERS.forEach(m=>cnt[m.group_id]=(cnt[m.group_id]||0)+1);
+  return "<div class='list'>"+(GROUPS.map(g=>"<div class='it'><span class='em'>"+esc(g.emoji||"👥")+"</span><div class='main'><b>"+esc(g.name)+"</b><small>skapad "+fmtDate(g.created_at)+"</small></div><div class='num'><b>"+(cnt[g.id]||0)+"</b> medlemmar</div></div>").join("")||"<div class='empty'>Inga grupper än</div>")+"</div>";
+}
+function sheet(html){$("sheet").innerHTML=html;$("modal").classList.add("on")}
+function close(){$("modal").classList.remove("on")}
+$("modal").onclick=e=>{if(e.target===$("modal")||e.target.closest("[data-close]"))close()};
+async function act(fn,body,ok){try{await rpc(fn,Object.assign({p_code:CODE},body));close();toast(ok);await load();render();}catch(e){toast(e.message)}}
+function churchOptions(sel,exclude){return "<option value=''>– Ingen –</option>"+CHURCHES.filter(c=>c.id!==exclude).map(c=>"<option value='"+c.id+"'"+(c.id===sel?" selected":"")+">"+esc(label(c))+(c.approved?"":" (väntar)")+"</option>").join("")}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-tab],[data-user],[data-approve],[data-edit],[data-merge],[data-reject]");if(!t)return;
+  if(t.dataset.tab){TAB=t.dataset.tab;render();return}
+  if(t.dataset.approve){const c=CHURCHES.find(x=>x.id==t.dataset.approve);act("admin_save_church",{p_id:c.id,p_name:c.name,p_city:c.city,p_approved:true},label(c)+" är godkänd");return}
+  if(t.dataset.reject){const c=CHURCHES.find(x=>x.id==t.dataset.reject);
+    sheet("<h2>Neka församling?</h2><p><b>"+esc(label(c))+"</b> tas bort. "+c.members+" medlem(mar) blir utan församling och får välja om.</p><p class='mut'>Är det en felstavning av en kyrka som redan finns? Använd hellre <b>Slå ihop</b>.</p><div class='row'><button class='b' data-close>Avbryt</button><button class='b no' id='go'>Neka</button></div>");
+    $("go").onclick=()=>act("admin_reject_church",{p_id:c.id},"Förslaget är borttaget");return}
+  if(t.dataset.merge){const c=CHURCHES.find(x=>x.id==t.dataset.merge);
+    sheet("<h2>Slå ihop</h2><p>Flytta alla "+c.members+" medlemmar från <b>"+esc(label(c))+"</b> till:</p><select class='inp' id='into'>"+churchOptions(null,c.id)+"</select><p class='mut' style='font-size:12px'>"+esc(label(c))+" tas sedan bort.</p><div class='row'><button class='b' data-close>Avbryt</button><button class='b pri' id='go'>Slå ihop</button></div>");
+    $("go").onclick=()=>{const into=+$("into").value;if(!into){toast("Välj en församling");return}act("admin_merge_church",{p_from:c.id,p_into:into},"Ihopslagen")};return}
+  if(t.dataset.edit){const c=t.dataset.edit==="new"?{id:null,name:"",city:"",approved:true}:CHURCHES.find(x=>x.id==t.dataset.edit);
+    sheet("<h2>"+(c.id?"Ändra församling":"Ny församling")+"</h2><label>Namn</label><input class='inp' id='cn' value='"+esc(c.name)+"' placeholder='T.ex. Pingstkyrkan'><label>Ort</label><input class='inp' id='cc' value='"+esc(c.city)+"' placeholder='T.ex. Katrineholm'><label style='display:flex;gap:8px;align-items:center;font-size:14px;color:var(--text)'><input type='checkbox' id='ca' "+(c.approved?"checked":"")+"> Godkänd (syns i listan för alla)</label><div class='row'><button class='b' data-close>Avbryt</button><button class='b pri' id='go'>Spara</button></div>");
+    $("go").onclick=()=>act("admin_save_church",{p_id:c.id,p_name:$("cn").value,p_city:$("cc").value,p_approved:$("ca").checked},"Sparat");return}
+  if(t.dataset.user){const u=USERS.find(x=>x.id===t.dataset.user);const grp=MEMBERS.filter(m=>m.profile_id===u.id).map(m=>(GROUPS.find(g=>g.id===m.group_id)||{}).name).filter(Boolean);
+    sheet("<h2>"+esc((u.emoji||"")+" "+u.name)+"</h2><p class='mut' style='margin:0'>Registrerad "+new Date(u.created_at).toLocaleString("sv-SE",{dateStyle:"medium",timeStyle:"short"})+"<br>"+u.rounds+" verser · "+u.days+" dagar · "+u.points+" p · senast "+fmtDate(u.last_day)+(u.mara_best?"<br>Längsta maraton: "+u.mara_best:"")+(grp.length?"<br>Grupper: "+esc(grp.join(", ")):"")+"</p>"+
+      (u.church&&!u.church_id?"<p style='font-size:13px'>Gammal fritext: <b>"+esc(u.church)+"</b></p>":"")+
+      "<label>Församling</label><select class='inp' id='uc'>"+churchOptions(u.church_id)+"</select><label>Ort</label><input class='inp' id='uo' value='"+esc(u.city||"")+"'><div class='row'><button class='b' data-close>Stäng</button><button class='b pri' id='go'>Spara</button></div>");
+    $("go").onclick=()=>act("admin_set_user_church",{p_user:u.id,p_church_id:$("uc").value?+$("uc").value:null,p_city:$("uo").value},"Sparat");return}
+});
+CODE=readCode();start();
+</script>
+</body>
+</html>
