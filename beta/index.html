@@ -1272,7 +1272,7 @@ function renderLearn(){
   [...$("lrnTabs").children].forEach(b=>b.classList.toggle("on",b.dataset.l===LEARN.tab));
   let h="";
   if(LEARN.tab==="order"){
-    h+="<div class='ramsa'><div class='mut' style='font-size:11px;letter-spacing:1.5px;text-transform:uppercase'>Ramsan från bibelskolan · Paulus brev</div><div class='say' id='ramsaSay'>"+
+    h+="<div class='ramsa'><div class='mut' style='font-size:11px;letter-spacing:1.5px;text-transform:uppercase'>Ramsan från bibelskolan · Paulus brev + Hebreerbrevet</div><div class='say' id='ramsaSay'>"+
       RAMSA.map((r,i)=>"<span data-ri='"+i+"'>"+r[0]+"</span>").join("")+"</div><div class='map' id='ramsaMap'>"+RAMSA.map((r,i)=>r[1].map(b=>"<i data-ri='"+i+"'>"+SHORT[b]+"</i>").join("")).join("")+"</div>"+
       "<button class='btn sm' id='ramsaPlay' style='margin-top:10px'>▶ Gå igenom ramsan</button></div>";
     if(!LEARN.pool.length&&!LEARN.done.length)startOrder(LEARN.sec);
