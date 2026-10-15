@@ -213,6 +213,9 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .week div.today{color:var(--text);font-weight:700}
 .bigbtn{display:block;width:100%;border:none;background:linear-gradient(160deg,#e0b066,#c48c3e);color:#1c160d;border-radius:18px;padding:18px;text-align:center;font-family:var(--serif);font-size:22px;font-weight:800}
 .bigbtn small{display:block;font-family:var(--sans);font-size:12.5px;font-weight:600;opacity:.8;margin-top:3px}
+.vswitch{display:flex;gap:4px;justify-content:center;margin:10px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;width:max-content}
+.vswitch a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:999px}
+.vswitch a.on{background:var(--accent);color:#1c160d}
 .mrow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-size:14px;margin-top:10px;width:100%;text-align:left;color:var(--text)}
 .mrow b{color:var(--accent)}.mrow .arr{margin-left:auto;color:var(--accent);font-size:20px}.mrow .ic{font-size:26px}
 #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;background:#181411;border-top:1px solid var(--line);padding:6px 0 max(10px,env(safe-area-inset-bottom))}
@@ -281,6 +284,7 @@ body.nav-on .navback{visibility:hidden}
     <button class="iconbtn" id="homeAv" data-go="stats" aria-label="Jag" style="border-radius:50%;border:2px solid var(--accent);font-size:20px">👤</button>
   </header>
   <div class="scroll">
+    <div id="vSwitch"></div>
     <div class="streakbig" id="streakBig"></div>
     <div class="week" id="week"></div>
     <button class="bigbtn" id="playCard"></button>
@@ -608,7 +612,7 @@ async function loadAll(){
   if(!DB_ON) return;
   try{
     const [pr,sc,mem,gr,ch]=await Promise.all([
-      get("profiles?select=id,name,church,emoji,church_id,city&limit=10000"),
+      get("profiles?select=id,name,church,emoji,church_id,city,is_admin&limit=10000"),
       get("beta_scores?select=profile_id,day,round,attempts,solved,points,guesses&day=gte."+START_DAY+"&limit=20000"),
       get("group_members?select=group_id,profile_id&limit=20000"),
       get("groups?select=id,name,emoji&limit=5000"),
@@ -692,6 +696,7 @@ function avatar(p,size){return "<span class='av' style='width:"+size+"px;height:
 function renderHome(){
   if(!ME) return;
   $("homeAv").textContent=ME.emoji||"👤";
+  $("vSwitch").innerHTML=vSwitchHTML();
   const sk=streakInfo(), n=doneCount(), done=n===ROUNDS, playedToday=sk.days.has(TODAY);
   $("streakBig").innerHTML="<div class='n'>🔥 "+sk.cur+"</div><div class='l'>"+
     (sk.cur===0?"Spela idag och tänd elden!":!playedToday?(sk.cur===1?"dag":"dagar")+" i rad – spela idag så brinner elden vidare!":(sk.cur===1?"dag":"dagar")+" i rad – håll elden vid liv!")+"</div>";
@@ -1092,6 +1097,7 @@ function renderStats(){
   html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div>"+
     "<div class='streak' style='margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'><span class='f'>🏃</span><div><b>"+maraBest()+" i rad</b><div class='mut'>Längsta maraton</div></div></div></div>";
   html+=INVITE_BTN+"<div style='height:12px'></div>";
+  if(vSwitchHTML())html=vSwitchHTML()+"<div style='height:10px'></div>"+html;
   html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
   html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>🏅 Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
   html+=journeyHTML();
@@ -1236,6 +1242,14 @@ async function joinFromUrl(){
   const code=new URLSearchParams(location.search).get("grupp");if(!code||!ME)return;
   try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:code});await loadAll();toast("Du är med i "+r[0].name+"!",3500);}catch(e){toast(e.message);}
   history.replaceState(null,"",location.pathname);
+}
+
+/* ===== VERSIONSBYTE (bara för admin) ===== */
+function siteBase(){return location.pathname.replace(/(beta|admin)\/?(index\.html)?$/,"").replace(/index\.html$/,"")}
+function vSwitchHTML(){
+  if(!ME||!PROFILES[ME.id]||!PROFILES[ME.id].is_admin)return "";
+  const b=siteBase();
+  return "<div class='vswitch'><a href='"+b+"' class='"+(IS_BETA?"":"on")+"'>Vanlig</a><a href='"+b+"beta/' class='"+(IS_BETA?"on":"")+"'>Beta</a><a href='"+b+"admin/'>Admin</a></div>";
 }
 
 /* ===== UTBILDNING (bara beta) ===== */

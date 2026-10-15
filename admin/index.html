@@ -15,7 +15,10 @@ button,input,select{font:inherit;color:inherit}
 .wrap{max-width:900px;margin:0 auto;padding:0 16px 40px}
 header{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:14px}
 header h1{font-family:var(--serif);font-size:24px;margin:0}header h1 span{color:var(--accent)}
-header a{color:var(--muted);font-size:13px}
+.vsw{display:flex;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+.vsw a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:5px 11px;border-radius:999px}
+.vsw a.on{background:var(--accent);color:#1c160d}
+@media(max-width:480px){header{flex-wrap:wrap;gap:8px}}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
 .tile b{display:block;font-family:var(--serif);font-size:28px;color:var(--accent);line-height:1.1}
@@ -58,7 +61,7 @@ header a{color:var(--muted);font-size:13px}
 </head>
 <body>
 <div class="wrap">
-  <header><h1>Vers<span>jakten</span> · Admin</h1><a href="../">Till spelet ›</a></header>
+  <header><h1>Vers<span>jakten</span> · Admin</h1><nav class="vsw"><a href="../">Vanlig</a><a href="../beta/">Beta</a><a class="on">Admin</a></nav></header>
   <div id="app"></div>
 </div>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
