@@ -347,6 +347,7 @@ body.nav-on .navback{visibility:hidden}
     <button class="bigbtn" id="playCard"></button>
     <button class="mrow" id="maraRow"></button>
     <button class="mrow" id="groupRow" style="display:none"></button>
+    <a class="mrow" id="tipRow" target="_blank" rel="noopener" style="display:none;text-decoration:none"><span class="ic">📱</span><span><small class="mut" style="font-size:11px;letter-spacing:1px">TIPS</small><br>Läs Bibeln i <b>Kärnbibeln</b>-appen – gratis och med förklaringar</span><span class="arr">›</span></a>
     <button class="mrow" id="churchRow" style="display:none;border-color:var(--accent)"><span class="ic">⛪</span><span>Nytt: välj din <b>församling</b> och <b>ort</b> i listan</span><span class="arr">›</span></button>
     <p class="mut" id="testNote" style="text-align:center;font-size:11px;margin-top:22px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
   </div>
@@ -825,6 +826,8 @@ function maybeIntro(){ // förklaring första gången (bara betan, bara helt nya
   if(st.done||st.guesses.length||myScores().length)return;
   $("introModal").classList.add("on");
 }
+if(IS_BETA){const t=$("tipRow"),ua=navigator.userAgent;t.style.display="";
+  t.href=/android/i.test(ua)?"https://play.google.com/store/search?q=Svenska%20K%C3%A4rnbibeln&c=apps":/iphone|ipad|ipod/i.test(ua)?"https://apps.apple.com/se/app/svenska-k%C3%A4rnbibeln/id6443848205":"https://www.karnbibeln.se";}
 $("churchRow").onclick=()=>{EDIT=true;go("onboard");};
 $("playCard").onclick=()=>{const gid=$("playCard").dataset.gid;
   if(gid){const g=+gid;if(gDone(g))openGroup(g,"chat");else loadGroupRound(g,gFirstOpen(g));return;}
