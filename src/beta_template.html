@@ -279,7 +279,20 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);vertical-align:2px;margin-left:2px}
 #nav button.dot{position:relative}#nav button.dot::after{content:"";position:absolute;top:2px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid #181411}
 /* utbildning */
-.lrn-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 14px}
+.lrn-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 14px}
+.wk{margin-top:12px;border:1.5px solid var(--accent);border-radius:16px;background:var(--panel);padding:12px 14px}
+.wk .k{font-size:11px;letter-spacing:1.5px;color:var(--accent);font-weight:700}
+.wk h3{margin:2px 0 2px;font-family:var(--serif);font-size:24px}
+.wk p{margin:0 0 8px;font-size:13.5px;color:var(--muted)}
+.wk .row{display:flex;gap:8px}.wk .row .btn{margin-top:0;height:40px;font-size:14px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.ord-sec button .ok{color:var(--green);font-weight:700}
+.qz .q{font-family:var(--serif);font-size:21px;line-height:1.35;margin:6px 0 12px}
+.qz .opts{display:grid;gap:8px}
+.qz .opts button{min-height:50px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel);color:var(--text);font-size:15.5px;font-weight:600;padding:8px 12px}
+.qz .opts button.right{background:#24361f;border-color:var(--green)}
+.qz .opts button.wrong{background:#3a1f1a;border-color:var(--red)}
+.qz .dots{display:flex;gap:6px;margin-bottom:6px}.qz .dots i{flex:1;height:6px;border-radius:3px;background:var(--cell)}
+.qz .dots i.r{background:var(--green)}.qz .dots i.w{background:var(--red)}.qz .dots i.c{background:var(--accent)}
 .lrn-tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px 10px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;font-weight:700}
 .lrn-tabs button .li{font-size:28px;line-height:1}
 .lrn-tabs button small{font-size:11px;font-weight:500;color:var(--muted);line-height:1.25}
@@ -403,7 +416,8 @@ body.nav-on .navback{visibility:hidden}
     <button class="iconbtn ghost"></button>
   </header>
   <div class="scroll">
-    <div class="lrn-tabs" id="lrnTabs"><button data-l="order" class="on"><span class="li">🔢</span>Ordningen<small>Lär dig böckernas ordning</small></button><button data-l="books"><span class="li">📚</span>Böckerna<small>Fakta och film om alla 66</small></button><button data-l="tips"><span class="li">🎓</span>Fördjupning<small>Appar, kurser och filmer</small></button></div>
+    <div id="lrnWeek"></div>
+    <div class="lrn-tabs" id="lrnTabs"><button data-l="order" class="on"><span class="li">🔢</span>Ordningen<small>Lär dig böckernas ordning</small></button><button data-l="books"><span class="li">📚</span>Böckerna<small>Fakta och film om alla 66</small></button><button data-l="tips"><span class="li">🎓</span>Fördjupning<small>Appar, kurser och filmer</small></button><button data-l="quiz"><span class="li">❓</span>Snabbquiz<small>5 frågor om böckerna</small></button></div>
     <div id="learnBody"></div>
   </div>
 </section>
@@ -1005,7 +1019,8 @@ function openCtx(a){
   const info=BOOKINFO[a.b];
   $("ctxBody").innerHTML="<h2>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</h2><div class='ctx'>"+esc(a.t)+"</div>"+
     "<a class='btn ghost' href='"+chapterUrl(a)+"' target='_blank' rel='noopener'>📖 Läs hela kapitel "+a.c+"</a><p class='mut' style='font-size:11.5px;text-align:center;margin:4px 0 0'>Öppnas i YouVersion-appen om du har den, annars på bible.com</p>"+
-    "<div class='card' style='margin-top:12px'><h2 style='font-size:18px'>Om "+esc(BOOKS[a.b])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div></div>"+
+    "<div class='card' style='margin-top:12px'><h2 style='font-size:18px'>Om "+esc(BOOKS[a.b])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div>"+
+    (IS_BETA?"<a class='btn ghost' href='"+ytOverview(a.b)+"' target='_blank' rel='noopener' style='margin-top:8px'>▶ Kort film om "+esc(BOOKS[a.b])+" (BibleProject)</a>":"")+"</div>"+
     (MODE==="group"?"":MODE==="mara"?(RUN&&!RUN.over?"<button class='btn' id='ctxNext'>Nästa vers →</button>":""):allDone()?"<button class='btn' data-close id='ctxRes'>Se resultat</button>":"<button class='btn' data-close id='ctxNext'>Nästa vers →</button>")+
     "<button class='btn ghost' data-close>Stäng</button>";
   $("ctxModal").classList.add("on");
@@ -1567,9 +1582,48 @@ const LSECT=[
 const RAMSA=[["Rom-",[44]],["kor-",[45,46]],["gal-",[47]],["ef, ",[48]],["fil-",[49]],["kol, ",[50]],["tessalon-",[51,52]],["timo-",[53,54]],["tit, ",[55]],["fil-",[56]],["hebraios",[57]]];
 let LEARN={tab:"order",sec:"paul",done:[],pool:[],errs:0,t0:0,hl:-1};
 function ytOverview(b){return "https://www.youtube.com/results?search_query="+encodeURIComponent("BibleProject Svenska Översikt "+BOOKS[b])}
-function startOrder(k){const sc=LSECT.find(x=>x.k===k);LEARN.sec=k;LEARN.done=[];LEARN.errs=0;LEARN.t0=Date.now();
+function startOrder(k){const sc=LSECT.find(x=>x.k===k);LEARN.sec=k;LEARN.rec=false;LEARN.done=[];LEARN.errs=0;LEARN.t0=Date.now();
   const ids=[];for(let i=sc.from;i<=sc.to;i++)ids.push(i);LEARN.pool=ids.sort(()=>Math.random()-.5);}
+function weekBook(){return hstr("vecka|"+weekStart(TODAY))%66}
+function openBook(i){const info=BOOKINFO[i];
+  $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span><b>Kapitel</b><span>"+DATA.counts[i].length+"</span><b>Plats</b><span>Bok "+(i+1)+" av 66</span></div>"+
+    "<a class='btn' href='"+ytOverview(i)+"' target='_blank' rel='noopener'>▶ Kort film om boken (BibleProject)</a><a class='btn ghost' href='"+yvUrl(i,1)+"' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
+  $("ctxModal").classList.add("on");}
+function ordBest(){return store.get("vjb_ord_best")||{}}
+/* snabbquiz */
+const QZ={qs:[],i:0,ans:[],pick:null};
+function qShuffle(a){return a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1])}
+function qRand(n){return Math.floor(Math.random()*n)}
+function qAuthor(i){const a=BOOKINFO[i][0];if(/Okänd|m\.fl\.|Främst/.test(a))return null;
+  const n=a.replace(/^Traditionellt /,"").replace(/^Profeten /,"").replace(/^aposteln /,"").replace(/,.*$/,"").trim();
+  return BOOKS[i].toLowerCase().includes(n.toLowerCase())?null:n}
+function makeQuestion(){
+  const t=qRand(5);
+  if(t===0){const i=qRand(66);return {q:"Står "+BOOKS[i]+" i Gamla eller Nya testamentet?",opts:["Gamla testamentet","Nya testamentet"],a:i<39?0:1,b:i}}
+  if(t===1){let x=qRand(66),y=qRand(66);while(y===x||Math.abs(x-y)>12)y=qRand(66);const o=qShuffle([x,y]);return {q:"Vilken kommer först i Bibeln?",opts:o.map(k=>BOOKS[k]),a:o.indexOf(Math.min(x,y)),b:Math.min(x,y)}}
+  if(t===2){const i=qRand(66),right=BOOKINFO[i][1].split(" · ")[0];const all=[...new Set(BOOKINFO.map(x=>x[1].split(" · ")[0]))].filter(x=>x!==right);
+    const o=qShuffle([right,...qShuffle(all).slice(0,2)]);return {q:"Vilken sorts bok är "+BOOKS[i]+"?",opts:o,a:o.indexOf(right),b:i}}
+  if(t===3){const i=qRand(66);const others=qShuffle([...Array(66).keys()].filter(k=>k!==i)).slice(0,3);const o=qShuffle([i,...others]);
+    return {q:"Vilken bok handlar om: "+BOOKINFO[i][2].charAt(0).toLowerCase()+BOOKINFO[i][2].slice(1)+"?",opts:o.map(k=>BOOKS[k]),a:o.indexOf(i),b:i}}
+  const cand=[...Array(66).keys()].filter(qAuthor);const i=cand[qRand(cand.length)],right=qAuthor(i);
+  const others=qShuffle([...new Set(cand.map(qAuthor))].filter(x=>x!==right)).slice(0,3);const o=qShuffle([right,...others]);
+  return {q:"Vem skrev "+BOOKS[i]+" (enligt traditionen)?",opts:o,a:o.indexOf(right),b:i}}
+function newQuiz(){QZ.qs=[];const used=new Set();while(QZ.qs.length<5){const q=makeQuestion();if(used.has(q.q))continue;used.add(q.q);QZ.qs.push(q);}QZ.i=0;QZ.ans=[];QZ.pick=null;}
+function quizHTML(){
+  if(!QZ.qs.length)newQuiz();
+  const dots="<div class='dots'>"+QZ.qs.map((_,k)=>"<i class='"+(k<QZ.ans.length?(QZ.ans[k]?"r":"w"):k===QZ.i?"c":"")+"'></i>").join("")+"</div>";
+  if(QZ.i>=QZ.qs.length){const n=QZ.ans.filter(Boolean).length,best=Math.max(n,store.get("vjb_quiz_best")||0);store.set("vjb_quiz_best",best);
+    return "<div class='qz'>"+dots+"<div class='card' style='text-align:center'><div style='font-size:40px'>"+(n===5?"🏆":n>=3?"👏":"📚")+"</div><b style='font-size:20px'>"+n+" av 5 rätt</b><div class='mut'>Ditt rekord: "+best+" av 5</div><button class='btn' id='qzAgain'>Nya frågor</button></div></div>"}
+  const q=QZ.qs[QZ.i],done=QZ.pick!==null;
+  return "<div class='qz'>"+dots+"<div class='mut' style='font-size:12px'>Fråga "+(QZ.i+1)+" av 5</div><div class='q'>"+esc(q.q)+"</div><div class='opts'>"+
+    q.opts.map((o,k)=>"<button data-qa='"+k+"' class='"+(done?(k===q.a?"right":k===QZ.pick?"wrong":""):"")+"'"+(done?" disabled":"")+">"+esc(o)+"</button>").join("")+"</div>"+
+    (done?"<div style='display:flex;gap:8px;margin-top:10px'><button class='btn ghost' data-bk='"+q.b+"' style='margin-top:0'>Om "+esc(BOOKS[q.b])+"</button><button class='btn' id='qzNext' style='margin-top:0'>"+(QZ.i===4?"Se resultat":"Nästa →")+"</button></div>":"")+"</div>";
+}
+function renderWeek(){const i=weekBook(),info=BOOKINFO[i];
+  $("lrnWeek").innerHTML="<div class='wk'><div class='k'>VECKANS BOK</div><h3>"+esc(BOOKS[i])+"</h3><p>"+esc(info[1])+" · "+esc(info[2])+"</p><div class='row'><a class='btn' href='"+ytOverview(i)+"' target='_blank' rel='noopener'>▶ Se filmen</a><button class='btn ghost' data-bk='"+i+"'>Fakta & läs</button></div></div>";}
+$("lrnWeek").addEventListener("click",e=>{const b=e.target.closest("button[data-bk]");if(b)openBook(+b.dataset.bk);});
 function renderLearn(){
+  renderWeek();
   [...$("lrnTabs").children].forEach(b=>b.classList.toggle("on",b.dataset.l===LEARN.tab));
   let h="";
   if(LEARN.tab==="order"){
@@ -1578,9 +1632,9 @@ function renderLearn(){
       "<button class='btn sm' id='ramsaPlay' style='margin-top:10px'>▶ Gå igenom ramsan</button></div>";
     if(!LEARN.pool.length&&!LEARN.done.length)startOrder(LEARN.sec);
     const sc=LSECT.find(x=>x.k===LEARN.sec),total=sc.to-sc.from+1;
-    h+="<h2 class='t' style='margin:6px 0 6px;font-size:19px'>Sätt böckerna i ordning</h2><div class='ord-sec' id='ordSec'>"+LSECT.map(x=>"<button data-s='"+x.k+"' class='"+(x.k===LEARN.sec?"on":"")+"'>"+x.name+"</button>").join("")+"</div>";
+    h+="<h2 class='t' style='margin:6px 0 6px;font-size:19px'>Sätt böckerna i ordning</h2><div class='ord-sec' id='ordSec'>"+LSECT.map(x=>{const bb=ordBest()[x.k];return "<button data-s='"+x.k+"' class='"+(x.k===LEARN.sec?"on":"")+"'>"+x.name+(bb?" <span class='ok'>✓ "+bb.t+" s</span>":"")+"</button>";}).join("")+"</div>";
     if(LEARN.done.length===total){const sec=Math.round((Date.now()-LEARN.t0)/1000);
-      h+="<div class='card' style='text-align:center'><div style='font-size:40px'>🎉</div><b style='font-size:18px'>"+sc.name+" klara!</b><div class='mut'>"+sec+" sekunder · "+LEARN.errs+(LEARN.errs===1?" fel":" fel")+"</div><div class='ord-done' style='justify-content:center'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><button class='btn' id='ordAgain'>Kör igen</button></div>";
+      h+="<div class='card' style='text-align:center'><div style='font-size:40px'>🎉</div><b style='font-size:18px'>"+sc.name+" klara!</b><div class='mut'>"+sec+" sekunder · "+LEARN.errs+" fel"+(LEARN.rec?" · <b style='color:var(--accent)'>nytt rekord!</b>":ordBest()[sc.k]?" · rekord "+ordBest()[sc.k].t+" s":"")+"</div><div class='ord-done' style='justify-content:center'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><button class='btn' id='ordAgain'>Kör igen</button></div>";
     } else {
       h+="<p class='mut' style='margin:0'>Tryck på böckerna i den ordning de står i Bibeln. "+LEARN.done.length+" av "+total+"</p><div class='ord-done'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><div class='ord-pool' id='ordPool'>"+LEARN.pool.map(b=>"<button data-b='"+b+"'>"+esc(BOOKS[b])+"</button>").join("")+"</div>";
     }
@@ -1588,6 +1642,8 @@ function renderLearn(){
     const cell=i=>"<button data-bk='"+i+"'>"+esc(BOOKS[i])+"<small>"+esc(BOOKINFO[i][1])+"</small></button>";
     let a="",b="";for(let i=0;i<39;i++)a+=cell(i);for(let i=39;i<66;i++)b+=cell(i);
     h+="<p class='mut' style='margin:0 0 8px'>Tryck på en bok för fakta, en kort film och för att börja läsa.</p><div class='sec'>Gamla testamentet</div><div class='bklist'>"+a+"</div><div class='sec'>Nya testamentet</div><div class='bklist nt'>"+b+"</div><div style='height:10px'></div>";
+  } else if(LEARN.tab==="quiz"){
+    h+=quizHTML();
   } else {
     h+="<div class='res-card'><span class='ri'>🎓</span><div><b>TELOS – Teologi för folket</b><p>Kurser och podd i teologi på svenska, med lärare från bl.a. Pingst, ALT och Evangeliska Alliansen.</p><div class='lnk'><a href='https://telos.nu/' target='_blank' rel='noopener'>Besök telos.nu</a></div></div></div>";
     h+="<div class='res-card'><span class='ri'>📱</span><div><b>Svenska Kärnbibeln – app</b><p>Gratis bibelapp med Kärnbibeln, förklaringar i texten, grekiska och hebreiska ordböcker, läsplaner och dagligt quiz.</p><div class='lnk'><a href='https://apps.apple.com/se/app/svenska-k%C3%A4rnbibeln/id6443848205' target='_blank' rel='noopener'> App Store</a><a href='https://play.google.com/store/search?q=Svenska%20K%C3%A4rnbibeln&c=apps' target='_blank' rel='noopener'>▶ Google Play</a><a class='g' href='https://www.karnbibeln.se' target='_blank' rel='noopener'>karnbibeln.se</a></div></div></div>";
@@ -1601,14 +1657,18 @@ $("learnBody").addEventListener("click",e=>{
   const s=e.target.closest("#ordSec button[data-s]");if(s){startOrder(s.dataset.s);renderLearn();return;}
   if(e.target.closest("#ordAgain")){startOrder(LEARN.sec);renderLearn();return;}
   const pb=e.target.closest("#ordPool button[data-b]");if(pb){const sc=LSECT.find(x=>x.k===LEARN.sec);const want=sc.from+LEARN.done.length,b=+pb.dataset.b;
-    if(b===want){LEARN.done.push(b);LEARN.pool=LEARN.pool.filter(x=>x!==b);renderLearn();}
+    if(b===want){LEARN.done.push(b);LEARN.pool=LEARN.pool.filter(x=>x!==b);LEARN.rec=false;
+      if(LEARN.done.length===sc.to-sc.from+1){const t=Math.round((Date.now()-LEARN.t0)/1000),all=ordBest(),old=all[sc.k];
+        if(!old||t<old.t){all[sc.k]={t,errs:LEARN.errs};store.set("vjb_ord_best",all);LEARN.rec=true;
+          if(GROUPS_ON)MYGROUPS.forEach(g=>postResult(g.id,"o"+sc.k,"satte "+sc.name+" i ordning på "+t+" s"+(LEARN.errs?" ("+LEARN.errs+" fel)":" utan fel")+" 📚"));}}
+      renderLearn();}
     else{LEARN.errs++;pb.classList.remove("bad");void pb.offsetWidth;pb.classList.add("bad");toast("Inte än – "+esc(BOOKS[b])+" kommer senare");}
     return;}
   if(e.target.closest("#ramsaPlay")){let i=0;const step=()=>{document.querySelectorAll("#ramsaSay span,#ramsaMap i").forEach(x=>x.classList.toggle("hl",+x.dataset.ri===i));if(i<RAMSA.length){i++;setTimeout(step,850);}};step();return;}
-  const bk=e.target.closest("button[data-bk]");if(bk){const i=+bk.dataset.bk,info=BOOKINFO[i];
-    $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span><b>Kapitel</b><span>"+DATA.counts[i].length+"</span><b>Plats</b><span>Bok "+(i+1)+" av 66</span></div>"+
-      "<a class='btn' href='"+ytOverview(i)+"' target='_blank' rel='noopener'>▶ Kort film om boken (BibleProject)</a><a class='btn ghost' href='"+yvUrl(i,1)+"' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
-    $("ctxModal").classList.add("on");}
+  const qa=e.target.closest("button[data-qa]");if(qa&&QZ.pick===null){QZ.pick=+qa.dataset.qa;QZ.ans.push(QZ.pick===QZ.qs[QZ.i].a);renderLearn();return;}
+  if(e.target.closest("#qzNext")){QZ.i++;QZ.pick=null;renderLearn();return;}
+  if(e.target.closest("#qzAgain")){newQuiz();renderLearn();return;}
+  const bk=e.target.closest("button[data-bk]");if(bk){openBook(+bk.dataset.bk);return;}
 });
 
 /* ===== BJUD IN FLER ===== */
