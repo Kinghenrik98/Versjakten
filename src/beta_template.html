@@ -212,6 +212,23 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .week i.t{background:var(--accent);color:#1c160d;font-weight:800;font-size:14px}
 .week div.today{color:var(--text);font-weight:700}
 .bigbtn{display:block;width:100%;border:none;background:linear-gradient(160deg,#e0b066,#c48c3e);color:#1c160d;border-radius:18px;padding:18px;text-align:center;font-family:var(--serif);font-size:22px;font-weight:800}
+.home2 .streakbig{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 0}
+.home2 .streakbig .n{font-size:28px}
+.home2 .streakbig .l{margin:0;font-size:13px}
+.home2 .week{margin:8px 0 14px}
+.home2 .week i{aspect-ratio:auto;height:24px;border-radius:7px;font-size:12px}
+.bigbtn.grp{padding:34px 16px 26px}
+.bigbtn .kick{display:block;font-family:var(--sans);font-size:11.5px;letter-spacing:1.5px;font-weight:700;opacity:.7;margin-bottom:6px}
+.bigbtn .gname{display:block;font-size:40px;line-height:1.05}
+.bigbtn.grp small{font-size:15px;color:#1c160d;opacity:.8}
+.bigbtn .pill{display:inline-block;margin-top:12px;padding:6px 12px;border-radius:999px;background:#1c160d1f;font-family:var(--sans);font-size:13px;font-weight:700}
+.sv3{margin:6px 0 2px;padding:7px 10px;border-radius:10px;background:#1f2a1c;border:1px solid #3f5f37;font-size:13px;color:var(--text)}
+.chatcard{margin-top:14px;border:2px solid var(--accent);border-radius:16px;padding:12px;background:var(--panel)}
+.chatcard .ch{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;margin-bottom:8px}
+.chatcard .nb{margin-left:auto;background:var(--accent);color:#1c160d;border-radius:999px;padding:2px 9px;font-size:12px}
+.chatcard .pm{background:var(--cell);border-radius:12px 12px 12px 4px;padding:7px 10px;font-size:13.5px;margin-top:6px}
+.chatcard .pm b{color:var(--accent);font-size:12.5px;display:block}
+.intro ol{padding-left:20px;line-height:1.55}
 .bigbtn small{display:block;font-family:var(--sans);font-size:12.5px;font-weight:600;opacity:.8;margin-top:3px}
 .vswitch{display:flex;gap:4px;justify-content:center;margin:10px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;width:max-content}
 .vswitch a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:999px}
@@ -515,6 +532,17 @@ body.nav-on .navback{visibility:hidden}
   <button class="btn ghost" data-close>Tillbaka</button>
 </div></div>
 
+<div class="modal" id="introModal"><div class="sheet intro">
+  <h2>Gissa – slå inte upp!</h2>
+  <p>Du får se en bibelvers. Din uppgift är att <b>gissa var den står</b>: bok, kapitel och vers. Det är meningen att du inte ska veta – det är så man lär sig.</p>
+  <ol>
+    <li>Välj en bok och skriv kapitel och vers.</li>
+    <li>Färger och pilar visar hur nära du är.</li>
+    <li>5 försök per vers.</li>
+  </ol>
+  <p class="mut">Ingen aning? Gissa ändå. Du får se rätt svar efteråt och kan läsa hela kapitlet.</p>
+  <button class="btn" data-close>Jag förstår – kör!</button>
+</div></div>
 <div class="modal" id="infoModal"><div class="sheet">
   <h2>Så spelar du</h2>
   <p>Varje dag kommer <b>tre nya verser</b>, samma för alla. Gissa <b>bok, kapitel och vers</b> på 5 försök per vers.</p>
@@ -547,6 +575,7 @@ const IS_BETA = __IS_BETA__;
 const GROUPS_ON = true; // gruppsida, chatt, gruppverser – ute i båda versionerna
 const AD_HTML = IS_BETA?"<div class='ad' style='margin-top:12px'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>":"";
 const BADGE = IS_BETA?"<i class='beta'>BETA</i>":"";
+if(IS_BETA)document.getElementById("s-home").classList.add("home2");
 if(!IS_BETA){document.title="Versjakten";document.querySelectorAll("h1 .beta").forEach(e=>e.remove());const tn=document.getElementById("testNote");if(tn)tn.remove();}
 /* ========================= */
 const DATA = __DATA__;
@@ -777,9 +806,29 @@ function renderHome(){
     gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
   else gr.style.display="none";
   $("churchRow").style.display=!ME.church_id&&!store.get("vjb_church_ask")?"":"none";
+  const pc=$("playCard");pc.classList.remove("grp");delete pc.dataset.gid;
+  const hg=homeGroup();
+  if(hg){const g=grpInfo(hg),gn=gCount(hg),gdone=gDone(hg),mem=grpMembers(hg);
+    const played=new Set();SCORES.forEach(s=>{if(s.day===TODAY)played.add(s.profile_id);});GSCORES.forEach(s=>{if(s.group_id===hg&&s.day===TODAY)played.add(s.profile_id);});if(gn)played.add(ME.id);
+    const pl=mem.filter(id=>played.has(id)).length,cr=crownInfo(hg);
+    const sub=gdone?"Klart ✓ · "+gTotal(hg)+" p · "+(unread(hg)?"nya meddelanden i chatten":"till chatten"):gn?"Fortsätt · "+gn+" av 5 klara":"Dagens 5 verser";
+    pc.classList.add("grp");pc.dataset.gid=hg;
+    pc.innerHTML="<span class='kick'>SPELA MED DIN GRUPP</span><span class='gname'>"+esc(g.name)+"</span><small>"+sub+"</small><span class='pill'>"+(cr&&cr.day===TODAY?esc(pName(cr.id))+" leder · ":"")+pl+" av "+mem.length+" har spelat</span>";
+    gr.style.display="none";}
+}
+function homeGroup(){ // betan: senast spelade grupp, annars första
+  if(!IS_BETA||!GROUPS_ON||!MYGROUPS.length)return null;
+  const last=store.get("vjb_lastgroup");return MYGROUPS.some(g=>g.id===last)?last:MYGROUPS[0].id;
+}
+function maybeIntro(){ // förklaring första gången (bara betan, bara helt nya spelare)
+  if(!IS_BETA||store.get("vjb_intro"))return;store.set("vjb_intro",1);
+  if(st.done||st.guesses.length||myScores().length)return;
+  $("introModal").classList.add("on");
 }
 $("churchRow").onclick=()=>{EDIT=true;go("onboard");};
-$("playCard").onclick=()=>{ if(allDone()) openRes(); else go("play"); };
+$("playCard").onclick=()=>{const gid=$("playCard").dataset.gid;
+  if(gid){const g=+gid;if(gDone(g))openGroup(g,"chat");else loadGroupRound(g,gFirstOpen(g));return;}
+  if(allDone()) openRes(); else go("play"); };
 $("maraRow").onclick=()=>go("mara");
 $("groupRow").onclick=()=>{const sc=$("groupRow").dataset.scope;if(GROUPS_ON&&sc.startsWith("g")){openGroup(+sc.slice(1),unread(+sc.slice(1))?"chat":"verses");return;}BOARD.scope=sc;BOARD.period="day";BOARD.back="home";go("board");};
 
@@ -912,7 +961,7 @@ $("playHome").onclick=()=>{if(MODE==="group")openGroup(GID,"verses");else go("ho
 function loadRound(r){
   MODE="day";setPlayHeader();
   R=r;ANS=ansFor(r);st=loadSt(r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
-  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();maybeIntro();
   if(st.done)finish(false);else{$("controls").style.display="";$("donebar").style.display="none";}
   fitVerse();
 }
@@ -922,10 +971,11 @@ function finish(fresh){
   const cheer=st.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][st.guesses.length-1]:"Inte den här gången.";
   let h="<div class='l1'>"+cheer+" "+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
   h+=done?"<div class='l2'>Dagens total <b>"+dayTotal()+" p</b> · Nya verser om <b class='cd'></b></div>":"<div class='l2'>Dagens total hittills <b>"+dayTotal()+" p</b></div>";
-  h+="<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(done?"<button class='btn' id='resBtn'>Resultat</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
+  h+="<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(done&&homeGroup()&&!gDone(homeGroup())?"<button class='btn' id='toGrpBtn'>Fortsätt med gruppen →</button>":done?"<button class='btn' id='resBtn'>Resultat</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
   d.innerHTML=h;
   $("ctxBtn").onclick=()=>openCtx(ANS);
-  if(done)$("resBtn").onclick=openRes;else $("nextBtn").onclick=()=>loadRound(firstOpen());
+  if($("toGrpBtn")){const g=homeGroup();$("toGrpBtn").onclick=()=>loadGroupRound(g,gFirstOpen(g));}
+  else if(done)$("resBtn").onclick=openRes;else $("nextBtn").onclick=()=>loadRound(firstOpen());
   tick();fitVerse();
   saveScores();
   if(GROUPS_ON&&fresh&&done)MYGROUPS.forEach(g=>postResult(g.id,"d","klarade dagens 3 verser: "+dayTotal()+" p ("+[0,1,2].map(r=>loadSt(r).points).join("·")+")"));
@@ -1435,10 +1485,10 @@ async function postResult(gid,kind,text){ // automatiskt resultatinlägg, en gå
 }
 /* --- spela gruppverser --- */
 function loadGroupRound(gid,r){
-  MODE="group";GID=gid;SCREEN="play";
+  MODE="group";GID=gid;SCREEN="play";if(IS_BETA)store.set("vjb_lastgroup",gid);
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-play"));document.body.classList.remove("nav-on");
   setPlayHeader();R=r;ANS=verseObj(groupVerses(gid)[r]);st=gLoad(gid,r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
-  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();maybeIntro();
   if(st.done)groupRoundDone(false);else{$("controls").style.display="";$("donebar").style.display="none";}
   fitVerse();
 }
@@ -1447,7 +1497,8 @@ function groupRoundDone(fresh){
   const d=$("donebar");d.style.display="block";const all=gDone(GID);
   const cheer=st.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][st.guesses.length-1]:"Inte den här gången.";
   d.innerHTML="<div class='l1'>"+cheer+" "+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div><div class='l2'>Gruppens verser "+gCount(GID)+"/5 · <b>"+gTotal(GID)+" p</b></div>"+
-    "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(all?"<button class='btn' id='gResBtn'>Topplistan</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
+    (IS_BETA&&R===ROUNDS-1&&allDone()?"<div class='sv3'>✓ <b>"+dayTotal()+" p</b> till Sverigetoppen. Nu 2 extra för gruppen!</div>":"")+
+    "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(all?"<button class='btn' id='gResBtn'>"+(IS_BETA?"Resultat & chatt":"Topplistan")+"</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
   $("ctxBtn").onclick=()=>openCtx(ANS);
   if(all)$("gResBtn").onclick=()=>openGroupResult();else $("nextBtn").onclick=()=>loadGroupRound(GID,gFirstOpen(GID));
   fitVerse();saveGroupScores(GID);
@@ -1468,8 +1519,13 @@ function openGroupResult(){
   const g=grpInfo(GID),t=gTotal(GID),rows=gRows(GID,TODAY,TODAY,true),me=rows.findIndex(r=>ME&&r.id===ME.id);
   $("resBody").innerHTML="<div class='res'><h2>"+esc((g.emoji||"👥")+" "+g.name)+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 250 · "+(me>=0?"du är "+(me+1)+":a av "+rows.length+" idag":"")+"</div></div>"+
     "<div class='sec'>Topplistan idag · alla 5 verser</div>"+rowsTable(rows,true,weekKing(GID))+
-    "<button class='btn' id='gToChat'>💬 Till gruppchatten</button><button class='btn ghost' id='gToGroup'>Till gruppen</button>";
+    (IS_BETA?"<div class='chatcard' id='gChatCard'><div class='ch'>💬 Gruppens chatt"+(unread(GID)?"<span class='nb'>nytt</span>":"")+"</div><div id='gChatPrev' class='mut' style='font-size:13px'>Laddar…</div><button class='btn' id='gToChat'>Skriv i chatten</button></div>":"<button class='btn' id='gToChat'>💬 Till gruppchatten</button>")+
+    "<button class='btn ghost' id='gToGroup'>Till gruppen</button>";
   $("resModal").classList.add("on");
+  if(IS_BETA&&DB_ON&&ME){const gid=GID;rpc("get_messages",{p_code:ME.code,p_group:gid}).then(m=>{const el=$("gChatPrev");if(!el||GID!==gid)return;
+    const last=m.filter(x=>x.kind!=="result").slice(-3);
+    el.outerHTML=last.length?last.map(x=>"<div class='pm'><b>"+esc(pName(x.profile_id))+"</b>"+esc(x.body.length>90?x.body.slice(0,90)+"…":x.body)+"</div>").join(""):"<div class='mut' style='font-size:13px'>Ingen har skrivit idag än – säg något om dagens verser!</div>";
+  }).catch(()=>{const el=$("gChatPrev");if(el)el.remove();});}
   $("gToChat").onclick=()=>{$("resModal").classList.remove("on");openGroup(GID,"chat");};
   $("gToGroup").onclick=()=>{$("resModal").classList.remove("on");openGroup(GID,"verses");};
 }
