@@ -279,9 +279,12 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);vertical-align:2px;margin-left:2px}
 #nav button.dot{position:relative}#nav button.dot::after{content:"";position:absolute;top:2px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid #181411}
 /* utbildning */
-.lrn-tabs{display:flex;gap:6px;margin:12px 0 10px}
-.lrn-tabs button{flex:1;height:36px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font-size:13.5px}
-.lrn-tabs button.on{background:var(--accent);border-color:var(--accent);color:#1c160d;font-weight:700}
+.lrn-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 14px}
+.lrn-tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px 10px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;font-weight:700}
+.lrn-tabs button .li{font-size:28px;line-height:1}
+.lrn-tabs button small{font-size:11px;font-weight:500;color:var(--muted);line-height:1.25}
+.lrn-tabs button.on{background:linear-gradient(160deg,#e0b066,#c48c3e);border-color:var(--accent);color:#1c160d}
+.lrn-tabs button.on small{color:#1c160d;opacity:.75}
 .bklist{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .bklist button{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:9px 10px;text-align:left;font-size:13.5px}
 .bklist.nt button{border-left-color:var(--green)}
@@ -400,7 +403,7 @@ body.nav-on .navback{visibility:hidden}
     <button class="iconbtn ghost"></button>
   </header>
   <div class="scroll">
-    <div class="lrn-tabs" id="lrnTabs"><button data-l="order" class="on">Ordningen</button><button data-l="books">Böckerna</button><button data-l="tips">Fördjupning</button></div>
+    <div class="lrn-tabs" id="lrnTabs"><button data-l="order" class="on"><span class="li">🔢</span>Ordningen<small>Lär dig böckernas ordning</small></button><button data-l="books"><span class="li">📚</span>Böckerna<small>Fakta och film om alla 66</small></button><button data-l="tips"><span class="li">🎓</span>Fördjupning<small>Appar, kurser och filmer</small></button></div>
     <div id="learnBody"></div>
   </div>
 </section>
