@@ -826,7 +826,7 @@ function maybeIntro(){ // förklaring första gången (bara betan, bara helt nya
   if(st.done||st.guesses.length||myScores().length)return;
   $("introModal").classList.add("on");
 }
-if(IS_BETA){const t=$("tipRow"),ua=navigator.userAgent;t.style.display="";
+{const t=$("tipRow"),ua=navigator.userAgent;t.style.display="";
   t.href=/android/i.test(ua)?"https://play.google.com/store/search?q=Svenska%20K%C3%A4rnbibeln&c=apps":/iphone|ipad|ipod/i.test(ua)?"https://apps.apple.com/se/app/svenska-k%C3%A4rnbibeln/id6443848205":"https://www.karnbibeln.se";}
 $("churchRow").onclick=()=>{EDIT=true;go("onboard");};
 $("playCard").onclick=()=>{const gid=$("playCard").dataset.gid;
