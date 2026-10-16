@@ -229,6 +229,23 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .chatcard .pm{background:var(--cell);border-radius:12px 12px 12px 4px;padding:7px 10px;font-size:13.5px;margin-top:6px}
 .chatcard .pm b{color:var(--accent);font-size:12.5px;display:block}
 .intro ol{padding-left:20px;line-height:1.55}
+.home3 .streakbig{justify-content:flex-start;margin:10px 0 0}
+.home3 .streakbig .n{font-size:20px}.home3 .streakbig .l{font-size:13px}
+.home3 .week{margin:6px 0 16px;gap:5px}
+.home3 .week div{font-size:0;max-width:none}
+.home3 .week i{height:6px;border-radius:3px;font-size:0;margin:0;border:none!important;background:var(--cell)}
+.home3 .week i.f{background:#f08a3c}.home3 .week i.t{background:var(--accent)}
+.home3 .bigbtn.grp{text-align:left;padding:24px 22px}
+.home3 .bigbtn .gname{font-size:44px}
+.home3 .bigbtn .brow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+.home3 .bigbtn .brow small{margin:0;font-size:15px}
+.home3 .bigbtn .gochat{flex:none;padding:9px 14px;border-radius:999px;background:#1c160d;color:var(--accent);font-family:var(--sans);font-size:14px;font-weight:700}
+.moreh{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 8px}.moreh b{font-size:17px}.moreh span{font-size:12.5px;color:var(--muted)}
+.more{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;margin:0 -16px;padding:0 16px 6px;scrollbar-width:none}
+.more::-webkit-scrollbar{display:none}
+#moreRow button{flex:none;width:148px;height:160px;box-sizing:border-box;padding:16px!important;scroll-snap-align:start;border-radius:20px;background:var(--panel);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;color:var(--text)}
+#moreRow button .mi{font-size:30px;line-height:1}.more button b{display:block;font-size:17px}.more button small{color:var(--muted);font-size:13px}
+.home3 #tipRow{margin-top:16px;padding:18px 16px;font-size:16px}.home3 #tipRow .ic{font-size:34px}
 .bigbtn small{display:block;font-family:var(--sans);font-size:12.5px;font-weight:600;opacity:.8;margin-top:3px}
 .vswitch{display:flex;gap:4px;justify-content:center;margin:10px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;width:max-content}
 .vswitch a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:999px}
@@ -361,6 +378,7 @@ body.nav-on .navback{visibility:hidden}
     <div class="streakbig" id="streakBig"></div>
     <div class="week" id="week"></div>
     <button class="bigbtn" id="playCard"></button>
+    <div id="moreWrap" style="display:none"><div class="moreh"><b>Mer att göra</b><span>svep →</span></div><div class="more" id="moreRow"></div></div>
     <button class="mrow" id="maraRow"></button>
     <button class="mrow" id="groupRow" style="display:none"></button>
     <a class="mrow" id="tipRow" target="_blank" rel="noopener" style="display:none;text-decoration:none"><span class="ic">📱</span><span><small class="mut" style="font-size:11px;letter-spacing:1px">TIPS</small><br>Läs Bibeln i <b>Kärnbibeln</b>-appen – gratis och med förklaringar</span><span class="arr">›</span></a>
@@ -595,6 +613,7 @@ const GROUPS_ON = true; // gruppsida, chatt, gruppverser – ute i båda version
 const AD_HTML = IS_BETA?"<div class='ad' style='margin-top:12px'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>":"";
 const BADGE = IS_BETA?"<i class='beta'>BETA</i>":"";
 if(GROUP_FIRST)document.getElementById("s-home").classList.add("home2");
+if(IS_BETA)document.getElementById("s-home").classList.add("home3");
 if(!IS_BETA){document.title="Versjakten";document.querySelectorAll("h1 .beta").forEach(e=>e.remove());const tn=document.getElementById("testNote");if(tn)tn.remove();}
 /* ========================= */
 const DATA = __DATA__;
@@ -824,6 +843,11 @@ function renderHome(){
   else if(r.total){gr.style.display="";gr.dataset.scope=pick.key;
     gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
   else gr.style.display="none";
+  if(IS_BETA){const run2=store.get("vjb_mara"),wb=weekBook();$("maraRow").style.display="none";$("moreWrap").style.display="";
+    $("moreRow").innerHTML="<button data-more='mara'><span class='mi'>🏃</span><span><b>Maraton</b><small>"+(run2&&!run2.over&&run2.n>0?"Fortsätt · "+run2.n+" i rad":best?"Rekord "+best:"Hur många i rad?")+"</small></span></button>"+
+      "<button data-more='week'><span class='mi'>📖</span><span><b>Veckans bok</b><small>"+esc(BOOKS[wb])+"</small></span></button>"+
+      "<button data-more='quiz'><span class='mi'>❓</span><span><b>Snabbquiz</b><small>5 frågor"+(store.get("vjb_quiz_best")?" · rekord "+store.get("vjb_quiz_best")+"/5":"")+"</small></span></button>"+
+      "<button data-more='order'><span class='mi'>🔢</span><span><b>Ordningen</b><small>Sätt böckerna i ordning</small></span></button>";}
   $("churchRow").style.display=!ME.church_id&&!store.get("vjb_church_ask")?"":"none";
   const pc=$("playCard");pc.classList.remove("grp");delete pc.dataset.gid;
   const hg=homeGroup();
@@ -832,7 +856,9 @@ function renderHome(){
     const pl=mem.filter(id=>played.has(id)).length,cr=crownInfo(hg);
     const sub=gdone?"Klart ✓ · "+gTotal(hg)+" p · "+(unread(hg)?"nya meddelanden i chatten":"till chatten"):gn?"Fortsätt · "+gn+" av 5 klara":"Dagens 5 verser";
     pc.classList.add("grp");pc.dataset.gid=hg;
-    pc.innerHTML="<span class='kick'>SPELA MED DIN GRUPP</span><span class='gname'>"+esc(g.name)+"</span><small>"+sub+"</small><span class='pill'>"+(cr&&cr.day===TODAY?esc(pName(cr.id))+" leder · ":"")+pl+" av "+mem.length+" har spelat</span>";
+    if(IS_BETA){const n2=unread(hg)?" · nytt":"";
+      pc.innerHTML="<span class='kick'>DIN GRUPP</span><span class='gname'>"+esc(g.name)+"</span><span class='brow'><small>"+(gdone?"Klart ✓ "+gTotal(hg)+" p":gn?"Fortsätt · "+gn+" av 5":"Dagens 5 verser")+"</small><span class='gochat' data-chat='1'>"+(gdone?"Till chatten"+n2:"Spela →")+"</span></span><small style='margin-top:8px'>"+(cr&&cr.day===TODAY?esc(pName(cr.id))+" leder · ":"")+pl+" av "+mem.length+" har spelat</small>";}
+    else pc.innerHTML="<span class='kick'>SPELA MED DIN GRUPP</span><span class='gname'>"+esc(g.name)+"</span><small>"+sub+"</small><span class='pill'>"+(cr&&cr.day===TODAY?esc(pName(cr.id))+" leder · ":"")+pl+" av "+mem.length+" har spelat</span>";
     gr.style.display="none";}
 }
 function homeGroup(){ // betan: senast spelade grupp, annars första
@@ -847,10 +873,14 @@ function maybeIntro(){ // förklaring första gången (bara betan, bara helt nya
 {const t=$("tipRow"),ua=navigator.userAgent;t.style.display="";
   t.href=/android/i.test(ua)?"https://play.google.com/store/search?q=Svenska%20K%C3%A4rnbibeln&c=apps":/iphone|ipad|ipod/i.test(ua)?"https://apps.apple.com/se/app/svenska-k%C3%A4rnbibeln/id6443848205":"https://www.karnbibeln.se";}
 $("churchRow").onclick=()=>{EDIT=true;go("onboard");};
-$("playCard").onclick=()=>{const gid=$("playCard").dataset.gid;
-  if(gid){const g=+gid;if(gDone(g))openGroup(g,"chat");else loadGroupRound(g,gFirstOpen(g));return;}
+$("playCard").onclick=e=>{const gid=$("playCard").dataset.gid;
+  if(gid){const g=+gid;if(e&&e.target.closest("[data-chat]")&&gDone(g)){openGroup(g,"chat");return;}if(gDone(g))openGroup(g,"chat");else loadGroupRound(g,gFirstOpen(g));return;}
   if(allDone()) openRes(); else go("play"); };
 $("maraRow").onclick=()=>go("mara");
+$("moreRow").onclick=e=>{const b=e.target.closest("button[data-more]");if(!b)return;const k=b.dataset.more;
+  if(k==="mara"){go("mara");return;}
+  if(k==="week"){LEARN.tab="books";go("learn");openBook(weekBook());return;}
+  LEARN.tab=k;go("learn");};
 $("groupRow").onclick=()=>{const sc=$("groupRow").dataset.scope;if(GROUPS_ON&&sc.startsWith("g")){openGroup(+sc.slice(1),unread(+sc.slice(1))?"chat":"verses");return;}BOARD.scope=sc;BOARD.period="day";BOARD.back="home";go("board");};
 
 /* ===== SPELET ===== */
