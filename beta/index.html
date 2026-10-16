@@ -685,7 +685,7 @@ const skey=(r,day=TODAY)=>"vjb_game_"+day+"_"+r;
 const loadSt=r=>store.get(skey(r))||{guesses:[],done:false,saved:false};
 let R=0, ANS=ansFor(0), st=loadSt(0), cur={b:null,d:""}, busy=false;
 let MODE="day", RUN=null; // RUN = maraton {n, used:[index], cur:index, st:{guesses,done,won}, over}
-function saveSt(){ if(MODE==="mara"){RUN.st=st;store.set("vjb_mara",RUN);} else if(MODE==="group") store.set(gkey(GID,R),st); else store.set(skey(R),st); }
+function saveSt(){ if(MODE==="mara"){RUN.st=st;store.set("vjb_mara",RUN);} else if(MODE==="group") store.set(R<ROUNDS?skey(R):gkey(GID,R),st); else store.set(skey(R),st); }
 
 function score(g,a=ANS){
   const ad=(pad2(a.c)+pad2(a.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
@@ -1318,9 +1318,9 @@ const GROUND=5;
 let GID=null, GRP={tab:"verses",btab:"g"}, GSCORES=[], GACT={}, CHAT={msgs:[],gid:null,prayer:false,pick:null}, chatTimer=null;
 function hstr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}h^=h>>>16;h=Math.imul(h,0x85ebca6b);h^=h>>>13;h=Math.imul(h,0xc2b2ae35);h^=h>>>16;return h>>>0}
 function dayIdx(day){const dn=dayNum(day)-dayNum(START_DAY);return [0,1,2].map(r=>((dn*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length)}
-function groupVerses(gid,day=TODAY){const ban=new Set(dayIdx(day)),out=[];let k=0;while(out.length<GROUND){const i=hstr(gid+"|"+day+"|"+k)%VERSES.length;k++;if(!ban.has(i)&&!out.includes(i))out.push(i);}return out}
+function groupVerses(gid,day=TODAY){const pub=dayIdx(day),ban=new Set(pub),out=pub.slice();let k=0;while(out.length<GROUND){const i=hstr(gid+"|"+day+"|"+k)%VERSES.length;k++;if(!ban.has(i)&&!out.includes(i))out.push(i);}return out}
 const gkey=(gid,r,day=TODAY)=>"vjb_g"+gid+"_"+day+"_"+r;
-const gLoad=(gid,r)=>store.get(gkey(gid,r))||{guesses:[],done:false,saved:false};
+const gLoad=(gid,r)=>r<ROUNDS?loadSt(r):(store.get(gkey(gid,r))||{guesses:[],done:false,saved:false});
 function gDone(gid){for(let r=0;r<GROUND;r++)if(!gLoad(gid,r).done)return false;return true}
 function gCount(gid){let n=0;for(let r=0;r<GROUND;r++)if(gLoad(gid,r).done)n++;return n}
 function gTotal(gid){let t=0;for(let r=0;r<GROUND;r++){const x=gLoad(gid,r);if(x.done)t+=x.points;}return t}
@@ -1339,17 +1339,21 @@ function unread(gid){const a=GACT[gid];return a&&a.last_id&&a.last_id>(store.get
 function updateBadges(){const n=MYGROUPS.filter(g=>unread(g.id)).length;const b=document.querySelector('#nav [data-nav="groups"]');if(b)b.classList.toggle("dot",IS_BETA&&n>0);}
 function gRows(gid,from,to,local){ // summerar gruppverser per person
   const set=new Set(grpMembers(gid)),agg={};
-  GSCORES.forEach(s=>{if(s.group_id!==gid||s.day<from||s.day>to||!set.has(s.profile_id))return;const a=agg[s.profile_id]||(agg[s.profile_id]={id:s.profile_id,pts:0,n:0,parts:Array(GROUND).fill(null)});a.pts+=s.points;a.n++;if(s.day===TODAY)a.parts[s.round-1]=s.points;});
-  if(local&&ME&&TODAY>=from&&TODAY<=to){const a=agg[ME.id]||(agg[ME.id]={id:ME.id,pts:0,n:0,parts:Array(GROUND).fill(null)});
+  const add=(pid,day,round,pts)=>{if(day<from||day>to||!set.has(pid))return;const a=agg[pid]||(agg[pid]={id:pid,pts:0,n:0,parts:Array(GROUND).fill(null)});a.pts+=pts;a.n++;if(day===to)a.parts[round-1]=pts;};
+  SCORES.forEach(s=>add(s.profile_id,s.day,s.round,s.points));
+  GSCORES.forEach(s=>{if(s.group_id===gid&&s.round>ROUNDS)add(s.profile_id,s.day,s.round,s.points);});
+  if(local&&ME&&to===TODAY){const a=agg[ME.id]||(agg[ME.id]={id:ME.id,pts:0,n:0,parts:Array(GROUND).fill(null)});
     for(let r=0;r<GROUND;r++){const x=gLoad(gid,r);if(x.done&&a.parts[r]===null){a.parts[r]=x.points;a.pts+=x.points;a.n++;}}}
   return Object.values(agg).sort((a,b)=>b.pts-a.pts);
 }
 function gStreak(gid){ // dagar i rad där minst 2 i gruppen spelade gruppverserna
-  const per={};GSCORES.forEach(s=>{if(s.group_id!==gid)return;(per[s.day]=per[s.day]||new Set()).add(s.profile_id);});
+  const per={},mem=new Set(grpMembers(gid));GSCORES.forEach(s=>{if(s.group_id!==gid)return;(per[s.day]=per[s.day]||new Set()).add(s.profile_id);});
+  SCORES.forEach(s=>{if(mem.has(s.profile_id))(per[s.day]=per[s.day]||new Set()).add(s.profile_id);});
   if(ME&&gCount(gid))(per[TODAY]=per[TODAY]||new Set()).add(ME.id);
   const ok=d=>per[d]&&per[d].size>=2;let n=0,d=ok(TODAY)?TODAY:addDays(TODAY,-1);while(ok(d)){n++;d=addDays(d,-1);}return n;
 }
-function weekKing(gid){const r=gRows(gid,weekStart(TODAY),TODAY,true);return r.length&&r[0].pts>0?r[0].id:null}
+function crownInfo(gid){for(let i=0;i<14;i++){const d=addDays(TODAY,-i);const r=gRows(gid,d,d,i===0);if(r.length&&r[0].pts>0)return {id:r[0].id,day:d,pts:r[0].pts};}return null}
+function weekKing(gid){const c=crownInfo(gid);return c?c.id:null}
 function pName(id){const p=PROFILES[id]||(ME&&id===ME.id?ME:null);return p?p.name:"?"}
 function pEmoji(id){const p=PROFILES[id]||(ME&&id===ME.id?ME:null);return (p&&p.emoji)||"🙂"}
 function rowsTable(rows,parts,crown){
@@ -1366,21 +1370,21 @@ function renderGroupPage(){
 }
 function renderGroupVerses(){
   const n=gCount(GID),done=n===GROUND,st2=gStreak(GID),king=weekKing(GID);
-  let h="<div class='gstats'><div><b>🔥 "+st2+"</b><span>gruppens eld</span></div><div><b>"+(king?esc(pEmoji(king)):"–")+"</b><span>"+(king?"👑 "+esc(pName(king))+" leder veckan":"ingen kung än")+"</span></div><div><b>"+grpMembers(GID).length+"</b><span>medlemmar</span></div></div>";
-  h+="<button class='bigbtn' id='gPlay' style='margin-top:12px'>"+(done?"Gruppens verser klara ✓":n?"Fortsätt gruppens verser":"Spela gruppens 5 verser")+"<small>"+(done?gTotal(GID)+" p av 250 · se topplistan":n+" av 5 klar · samma 5 verser för alla i gruppen")+"</small></button>";
+  let h="<div class='gstats'><div><b>🔥 "+st2+"</b><span>gruppens eld</span></div><div><b>"+(king?esc(pEmoji(king)):"–")+"</b><span>"+(king?"👑 "+esc(pName(king))+(crownInfo(GID).day===TODAY?" leder idag":" vann igår"):"ingen krona än")+"</span></div><div><b>"+grpMembers(GID).length+"</b><span>medlemmar</span></div></div>";
+  h+="<button class='bigbtn' id='gPlay' style='margin-top:12px'>"+(done?"Gruppens verser klara ✓":n?"Fortsätt gruppens verser":"Spela gruppens 5 verser")+"<small>"+(done?gTotal(GID)+" p av 250 · se topplistan":n+" av 5 klar · dagens 3 + 2 extra för gruppen")+"</small></button>";
   h+="<div class='gdots'>"+Array.from({length:GROUND},(_,r)=>{const x=gLoad(GID,r);return "<i class='"+(x.done?(x.won?"w":"l"):"")+"'>"+(x.done?x.points:r+1)+"</i>";}).join("")+"</div>";
-  if(n){h+="<div class='sec'>Idag · gruppens verser</div>"+rowsTable(gRows(GID,TODAY,TODAY,true),true);}
-  h+="<p class='mut' style='font-size:12px;margin-top:12px'>🔥 Gruppens eld växer varje dag minst två i gruppen spelar gruppverserna. 👑 Den som har flest gruppverspoäng under veckan blir veckans kung.</p>";
+  if(n){h+="<div class='sec'>Idag · alla 5 verser</div>"+rowsTable(gRows(GID,TODAY,TODAY,true),true,king);}
+  h+="<p class='mut' style='font-size:12px;margin-top:12px'>De tre första är samma som dagens verser för alla, sedan kommer två extra bara för gruppen. 👑 Kronan går till den som är bäst för dagen och flyttas när någon annan vinner en dag. 🔥 Gruppens eld växer varje dag minst två i gruppen spelar.</p>";
   h+="<button class='btn ghost' id='gInviteBtn'>📨 Bjud in till gruppen</button>";
   $("grpBody").innerHTML=h;
   $("gPlay").onclick=()=>{if(done){GRP.tab="board";GRP.btab="g";renderGroupPage();}else loadGroupRound(GID,gFirstOpen(GID));};
   $("gInviteBtn").onclick=()=>openShare(GID);
 }
 function renderGroupBoard(){
-  const segs=[["g","Gruppverser"],["d","Dagens 3"],["w","Veckan"]];
+  const segs=[["g","Idag (5)"],["d","Dagens 3"],["w","Veckan"]];
   let h="<div class='tabs' id='gbTabs' style='margin-top:4px'>"+segs.map(([k,l])=>"<button data-b='"+k+"' class='"+(GRP.btab===k?"on":"")+"'>"+l+"</button>").join("")+"</div>";
   if(GRP.btab==="g")h+=rowsTable(gRows(GID,TODAY,TODAY,true),true,weekKing(GID));
-  else if(GRP.btab==="w")h+=rowsTable(gRows(GID,weekStart(TODAY),TODAY,true),false,weekKing(GID))+"<p class='mut' style='font-size:12px'>Summan av gruppverserna sedan måndag.</p>";
+  else if(GRP.btab==="w")h+=rowsTable(gRows(GID,weekStart(TODAY),TODAY,true),false,weekKing(GID))+"<p class='mut' style='font-size:12px'>Summan av alla 5 verser per dag sedan måndag.</p>";
   else{const rows=aggregate("g"+GID,"day");h+=rowsTable(rows.map(r=>({...r,parts:r.parts})),true);}
   const mem=grpMembers(GID);
   h+="<div class='sec'>Medlemmar ("+mem.length+")</div><div class='card' style='padding:6px 12px'>"+mem.map(id=>{const played=GSCORES.some(s=>s.group_id===GID&&s.profile_id===id&&s.day===TODAY)||(ME&&id===ME.id&&gCount(GID));
@@ -1403,13 +1407,13 @@ function renderChat(){
   const meDone=gDone(GID)&&allDone();
   if(CHAT.gid!==GID){box.innerHTML="<div class='empty'>Laddar chatten…</div>";return;}
   if(!CHAT.msgs.length){box.innerHTML="<div class='empty'>Inga meddelanden än.<br>Säg hej, dela en tanke om dagens vers eller lägg upp ett böneämne 🙏</div>";return;}
-  let h="",lastDay="";
+  let h="",lastDay="";CHAT.king=weekKing(GID);
   CHAT.msgs.forEach(m=>{
     const day=sthlmDate(new Date(m.created_at));if(day!==lastDay){h+="<div class='cday'>"+(day===TODAY?"Idag":day===addDays(TODAY,-1)?"Igår":prettyDate(day))+"</div>";lastDay=day;}
     const mine=ME&&m.profile_id===ME.id,blur=m.spoiler&&!mine&&!meDone&&day===TODAY;
     const rx=Object.entries(m.reactions||{}).map(([e,who])=>"<button class='rx"+(ME&&who.includes(ME.id)?" me":"")+"' data-rx='"+e+"' data-m='"+m.id+"'>"+e+" "+who.length+"</button>").join("");
     if(m.kind==="result"){h+="<div class='cres' data-msg='"+m.id+"'>"+esc(pEmoji(m.profile_id)+" "+pName(m.profile_id))+" "+esc(m.body)+" <span class='ct'>"+fmtTime(m.created_at)+"</span><div class='rxs'>"+rx+"<button class='rx add' data-pick='"+m.id+"'>＋</button></div></div>";return;}
-    h+="<div class='cm"+(mine?" mine":"")+(m.kind==="prayer"?" pray":"")+"' data-msg='"+m.id+"'>"+(mine?"":"<span class='cav'>"+esc(pEmoji(m.profile_id))+"</span>")+"<div class='cb'>"+(mine?"":"<b>"+esc(pName(m.profile_id))+"</b>")+(m.kind==="prayer"?"<span class='ptag'>🙏 Böneämne</span>":"")+
+    h+="<div class='cm"+(mine?" mine":"")+(m.kind==="prayer"?" pray":"")+"' data-msg='"+m.id+"'>"+(mine?"":"<span class='cav'>"+esc(pEmoji(m.profile_id))+"</span>")+"<div class='cb'>"+(mine?"":"<b>"+esc(pName(m.profile_id))+(CHAT.king===m.profile_id?" 👑":"")+"</b>")+(m.kind==="prayer"?"<span class='ptag'>🙏 Böneämne</span>":"")+
       "<div class='ctext"+(blur?" blur' data-reveal='1' title='Tryck för att visa":"")+"'>"+esc(m.body)+"</div>"+(blur?"<div class='spo'>Kan avslöja dagens verser – tryck för att visa</div>":"")+
       "<div class='cmeta'><span class='ct'>"+fmtTime(m.created_at)+"</span><button class='rx add' data-pick='"+m.id+"'>＋</button></div>"+(rx||m.kind==="prayer"?"<div class='rxs'>"+(m.kind==="prayer"&&!(m.reactions&&m.reactions["🙏"]&&ME&&m.reactions["🙏"].includes(ME.id))?"<button class='rx pr' data-rx='🙏' data-m='"+m.id+"'>🙏 Jag ber för dig</button>":"")+rx+"</div>":"")+
       (CHAT.pick===m.id?"<div class='rpick'>"+REACTS.map(e=>"<button data-rx='"+e+"' data-m='"+m.id+"'>"+e+"</button>").join("")+(mine||grpInfo(GID).created_by===ME.id||(PROFILES[ME.id]&&PROFILES[ME.id].is_admin)?"<button class='del' data-del='"+m.id+"'>Ta bort</button>":"")+"</div>":"")+"</div></div>";
@@ -1446,12 +1450,14 @@ function groupRoundDone(fresh){
   $("ctxBtn").onclick=()=>openCtx(ANS);
   if(all)$("gResBtn").onclick=()=>openGroupResult();else $("nextBtn").onclick=()=>loadGroupRound(GID,gFirstOpen(GID));
   fitVerse();saveGroupScores(GID);
+  if(fresh&&R<ROUNDS&&allDone())MYGROUPS.forEach(g=>postResult(g.id,"d","klarade dagens 3 verser: "+dayTotal()+" p ("+[0,1,2].map(r=>loadSt(r).points).join("·")+")"));
   if(fresh&&all){const g=GID;setTimeout(()=>openGroupResult(),700);
     postResult(g,"g","klarade gruppens 5 verser: "+gTotal(g)+" p ("+Array.from({length:GROUND},(_,r)=>gLoad(g,r).points).join("·")+")");}
 }
 async function saveGroupScores(gid){
   if(!DB_ON||!ME)return;
-  for(let r=0;r<GROUND;r++){const s=gLoad(gid,r);if(!s.done||s.saved)continue;
+  saveScores();
+  for(let r=ROUNDS;r<GROUND;r++){const s=gLoad(gid,r);if(!s.done||s.saved)continue;
     try{await rpc("submit_group_score",{p_code:ME.code,p_group:gid,p_day:TODAY,p_round:r+1,p_attempts:s.guesses.length,p_solved:!!s.won,p_points:s.points,p_guesses:s.guesses.map(g=>({b:g.b,c:g.c,v:g.v}))});
       s.saved=true;store.set(gkey(gid,r),s);if(MODE==="group"&&r===R&&gid===GID)st.saved=true;
       if(!GSCORES.some(x=>x.group_id===gid&&x.profile_id===ME.id&&x.day===TODAY&&x.round===r+1))GSCORES.push({group_id:gid,profile_id:ME.id,day:TODAY,round:r+1,points:s.points,solved:!!s.won});
@@ -1460,7 +1466,7 @@ async function saveGroupScores(gid){
 function openGroupResult(){
   const g=grpInfo(GID),t=gTotal(GID),rows=gRows(GID,TODAY,TODAY,true),me=rows.findIndex(r=>ME&&r.id===ME.id);
   $("resBody").innerHTML="<div class='res'><h2>"+esc((g.emoji||"👥")+" "+g.name)+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 250 · "+(me>=0?"du är "+(me+1)+":a av "+rows.length+" idag":"")+"</div></div>"+
-    "<div class='sec'>Topplistan idag · gruppens verser</div>"+rowsTable(rows,true,weekKing(GID))+
+    "<div class='sec'>Topplistan idag · alla 5 verser</div>"+rowsTable(rows,true,weekKing(GID))+
     "<button class='btn' id='gToChat'>💬 Till gruppchatten</button><button class='btn ghost' id='gToGroup'>Till gruppen</button>";
   $("resModal").classList.add("on");
   $("gToChat").onclick=()=>{$("resModal").classList.remove("on");openGroup(GID,"chat");};
