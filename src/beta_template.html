@@ -1,0 +1,1593 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Versjakten BETA</title>
+<meta name="theme-color" content="#14110f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14110f; --panel:#1e1a17; --cell:#2a2420; --line:#3a322c;
+  --text:#f2ebe1; --muted:#a39785; --green:#5f8f4e; --yellow:#c9a43a; --gray:#4a423b;
+  --accent:#d9a55b; --red:#b0503f;
+  --serif:"Fraunces",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --tile:clamp(34px,5.2dvh,46px);
+  --key:clamp(40px,6dvh,52px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,.c,.pad,.choose{-webkit-user-select:none;user-select:none}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit}
+.screen{display:none;max-width:440px;margin:0 auto;height:100dvh;flex-direction:column;padding:0 14px max(10px,env(safe-area-inset-bottom))}
+.screen.on{display:flex}
+.scroll{flex:1;overflow-y:auto;padding-bottom:16px;-webkit-overflow-scrolling:touch}
+header{flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+header h1{font-family:var(--serif);font-weight:800;font-size:25px;margin:0;letter-spacing:-.5px;display:flex;align-items:center}
+header h1 span{color:var(--accent)}
+.beta{font-family:var(--sans);font-size:9.5px;font-weight:800;letter-spacing:1px;background:var(--red);color:#fff;border-radius:4px;padding:2px 5px;margin-left:5px}
+.iconbtn{background:none;border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:17px}
+.iconbtn.ghost{visibility:hidden}
+h2.t{font-family:var(--serif);font-size:22px;margin:14px 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.mut{color:var(--muted);font-size:13px}
+.btn{display:block;width:100%;height:46px;border:none;border-radius:10px;background:var(--accent);color:#1c160d;font-weight:700;font-size:16px;margin-top:10px}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--text)}
+.btn.sm{height:38px;font-size:14px}
+.btnrow{display:flex;gap:8px}.btnrow .btn{flex:1}
+.av{border-radius:50%;background:var(--cell);display:grid;place-items:center;border:2px solid var(--accent);flex:none}
+/* home */
+.hello{display:flex;align-items:center;gap:12px;margin:14px 0 14px}
+.hello .av{width:50px;height:50px;font-size:27px}
+.hello b{font-size:17px;display:block}.hello small{font-size:12.5px;color:var(--muted)}
+.play{background:linear-gradient(160deg,#e0b066,#c48c3e);color:#1c160d;border-radius:18px;padding:20px 18px;margin-bottom:10px;border:none;width:100%;text-align:left;display:block}
+.play .t{font-family:var(--serif);font-size:26px;font-weight:800}
+.play .s{font-size:13px;margin-top:3px;opacity:.85}
+.play .dots{display:flex;gap:6px;margin-top:12px}.play .dots i{flex:1;height:8px;border-radius:9px;background:#0002}.play .dots i.d{background:#1c160d}
+.play .go{margin-top:14px;background:#1c160d;color:var(--accent);text-align:center;border-radius:12px;padding:12px;font-weight:800;font-size:16px}
+.count{text-align:center;font-size:13px;color:var(--muted);margin:0 0 14px}.count b{color:var(--text)}
+.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.menu button{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;font-size:13px}
+.menu button span{display:block;font-size:26px;margin-bottom:6px}
+.r2{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:9px 0;border-bottom:1px solid var(--line);background:none;border-left:none;border-right:none;border-top:none;width:100%;text-align:left}
+.r2:last-child{border-bottom:none}.r2 b{color:var(--accent)}
+/* game */
+.rounds{flex:none;display:flex;justify-content:center;gap:6px;margin-top:8px}
+.rounds button{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
+.rounds button.done{background:var(--cell);color:var(--text)}
+.rounds button.cur{border-color:var(--accent);color:var(--text)}
+.rounds button b{color:var(--accent)}
+.rounds button:disabled{opacity:.4}
+.verseBox{flex:1 1 auto;min-height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px 2px;position:relative}
+.verse{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.4;text-align:center;margin:0;text-wrap:balance}
+.src{flex:none;text-align:center;font-size:10px;color:#6f6458;letter-spacing:.5px;margin:-4px 0 6px}
+.grid{flex:none;display:flex;flex-direction:column;gap:5px}
+.row{display:grid;grid-template-columns:1fr var(--tile) var(--tile) 8px var(--tile) var(--tile);gap:5px;align-items:center}
+.c{height:var(--tile);border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600}
+.c.book{justify-content:flex-start;padding:0 10px;font-size:14px;white-space:nowrap;overflow:hidden}
+.c.filled{border-color:#6b5e52}
+.row.active .c{border-color:#55493f}
+.row.active .c.book.empty{color:var(--muted);font-weight:400}
+.c.book .bn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.c.book .bx{flex:none;margin-left:6px;font-size:11px;font-weight:700;background:var(--red);color:#fff;border-radius:4px;padding:2px 5px}
+.c.book .bok{flex:none;margin-left:6px;color:#e6f5dc;font-size:14px;font-weight:700}
+.colon{text-align:center;font-weight:700;color:var(--muted)}
+.c.g{background:var(--green);border-color:var(--green)}
+.c.y{background:var(--yellow);border-color:var(--yellow);color:#1c160d}
+.c.x{background:var(--gray);border-color:var(--gray)}
+.c.drop{animation:drop .55s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes drop{0%{transform:translateY(-140px) scale(.9);opacity:0}60%{opacity:1}80%{transform:translateY(0) scale(1.06,.92)}100%{transform:translateY(0) scale(1)}}
+.row.win .c{animation:thud .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes thud{0%{transform:translateY(-160px);opacity:0}70%{transform:translateY(0) scale(1.08,.9);opacity:1}100%{transform:none}}
+.hint{flex:none;min-height:34px;display:flex;align-items:center;justify-content:center;text-align:center;margin:6px 0 5px;font-size:13px;color:var(--muted)}
+.hint .dir{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--accent);border-radius:999px;padding:6px 14px;font-size:15.5px;color:var(--text)}
+.hint .dir b{color:var(--accent);font-size:17px;letter-spacing:.5px}
+.hint .dir .arr{font-size:18px;color:var(--accent)}
+.hint .guide{font-size:15px;color:var(--text)}.hint .guide b{color:var(--accent)}
+.hint .dir.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.pulse{animation:pulse 1.4s ease-in-out infinite;border-color:var(--accent)!important}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,91,.55)}50%{box-shadow:0 0 0 7px rgba(217,165,91,0)}}
+#controls{flex:none}
+.choose{display:block;width:100%;height:var(--key);border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:16px;margin-bottom:7px}
+.pad{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pad button{height:var(--key);border:none;border-radius:8px;background:var(--cell);font-size:19px;font-weight:600}
+.pad button:active{filter:brightness(1.3)}
+.pad .ok{background:var(--green)}.pad .ok:disabled{opacity:.45}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.donebar{flex:none;display:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+.donebar .l1{font-family:var(--serif);font-size:17px}.donebar .l1 b{color:var(--accent)}
+.donebar .l2{font-size:12px;color:var(--muted);margin-top:2px}.donebar .l2 b{color:var(--text);font-variant-numeric:tabular-nums}
+.legend{position:absolute;left:0;right:0;top:4px;z-index:5;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;font-size:13px;text-align:left;box-shadow:0 8px 24px #000a}
+.legend .lx{position:absolute;right:4px;top:2px;background:var(--cell);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:20px;width:40px;height:40px;display:grid;place-items:center;padding:0}
+.legend .lbtns{display:flex;gap:6px;margin-top:8px}.legend .lbtns button{flex:1;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--cell);font-size:13.5px;font-weight:600}.legend .lbtns .pri{background:var(--accent);color:#1c160d;border-color:var(--accent)}
+.legend .li{display:flex;align-items:center;gap:8px;margin:5px 0}
+.legend i{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:5px;font-style:normal;font-weight:700;font-size:13px;flex:none}
+.legend .tag{background:var(--red);color:#fff;font-size:10px;border-radius:4px;padding:2px 4px;font-weight:700;flex:none}
+/* tabeller */
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button{flex:1;height:34px;border-radius:8px;border:1px solid var(--line);background:none;font-size:14px;color:var(--muted)}
+.tabs button.on{background:var(--accent);color:#1c160d;border-color:var(--accent);font-weight:700}
+.scopes{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:10px 0 8px;scrollbar-width:none}
+.scopes button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--muted);white-space:nowrap}
+.scopes button.on{background:var(--cell);border-color:var(--accent);color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:1px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.me td{color:var(--accent);font-weight:700}
+.rank{width:24px;color:var(--muted)}
+.pl{display:flex;align-items:center;gap:8px}
+.pl .em{font-size:18px;width:24px;text-align:center}
+.pl small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.pname{background:none;border:none;padding:0;color:inherit;font:inherit;text-align:left}
+.pname u{text-decoration-color:#6b5e52;text-underline-offset:3px}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:14px 0}
+/* modaler */
+.toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:80;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:400px;max-height:88dvh;overflow:auto;padding:18px}
+.sheet h2{font-family:var(--serif);margin:0 0 10px;font-size:22px}
+.sheet p,.sheet li{font-size:14px;line-height:1.55;color:#d9cfc2}
+.inp{width:100%;height:48px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px;padding:0 12px}
+.inp:focus{outline:none;border-color:var(--accent)}
+.fl{font-size:12px;color:var(--muted);margin:12px 0 5px;display:block}
+.sugg{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;margin-top:-4px;background:var(--panel);display:none}
+.sugg button{display:flex;justify-content:space-between;width:100%;padding:10px 12px;font-size:14px;border:none;border-top:1px solid var(--line);background:none;text-align:left}
+.sugg small{color:var(--muted)}
+.sugg button.add{color:var(--accent)}
+.chsel{display:flex;align-items:center;gap:10px;min-height:48px;padding-top:6px!important;padding-bottom:6px!important;border-radius:10px;border:1px solid var(--accent);background:#2c2418;padding:0 6px 0 12px;font-size:16px}
+.chsel span{flex:1}.chsel small{color:var(--muted);font-size:12px;display:block}
+.chsel button{background:none;border:none;font-size:18px;width:40px;height:40px;color:var(--muted)}
+.emo{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.emo button{height:38px;border-radius:9px;background:var(--cell);border:none;font-size:20px;padding:0}
+.emo button.on{outline:2px solid var(--accent);background:#2c2418}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:21px;letter-spacing:4px;text-align:center;background:var(--bg);border:1px dashed var(--accent);border-radius:10px;padding:10px;margin:8px 0}
+.books{padding:0}
+.books .head{position:sticky;top:0;background:var(--panel);padding:16px 18px 8px;font-family:var(--serif);font-weight:800;font-size:20px;border-bottom:1px solid var(--line)}
+.books h4{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 18px 4px;font-weight:500}
+.books .bk{display:block;width:calc(100% - 36px);margin:0 18px;text-align:left;background:none;border:none;border-left:3px solid var(--accent);padding:11px 12px;font-size:16px;border-bottom:1px solid #2b2521}
+.books .nt .bk{border-left-color:var(--green)}
+.books .bk.dim{color:#5c5249;border-left-color:#3a322c}
+.books .bk.sel{background:var(--cell)}
+.books .pad-b{height:14px}
+.res h2{text-align:center;margin-bottom:2px}
+.res .pts{text-align:center;font-size:42px;font-weight:800;color:var(--accent);font-family:var(--serif);line-height:1.1}
+.res .sub{text-align:center;color:var(--muted);font-size:14px}
+.ptable td{padding:6px 4px}
+.ctx{font-family:var(--serif);font-size:16px;line-height:1.5;background:#2c2418;border-left:3px solid var(--accent);padding:8px 10px;border-radius:4px;margin:6px 0 10px}
+.fact{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
+.fact b{color:var(--muted);font-weight:500}
+a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center}
+/* jämför */
+#cmpTabs .ctab{height:auto;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid #6b5e52;background:var(--cell);color:var(--text);border-radius:10px}
+#cmpTabs .ctab small{font-size:11px;color:var(--muted)}
+#cmpTabs .ctab.on{background:var(--accent);border-color:var(--accent);color:#1c160d}
+#cmpTabs .ctab.on small{color:#3b2c17}
+#cmpTabs .ctab:disabled{opacity:.4}
+#cmpModal{z-index:45}
+.cmpbox{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+.cmph{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}.cmph b{color:var(--accent)}
+.grid.minig{--tile:32px}.grid.minig .c{font-size:15px}.grid.minig .c.book{font-size:12.5px;padding:0 8px}
+/* resa + märken */
+.bar{height:10px;background:var(--cell);border-radius:99px;overflow:hidden;margin:6px 0 2px}.bar div{height:100%;background:var(--green)}
+.sec{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.jb{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.jb button{height:32px;border-radius:5px;background:var(--cell);border:none;font-size:9.5px;color:var(--muted);padding:0}
+.jb button.g{background:var(--green);color:#fff}.jb button.y{background:#6b5a2c;color:#fff}
+.lg{font-size:11px;color:var(--muted);display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge{background:var(--cell);border-radius:12px;padding:10px 6px;text-align:center;font-size:11.5px;color:var(--muted);border:1px solid transparent}
+.badge .e{font-size:28px;display:block;margin-bottom:4px;filter:grayscale(1);opacity:.5}
+.badge.on{background:#2c2418;border-color:var(--accent);color:var(--text)}.badge.on .e{filter:none;opacity:1}
+.streak{display:flex;align-items:center;gap:12px}.streak .f{font-size:42px}.streak b{font-family:var(--serif);font-size:28px;color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:4px}
+.stats b{display:block;font-size:20px}.stats span{font-size:11px;color:var(--muted)}
+.grp{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:none;border-right:none;border-top:none;text-align:left}
+.grp:last-child{border-bottom:none}
+.grp .ic{width:38px;height:38px;border-radius:10px;background:var(--cell);display:grid;place-items:center;font-size:20px;flex:none}
+.grp b{display:block;font-size:14.5px}.grp small{color:var(--muted);font-size:12px}
+.grp .rk{margin-left:auto;color:var(--accent);font-weight:700;font-size:14px;white-space:nowrap}
+.ad{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#3a1f3d,#5b2a4a);border:1px solid #7a3f66;border-radius:14px;padding:12px 14px;margin:0 0 12px;position:relative;color:#fff;text-align:left}
+.ad .ae{font-size:34px}
+.ad b{display:block;font-size:16px}.ad span.at{font-size:12.5px;opacity:.85}
+.ad .al{position:absolute;right:8px;top:6px;font-size:9px;letter-spacing:1px;opacity:.7}
+.linkbtn{background:none;border:none;color:var(--muted);text-decoration:underline;font-size:12px;padding:6px 0}
+/* startsida B */
+.streakbig{text-align:center;margin:22px 0 4px}
+.streakbig .n{font-family:var(--serif);font-size:64px;font-weight:800;color:var(--accent);line-height:1}
+.streakbig .l{font-size:14px;color:var(--muted);margin-top:6px}
+.week{display:flex;justify-content:space-between;gap:4px;margin:16px 0 18px}
+.week div{flex:1;max-width:46px;text-align:center;font-size:11px;color:var(--muted)}
+.week i{display:grid;place-items:center;aspect-ratio:1;border-radius:12px;background:var(--cell);font-style:normal;font-size:18px;margin-bottom:4px}
+.week i.f{background:#3b2a16;border:1px solid var(--accent)}
+.week i.t{background:var(--accent);color:#1c160d;font-weight:800;font-size:14px}
+.week div.today{color:var(--text);font-weight:700}
+.bigbtn{display:block;width:100%;border:none;background:linear-gradient(160deg,#e0b066,#c48c3e);color:#1c160d;border-radius:18px;padding:18px;text-align:center;font-family:var(--serif);font-size:22px;font-weight:800}
+.bigbtn small{display:block;font-family:var(--sans);font-size:12.5px;font-weight:600;opacity:.8;margin-top:3px}
+.vswitch{display:flex;gap:4px;justify-content:center;margin:10px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;width:max-content}
+.vswitch a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:999px}
+.vswitch a.on{background:var(--accent);color:#1c160d}
+.mrow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-size:14px;margin-top:10px;width:100%;text-align:left;color:var(--text)}
+.mrow b{color:var(--accent)}.mrow .arr{margin-left:auto;color:var(--accent);font-size:20px}.mrow .ic{font-size:26px}
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;background:#181411;border-top:1px solid var(--line);padding:6px 0 max(10px,env(safe-area-inset-bottom))}
+#nav .in{max-width:440px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+#nav.five .in{grid-template-columns:repeat(5,1fr)}
+/* gruppsida */
+.gstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.gstats div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.gstats b{display:block;font-family:var(--serif);font-size:22px;color:var(--accent)}.gstats span{font-size:11px;color:var(--muted)}
+.gdots{display:flex;gap:6px;justify-content:center;margin:12px 0 4px}
+.gdots i{font-style:normal;width:40px;height:40px;border-radius:10px;background:var(--cell);display:grid;place-items:center;font-weight:700;color:var(--muted)}
+.gdots i.w{background:var(--green);color:#fff}.gdots i.l{background:var(--gray);color:#fff}
+#chatBar{flex:none;gap:6px;align-items:flex-end;padding:8px 0 4px;border-top:1px solid var(--line)}
+#chatBar textarea{flex:1;min-height:42px;max-height:110px;resize:none;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:10px 12px;font:inherit;font-size:15px}
+#chatBar textarea:focus{outline:none;border-color:var(--accent)}
+#chatBar button{flex:none;height:42px;min-width:42px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:18px}
+#chatBar #chatSend{background:var(--accent);border-color:var(--accent);color:#1c160d;font-weight:800;font-size:15px;padding:0 14px}
+#chatBar #chatPray.on{background:#2c2418;border-color:var(--accent)}
+.chat{display:flex;flex-direction:column;gap:8px;padding:8px 0}
+.cday{text-align:center;font-size:11px;color:var(--muted);margin:6px 0 2px;letter-spacing:.5px}
+.cm{display:flex;gap:8px;align-items:flex-end;max-width:88%}
+.cm.mine{align-self:flex-end;flex-direction:row-reverse}
+.cav{width:30px;height:30px;border-radius:50%;background:var(--cell);display:grid;place-items:center;font-size:17px;flex:none}
+.cb{background:var(--panel);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:7px 10px;min-width:80px}
+.cm.mine .cb{background:#3b2a16;border-color:#6b4c22;border-radius:14px 14px 4px 14px}
+.cm.pray .cb{border-color:var(--accent);background:#2c2418}
+.cb b{font-size:12px;color:var(--accent);display:block;margin-bottom:1px}
+.ptag{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.ctext{font-size:15px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+.ctext.blur{filter:blur(6px);cursor:pointer;user-select:none}
+.spo{font-size:11px;color:var(--muted);margin-top:2px}
+.cmeta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.ct{font-size:10.5px;color:var(--muted)}
+.rxs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.rx{border:1px solid var(--line);background:var(--cell);border-radius:999px;padding:2px 8px;font-size:12.5px;color:var(--text)}
+.rx.me{border-color:var(--accent);background:#3b2a16}
+.rx.add{padding:0 7px;font-size:13px;color:var(--muted);background:none;border-color:transparent}
+.rx.pr{border-color:var(--accent);color:var(--accent)}
+.rpick{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.rpick button{background:var(--cell);border:1px solid var(--line);border-radius:10px;font-size:18px;height:34px;min-width:38px}
+.rpick .del{font-size:12px;color:#e7a091;border-color:var(--red);padding:0 10px}
+.cres{align-self:center;text-align:center;font-size:13px;background:#1f2a1b;border:1px solid #3d5a33;border-radius:12px;padding:6px 12px;max-width:94%}
+.cres .rxs{justify-content:center}
+.udot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);vertical-align:2px;margin-left:2px}
+#nav button.dot{position:relative}#nav button.dot::after{content:"";position:absolute;top:2px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid #181411}
+/* utbildning */
+.lrn-tabs{display:flex;gap:6px;margin:12px 0 10px}
+.lrn-tabs button{flex:1;height:36px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font-size:13.5px}
+.lrn-tabs button.on{background:var(--accent);border-color:var(--accent);color:#1c160d;font-weight:700}
+.bklist{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.bklist button{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:9px 10px;text-align:left;font-size:13.5px}
+.bklist.nt button{border-left-color:var(--green)}
+.bklist button small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+.ramsa{background:#2c2418;border:1px solid var(--accent);border-radius:14px;padding:14px;margin-bottom:12px}
+.ramsa .say{font-family:var(--serif);font-size:21px;line-height:1.35;margin:6px 0 10px}
+.ramsa .say span{display:inline-block;border-radius:6px;padding:0 3px;transition:background .2s}
+.ramsa .say span.hl{background:var(--accent);color:#1c160d}
+.ramsa .map{display:flex;flex-wrap:wrap;gap:5px}
+.ramsa .map i{font-style:normal;font-size:12px;background:var(--cell);border-radius:6px;padding:3px 7px;color:var(--muted)}
+.ramsa .map i.hl{background:var(--green);color:#fff}
+.ord-sec{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none}
+.ord-sec button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--muted)}
+.ord-sec button.on{border-color:var(--accent);color:var(--text);background:var(--cell)}
+.ord-done{display:flex;flex-wrap:wrap;gap:5px;min-height:38px;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:6px;margin:8px 0}
+.ord-done i{font-style:normal;background:var(--green);color:#fff;border-radius:7px;padding:5px 9px;font-size:13.5px;font-weight:600}
+.ord-pool{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.ord-pool button{height:44px;border-radius:9px;border:1px solid var(--line);background:var(--cell);font-size:15px;font-weight:600}
+.ord-pool button.bad{animation:sh .35s;border-color:var(--red)}
+.res-card{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.res-card .ri{font-size:30px;flex:none}
+.res-card b{display:block;font-size:16px}.res-card p{margin:3px 0 8px;font-size:13px;color:#d9cfc2;line-height:1.45}
+.res-card .lnk{display:flex;gap:6px;flex-wrap:wrap}
+.res-card .lnk a{display:inline-flex;align-items:center;height:34px;padding:0 12px;border-radius:8px;background:var(--accent);color:#1c160d;font-weight:700;font-size:13.5px;text-decoration:none}
+.res-card .lnk a.g{background:none;border:1px solid var(--line);color:var(--text)}
+#nav button{background:none;border:none;font-size:11px;font-weight:600;letter-spacing:.2px;color:#7d7266;padding:4px 0 0;display:flex;flex-direction:column;align-items:center;gap:3px}
+#nav button svg{width:24px;height:24px}
+#nav button.on{color:var(--accent)}
+#nav button.on svg{stroke-width:2.2}
+body.nav-on #nav{display:block}
+body.nav-on .screen{padding-bottom:72px}
+body.nav-on .navback{visibility:hidden}
+/* maraton */
+.mcount{display:flex;align-items:center;justify-content:center;gap:10px}
+.mcount .n{font-family:var(--serif);font-size:38px;font-weight:800;color:var(--accent);line-height:1}
+.mcount .l{font-size:12px;color:var(--muted);line-height:1.2;text-align:left}
+.mcred{text-align:center;font-size:11px;color:var(--muted);margin-top:2px}
+.mcount .rb{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin-left:6px}
+.over{text-align:center}
+.over .big{font-family:var(--serif);font-size:64px;font-weight:800;color:var(--accent);line-height:1}
+.over h2{margin:6px 0 2px}
+.over .died{font-size:13px;color:var(--muted)}.over .died b{color:var(--text)}
+.over .rec{display:inline-block;background:#2c2418;border:1px solid var(--accent);border-radius:999px;padding:5px 12px;font-size:13px;margin:8px 0 0}
+.mlb{background:var(--cell);border-radius:12px;padding:10px 12px;margin-top:12px;text-align:left}
+.mlb h3{font-family:var(--serif);font-size:16px;margin:0 0 4px}
+.mlb .row2{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.mlb .row2:last-child{border:none}
+.mlb .row2 .rk{width:20px;color:var(--muted)}.mlb .row2 b{margin-left:auto;color:var(--accent)}.mlb .row2.me{color:var(--accent);font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- ===== STARTSIDA ===== -->
+<section class="screen" id="s-home">
+  <header>
+    <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
+    <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn" id="homeAv" data-go="stats" aria-label="Jag" style="border-radius:50%;border:2px solid var(--accent);font-size:20px">👤</button>
+  </header>
+  <div class="scroll">
+    <div id="vSwitch"></div>
+    <div class="streakbig" id="streakBig"></div>
+    <div class="week" id="week"></div>
+    <button class="bigbtn" id="playCard"></button>
+    <button class="mrow" id="maraRow"></button>
+    <button class="mrow" id="groupRow" style="display:none"></button>
+    <button class="mrow" id="churchRow" style="display:none;border-color:var(--accent)"><span class="ic">⛪</span><span>Nytt: välj din <b>församling</b> och <b>ort</b> i listan</span><span class="arr">›</span></button>
+    <p class="mut" id="testNote" style="text-align:center;font-size:11px;margin-top:22px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
+  </div>
+</section>
+
+<!-- ===== SPELET ===== -->
+<section class="screen" id="s-play">
+  <header>
+    <button class="iconbtn" id="playHome" aria-label="Hem">🏠</button>
+    <h1 id="playTitle">Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
+  </header>
+  <div class="rounds" id="rounds"></div>
+  <div class="verseBox" id="verseBox"><p class="verse" id="verse"></p><div id="legendBox"></div></div>
+  <div class="src">Svenska Folkbibeln 2015</div>
+  <div class="grid" id="grid"></div>
+  <div class="hint" id="hint"></div>
+  <div id="controls">
+    <button class="choose" id="chooseBtn">Välj bok</button>
+    <div class="pad" id="pad"></div>
+  </div>
+  <div class="donebar" id="donebar"></div>
+</section>
+
+<!-- ===== PROFIL ===== -->
+<section class="screen" id="s-profile">
+  <header>
+    <button class="iconbtn" data-go="stats">←</button>
+    <h1>Min profil</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll" id="profileBody"></div>
+</section>
+
+<!-- ===== STATISTIK ===== -->
+<section class="screen" id="s-stats">
+  <header>
+    <button class="iconbtn ghost"></button>
+    <h1>Jag</h1>
+    <button class="iconbtn" data-go="profile" aria-label="Inställningar">⚙️</button>
+  </header>
+  <div class="scroll" id="statsBody"></div>
+</section>
+
+<!-- ===== UTBILDNING (beta) ===== -->
+<section class="screen" id="s-learn">
+  <header>
+    <button class="iconbtn ghost"></button>
+    <h1>Utbildning</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll">
+    <div class="lrn-tabs" id="lrnTabs"><button data-l="order" class="on">Ordningen</button><button data-l="books">Böckerna</button><button data-l="tips">Fördjupning</button></div>
+    <div id="learnBody"></div>
+  </div>
+</section>
+
+<!-- ===== GRUPPSIDA (beta) ===== -->
+<section class="screen" id="s-group">
+  <header>
+    <button class="iconbtn" id="grpBack" aria-label="Tillbaka">←</button>
+    <h1 id="grpTitle" style="font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%"></h1>
+    <button class="iconbtn" id="grpInvite" aria-label="Bjud in">＋</button>
+  </header>
+  <div class="lrn-tabs" id="grpTabs" style="flex:none"><button data-t="verses" class="on">Verser</button><button data-t="chat">Chatt</button><button data-t="board">Topplista</button></div>
+  <div class="scroll" id="grpBody"></div>
+  <div id="chatBar" style="display:none"><button id="chatPray" title="Böneämne" aria-label="Böneämne">🙏</button><textarea id="chatInp" rows="1" maxlength="500" placeholder="Skriv till gruppen…"></textarea><button id="chatSend">Skicka</button></div>
+</section>
+
+<!-- ===== GRUPPER ===== -->
+<section class="screen" id="s-groups">
+  <header>
+    <button class="iconbtn ghost"></button>
+    <h1>Grupper</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll" id="groupsBody"></div>
+</section>
+
+<!-- ===== TOPPLISTA ===== -->
+<section class="screen" id="s-board">
+  <header>
+    <button class="iconbtn navback" id="boardBack">←</button>
+    <h1>Topplista</h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll">
+    <div class="scopes" id="scopes"></div>
+    <div class="tabs" id="ptabs"><button data-t="day" class="on">Idag</button><button data-t="week">Veckan</button><button data-t="all">Totalt</button><button data-t="mara">Maraton</button></div>
+    <div id="boardBody"></div>
+  </div>
+</section>
+
+<!-- ===== VÄLKOMMEN / PROFIL-FORMULÄR ===== -->
+<section class="screen" id="s-onboard">
+  <header>
+    <button class="iconbtn ghost"></button>
+    <h1>Vers<span>jakten</span><i class="beta">BETA</i></h1>
+    <button class="iconbtn ghost"></button>
+  </header>
+  <div class="scroll">
+    <h2 class="t" id="obTitle">Vem är du?</h2>
+    <p class="mut" id="obIntro">Skapa din profil. Den syns på topplistan och i dina grupper.</p>
+    <label class="fl" for="obName">Namn</label>
+    <input class="inp" id="obName" maxlength="20" placeholder="T.ex. Henke" autocomplete="nickname">
+    <label class="fl" for="obCity">Ort (valfritt)</label>
+    <input class="inp" id="obCity" maxlength="40" placeholder="T.ex. Katrineholm" autocomplete="off">
+    <label class="fl" for="obChurch">Församling (valfritt)</label>
+    <div id="obChurchSel"></div>
+    <input class="inp" id="obChurch" maxlength="60" placeholder="Sök på kyrkans namn eller ort" autocomplete="off">
+    <div class="sugg" id="obSugg"></div>
+    <span class="fl">Välj din figur</span>
+    <div class="emo" id="obEmo"></div>
+    <button class="btn" id="obSave">Spara profil</button>
+    <div id="obLogin">
+      <p class="mut" style="text-align:center;margin-top:18px">Har du redan en profil på en annan telefon?</p>
+      <button class="btn ghost" id="obLoginBtn">Logga in med din kod</button>
+    </div>
+    <button class="btn ghost" id="obCancel" style="display:none">Avbryt</button>
+  </div>
+</section>
+
+<nav id="nav"><div class="in">
+  <button data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>Spela</button>
+  <button data-nav="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Topplista</button>
+  <button data-nav="learn" id="navLearn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>Utbildning</button>
+  <button data-nav="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/></svg>Grupper</button>
+  <button data-nav="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Jag</button>
+</div></nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="maraModal"><div class="sheet" id="maraBody"></div></div>
+
+<div class="modal" id="bookModal"><div class="sheet books" id="bookSheet"><div class="head">Välj bok</div><div id="bookList"></div></div></div>
+
+<div class="modal" id="loginModal"><div class="sheet">
+  <h2>Logga in med kod</h2>
+  <p>Skriv koden som visas under "Min profil" på din andra telefon.</p>
+  <input class="inp" id="loginCode" placeholder="T.ex. HENKE-7Q2" autocomplete="off" style="text-transform:uppercase">
+  <button class="btn" id="loginGo">Logga in</button>
+  <button class="btn ghost" data-close>Avbryt</button>
+</div></div>
+
+<div class="modal" id="joinModal"><div class="sheet">
+  <h2>Gå med i grupp</h2>
+  <p>Skriv gruppkoden du har fått, t.ex. <b>ABC-123</b>.</p>
+  <input class="inp" id="joinCode" placeholder="ABC-123" autocomplete="off" style="text-transform:uppercase">
+  <button class="btn" id="joinGo">Gå med</button>
+  <button class="btn ghost" data-close>Avbryt</button>
+</div></div>
+
+<div class="modal" id="createModal"><div class="sheet">
+  <h2>Skapa grupp</h2>
+  <label class="fl" for="newGroupName">Gruppens namn</label>
+  <input class="inp" id="newGroupName" maxlength="40" placeholder="T.ex. Morgongänget">
+  <span class="fl">Symbol</span>
+  <div class="emo" id="grpEmo"></div>
+  <button class="btn" id="createGo">Skapa</button>
+  <button class="btn ghost" data-close>Avbryt</button>
+</div></div>
+
+<div class="modal" id="shareModal"><div class="sheet">
+  <h2 id="shareTitle">Bjud in</h2>
+  <p id="shareText">Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.</p>
+  <div class="code" id="shareCode"></div>
+  <a class="btn" id="shareWa" target="_blank" rel="noopener">Dela i WhatsApp</a>
+  <button class="btn ghost" id="shareCopy">Kopiera länk</button>
+  <button class="linkbtn" id="shareLeave" style="display:block;margin:10px auto 0">Lämna gruppen</button>
+  <button class="btn ghost" data-close>Stäng</button>
+</div></div>
+
+<div class="modal" id="ctxModal"><div class="sheet" id="ctxBody"></div></div>
+
+<div class="modal" id="resModal"><div class="sheet" id="resBody"></div></div>
+
+<div class="modal" id="cmpModal"><div class="sheet">
+  <h2 id="cmpTitle">Jämför</h2>
+  <div class="tabs" id="cmpTabs"></div>
+  <p class="mut" style="text-align:center;margin:-2px 0 8px;font-size:12px">👆 Tryck på en vers för att byta (deras – dina poäng)</p>
+  <p class="mut" style="margin:0 0 8px">Rätt svar: <b id="cmpRef" style="color:var(--accent);font-family:var(--serif)"></b></p>
+  <div id="cmpBody"></div>
+  <button class="btn ghost" data-close>Tillbaka</button>
+</div></div>
+
+<div class="modal" id="infoModal"><div class="sheet">
+  <h2>Så spelar du</h2>
+  <p>Varje dag kommer <b>tre nya verser</b>, samma för alla. Gissa <b>bok, kapitel och vers</b> på 5 försök per vers.</p>
+  <ul>
+    <li>Välj bok och skriv kapitel och vers med två siffror var. Kapitel 6 vers 3 skrivs <b>06:03</b>.</li>
+    <li><b style="color:var(--green)">Grönt</b>: rätt bok, eller rätt siffra på <b>rätt plats</b>.</li>
+    <li><b style="color:var(--yellow)">Gult</b>: siffran <b>finns</b> i svaret, men på <b>fel plats</b>.</li>
+    <li><b>Grått</b>: siffran finns inte (där).</li>
+    <li>Efter varje miss får du veta om versen står <b>tidigare eller senare</b> i Bibeln.</li>
+  </ul>
+  <h2>Poäng</h2>
+  <table class="ptable">
+    <tr><td>Rätt på försök 1 / 2 / 3 / 4 / 5</td><td class="n">50 / 35 / 25 / 15 / 10 p</td></tr>
+    <tr><td>Ej klarat, men rätt bok och kapitel</td><td class="n">8 p</td></tr>
+    <tr><td>Ej klarat, men rätt bok</td><td class="n">5 p</td></tr>
+  </table>
+  <h2>🏃 Maraton</h2>
+  <p>Slumpade verser, en i taget. Klarar du versen på 5 försök kommer nästa direkt – hur många klarar du i rad? Missar du är loppet slut. Spelläget är <b>Valters</b> idé.</p>
+  <button class="btn ghost" id="showLegendBtn">Visa färgförklaringen</button>
+  <p style="font-size:12px;color:var(--muted)">Bibeltexten är hämtad från Svenska Folkbibeln 2015 (SFB15), © Stiftelsen Svenska Folkbibeln.</p>
+  <button class="btn ghost" data-close>Stäng</button>
+</div></div>
+
+<script>
+/* ===== INSTÄLLNINGAR ===== */
+const SUPABASE_URL = "__SUPABASE_URL__";
+const SUPABASE_KEY = "__SUPABASE_KEY__";
+const START_DAY = "2026-10-14";
+const IS_BETA = __IS_BETA__;
+const GROUPS_ON = true; // gruppsida, chatt, gruppverser – ute i båda versionerna
+const AD_HTML = IS_BETA?"<div class='ad' style='margin-top:12px'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>":"";
+const BADGE = IS_BETA?"<i class='beta'>BETA</i>":"";
+if(!IS_BETA){document.title="Versjakten";document.querySelectorAll("h1 .beta").forEach(e=>e.remove());const tn=document.getElementById("testNote");if(tn)tn.remove();}
+/* ========================= */
+const DATA = __DATA__;
+const BOOKS = DATA.books, VERSES = DATA.verses;
+const OSIS=['Gen','Exod','Lev','Num','Deut','Josh','Judg','Ruth','1Sam','2Sam','1Kgs','2Kgs','1Chr','2Chr','Ezra','Neh','Esth','Job','Ps','Prov','Eccl','Song','Isa','Jer','Lam','Ezek','Dan','Hos','Joel','Amos','Obad','Jonah','Mic','Nah','Hab','Zeph','Hag','Zech','Mal','Matt','Mark','Luke','John','Acts','Rom','1Cor','2Cor','Gal','Eph','Phil','Col','1Thess','2Thess','1Tim','2Tim','Titus','Phlm','Heb','Jas','1Pet','2Pet','1John','2John','3John','Jude','Rev'];
+const USFM=['GEN','EXO','LEV','NUM','DEU','JOS','JDG','RUT','1SA','2SA','1KI','2KI','1CH','2CH','EZR','NEH','EST','JOB','PSA','PRO','ECC','SNG','ISA','JER','LAM','EZK','DAN','HOS','JOL','AMO','OBA','JON','MIC','NAM','HAB','ZEP','HAG','ZEC','MAL','MAT','MRK','LUK','JHN','ACT','ROM','1CO','2CO','GAL','EPH','PHP','COL','1TH','2TH','1TI','2TI','TIT','PHM','HEB','JAS','1PE','2PE','1JN','2JN','3JN','JUD','REV'];
+const YV_VERSION=1223; // Svenska Folkbibeln 2015 hos YouVersion
+function yvUrl(b,c){return "https://www.bible.com/bible/"+YV_VERSION+"/"+USFM[b]+"."+c+".SFB15"}
+const SHORT=['1 Mos','2 Mos','3 Mos','4 Mos','5 Mos','Jos','Dom','Rut','1 Sam','2 Sam','1 Kung','2 Kung','1 Krön','2 Krön','Esra','Neh','Est','Job','Ps','Ords','Pred','Höga','Jes','Jer','Klag','Hes','Dan','Hos','Joel','Amos','Ob','Jona','Mika','Nah','Hab','Sef','Hagg','Sak','Mal','Matt','Mark','Luk','Joh','Apg','Rom','1 Kor','2 Kor','Gal','Ef','Fil','Kol','1 Tess','2 Tess','1 Tim','2 Tim','Tit','Filem','Hebr','Jak','1 Pet','2 Pet','1 Joh','2 Joh','3 Joh','Jud','Upp'];
+const BOOKINFO=[
+["Traditionellt Mose","Moseböckerna · GT","Skapelsen, syndafallet, Noa, Abraham, Isak, Jakob och Josef"],
+["Traditionellt Mose","Moseböckerna · GT","Uttåget ur Egypten, de tio budorden och tabernaklet"],
+["Traditionellt Mose","Moseböckerna · GT","Offer, prästtjänst och hur folket skulle leva heligt"],
+["Traditionellt Mose","Moseböckerna · GT","Israels år i öknen på väg mot det utlovade landet"],
+["Traditionellt Mose","Moseböckerna · GT","Moses avskedstal: lagen upprepas innan folket går in i landet"],
+["Okänd, traditionellt Josua","Historia · GT","Intåget i Kanaan och fördelningen av landet"],
+["Okänd","Historia · GT","Tiden med domare som Debora, Gideon och Simson"],
+["Okänd","Historia · GT","Moabitiskan Rut som blir stammoder till kung David"],
+["Okänd","Historia · GT","Samuel, kung Saul och den unge David"],
+["Okänd","Historia · GT","David som kung över Israel"],
+["Okänd","Historia · GT","Salomo, templet, rikets delning och profeten Elia"],
+["Okänd","Historia · GT","Elisa, kungarna i Israel och Juda och fångenskapen i Babylon"],
+["Okänd, traditionellt Esra","Historia · GT","Släkttavlor och kung Davids regering"],
+["Okänd, traditionellt Esra","Historia · GT","Salomo och Juda kungar fram till fångenskapen"],
+["Traditionellt Esra","Historia · GT","Återkomsten från Babylon och templets återuppbyggnad"],
+["Nehemja","Historia · GT","Jerusalems murar byggs upp igen"],
+["Okänd","Historia · GT","Drottning Ester som räddar det judiska folket"],
+["Okänd","Vishet · GT","Varför drabbas en rättfärdig människa av lidande?"],
+["David m.fl.","Poesi · GT","150 psalmer: lovsång, klagan, bön och tack"],
+["Främst Salomo","Vishet · GT","Korta visdomsord för vardagslivet"],
+["Traditionellt Salomo","Vishet · GT","Livets mening: allt är förgängligt utan Gud"],
+["Traditionellt Salomo","Poesi · GT","Kärlekssånger mellan brud och brudgum"],
+["Profeten Jesaja","Profet · GT","Dom och hopp, med profetior om Messias"],
+["Profeten Jeremia","Profet · GT","Varningar före Jerusalems fall och löftet om ett nytt förbund"],
+["Traditionellt Jeremia","Poesi · GT","Sorgesånger över Jerusalems förstörelse"],
+["Profeten Hesekiel","Profet · GT","Syner i fångenskapen i Babylon, bl.a. dalen med de torra benen"],
+["Daniel","Profet · GT","Daniel i Babylon: lejongropen, den brinnande ugnen och syner"],
+["Profeten Hosea","Profet · GT","Guds trofasta kärlek trots folkets otrohet"],
+["Profeten Joel","Profet · GT","Herrens dag och löftet om Anden"],
+["Profeten Amos","Profet · GT","Krav på rättvisa och omsorg om de fattiga"],
+["Profeten Obadja","Profet · GT","Dom över Edom – GT:s kortaste bok"],
+["Okänd, handlar om Jona","Profet · GT","Profeten som flydde, den stora fisken och staden Nineve"],
+["Profeten Mika","Profet · GT","Rättvisa, barmhärtighet och Messias född i Betlehem"],
+["Profeten Nahum","Profet · GT","Dom över Nineve"],
+["Profeten Habackuk","Profet · GT","Samtal med Gud om ondskan: den rättfärdige ska leva genom sin tro"],
+["Profeten Sefanja","Profet · GT","Herrens dag och glädjen över ett återupprättat folk"],
+["Profeten Haggai","Profet · GT","Uppmaning att bygga upp templet igen"],
+["Profeten Sakarja","Profet · GT","Syner och löftet om kungen som kommer ridande på en åsna"],
+["Profeten Malaki","Profet · GT","GT:s sista bok: en kallelse till omvändelse"],
+["Traditionellt Matteus, lärjunge","Evangelium · NT","Jesus som den utlovade kungen, med bergspredikan"],
+["Traditionellt Markus","Evangelium · NT","Det kortaste evangeliet – Jesus i handling"],
+["Lukas, läkare","Evangelium · NT","Jesu liv noggrant berättat, med många liknelser"],
+["Traditionellt aposteln Johannes","Evangelium · NT","Jesus som Guds Son och hans ”Jag är”-ord"],
+["Lukas","Historia · NT","Den första församlingen och Paulus resor"],
+["Paulus","Brev · NT","Frälsning genom tro för både judar och greker"],
+["Paulus","Brev · NT","Råd till en splittrad församling – och kärlekens kapitel 13"],
+["Paulus","Brev · NT","Paulus tjänst, svaghet och Guds nåd"],
+["Paulus","Brev · NT","Friheten i Kristus: rättfärdig genom tro, inte genom lagen"],
+["Paulus","Brev · NT","Församlingen som Kristi kropp och Guds vapenrustning"],
+["Paulus","Brev · NT","Glädje i Herren, skrivet i fängelset"],
+["Paulus","Brev · NT","Kristus är över allt"],
+["Paulus","Brev · NT","Uppmuntran och Jesu återkomst"],
+["Paulus","Brev · NT","Mer om Herrens dag och att leva troget"],
+["Paulus","Brev · NT","Råd till den unge ledaren Timoteus"],
+["Paulus","Brev · NT","Paulus sista brev: håll fast vid Skriften"],
+["Paulus","Brev · NT","Råd till Titus om ledarskap och ett gott liv"],
+["Paulus","Brev · NT","Ett personligt brev om slaven Onesimos"],
+["Okänd","Brev · NT","Jesus som den större översteprästen; trons hjältar i kapitel 11"],
+["Jakob, Jesu bror","Brev · NT","Tro som syns i handling"],
+["Petrus","Brev · NT","Hopp och fasthet mitt i lidande"],
+["Petrus","Brev · NT","Varning för falska lärare och löftet om Jesu återkomst"],
+["Traditionellt aposteln Johannes","Brev · NT","Gud är kärlek – att leva i ljuset"],
+["Johannes, ”den äldste”","Brev · NT","Kort brev om sanning och kärlek"],
+["Johannes, ”den äldste”","Brev · NT","Kort brev om gästfrihet"],
+["Judas, Jakobs bror","Brev · NT","Kämpa för tron mot falska lärare"],
+["Johannes","Profetia · NT","Syner om Jesu seger och en ny himmel och en ny jord"]];
+const EMOJIS=["🦁","🐑","🕊️","🐟","⛵","🔥","🌿","⭐","🍞","🏔️","👑","🎺","🌈","🐪","🗝️","📯"];
+const GEMOJIS=["☕","🎸","⛪","🙏","📖","🔥","⚽","🎉","🌟","🏠","🎓","❤️","🌍","🍕","🚀","🐑"];
+const PTS_WIN=[50,35,25,15,10], PTS_BOOKCH=8, PTS_BOOK=5, MAX=5, ROUNDS=3, STAGGER=230, DROP_MS=550;
+const $=id=>document.getElementById(id);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const DB_ON=SUPABASE_URL.startsWith("http")&&SUPABASE_KEY.length>20;
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function toast(m,ms){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),ms||2400);}
+const pad2=n=>String(n).padStart(2,"0");
+
+/* ---- datum ---- */
+function sthlmDate(d=new Date()){return new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
+function dayNum(s){const [y,m,d]=s.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)}
+function addDays(s,n){return new Date((dayNum(s)+n)*864e5).toISOString().slice(0,10)}
+function weekStart(s){const wd=(new Date(dayNum(s)*864e5).getUTCDay()+6)%7;return addDays(s,-wd)}
+const TODAY=sthlmDate();
+function ansForDay(day,r){const dn=dayNum(day)-dayNum(START_DAY);const i=((dn*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length;const [b,c,v,t]=VERSES[i];return {b,c,v,t}}
+const ansFor=r=>ansForDay(TODAY,r);
+function prettyDate(s){return new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"}).format(new Date(dayNum(s)*864e5)).replace(/^./,c=>c.toUpperCase())}
+
+/* ---- Supabase ---- */
+function hdr(x){const h={"apikey":SUPABASE_KEY,"Content-Type":"application/json"};if(SUPABASE_KEY.startsWith("eyJ"))h.Authorization="Bearer "+SUPABASE_KEY;return Object.assign(h,x||{})}
+async function rpc(fn,body){
+  const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:hdr(),body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>null);
+  if(!r.ok) throw new Error((j&&j.message)||("Fel "+r.status));
+  return j;
+}
+async function get(path){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{headers:hdr()});if(!r.ok)throw new Error(r.status);return r.json()}
+
+/* ---- data i minnet ---- */
+let ME=store.get("vjb_profile");      // {id,code,name,church,emoji}
+let PROFILES={}, SCORES=[], MEMBERS=[], GROUPS={}, MYGROUPS=[], MRUNS=[], CHURCHES={};
+function churchLabel(id){const c=CHURCHES[id];if(!c)return "";return c.name.toLowerCase().includes(c.city.toLowerCase())?c.name:c.name+" "+c.city}
+function profChurch(p){return p?(churchLabel(p.church_id)||p.church||""):""}
+function meLine(){if(!ME)return "";const c=ME.church_id?churchLabel(ME.church_id):(ME.church||"");const parts=[];if(c)parts.push(c);if(ME.city&&!c.toLowerCase().includes(ME.city.trim().toLowerCase()))parts.push(ME.city);return parts.join(" · ")||"Ingen församling angiven"}
+function sameCity(a,b){return a&&b&&a.trim().toLowerCase()===b.trim().toLowerCase()}
+const hidden=p=>!p||String(p.name||"").startsWith("__");
+async function loadAll(){
+  if(!DB_ON) return;
+  try{
+    const [pr,sc,mem,gr,ch]=await Promise.all([
+      get("profiles?select=id,name,church,emoji,church_id,city,is_admin,is_tester&limit=10000"),
+      get("beta_scores?select=profile_id,day,round,attempts,solved,points,guesses&day=gte."+START_DAY+"&limit=20000"),
+      get("group_members?select=group_id,profile_id&limit=20000"),
+      get("groups?select=id,name,emoji&limit=5000"),
+      get("churches?select=id,name,city,approved,created_by&limit=5000")]);
+    CHURCHES={}; ch.forEach(c=>CHURCHES[c.id]=c);
+    PROFILES={}; pr.forEach(p=>PROFILES[p.id]=p);
+    if(ME&&PROFILES[ME.id]){const p=PROFILES[ME.id];ME={...ME,name:p.name,emoji:p.emoji,church_id:p.church_id,city:p.city,church:profChurch(p)||null};store.set("vjb_profile",ME);}
+    SCORES=sc.filter(s=>!hidden(PROFILES[s.profile_id]));
+    MEMBERS=mem; GROUPS={}; gr.forEach(g=>GROUPS[g.id]=g);
+    if(ME){ MYGROUPS=await rpc("my_groups",{p_code:ME.code}).catch(()=>MYGROUPS); }
+    loadGroupData();
+    MRUNS=(await get("marathon_runs?select=profile_id,length&length=gt.0&order=length.desc&limit=5000").catch(()=>[])).filter(m=>!hidden(PROFILES[m.profile_id]));
+  }catch(e){ console.warn(e); }
+}
+
+/* ---- lokalt spelläge ---- */
+const skey=(r,day=TODAY)=>"vjb_game_"+day+"_"+r;
+const loadSt=r=>store.get(skey(r))||{guesses:[],done:false,saved:false};
+let R=0, ANS=ansFor(0), st=loadSt(0), cur={b:null,d:""}, busy=false;
+let MODE="day", RUN=null; // RUN = maraton {n, used:[index], cur:index, st:{guesses,done,won}, over}
+function saveSt(){ if(MODE==="mara"){RUN.st=st;store.set("vjb_mara",RUN);} else if(MODE==="group") store.set(R<ROUNDS?skey(R):gkey(GID,R),st); else store.set(skey(R),st); }
+
+function score(g,a=ANS){
+  const ad=(pad2(a.c)+pad2(a.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
+  const res=Array(4).fill("x"), left={};
+  gd.forEach((d,i)=>{ if(d===ad[i]) res[i]="g"; else left[ad[i]]=(left[ad[i]]||0)+1; });
+  gd.forEach((d,i)=>{ if(res[i]!=="g"&&left[d]>0){res[i]="y";left[d]--;} });
+  return {book:g.b===a.b?"g":"x",digits:res};
+}
+function cmp(g,a=ANS){const x=[a.b,a.c,a.v],y=[g.b,g.c,g.v];for(let i=0;i<3;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1;}return 0}
+function possibleBooks(){
+  let lo=0,hi=BOOKS.length-1;const no=new Set();
+  st.guesses.forEach(g=>{const d=cmp(g);if(g.b!==ANS.b)no.add(g.b);if(d>0)lo=Math.max(lo,g.b);if(d<0)hi=Math.min(hi,g.b);});
+  return BOOKS.map((_,i)=>i>=lo&&i<=hi&&!no.has(i));
+}
+
+/* ---- navigering ---- */
+let SCREEN="home";
+const NAV_SCREENS=["home","board","groups","stats","learn"];
+function go(name){
+  if(!ME && name!=="onboard"){ name="onboard"; }
+  let mara=false; if(name==="mara"){name="play";mara=true;}
+  SCREEN=name;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-"+name));
+  document.body.classList.toggle("nav-on",NAV_SCREENS.includes(name));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.nav===name));
+  if(name==="home") renderHome();
+  if(name==="play"){ if(mara) loadMara(); else loadRound(firstOpen()); }
+  if(name==="profile") renderProfile();
+  if(name==="stats") renderStats();
+  if(name==="groups") renderGroups();
+  if(name==="board") renderBoard();
+  if(name==="learn") renderLearn();
+  if(name==="group") renderGroupPage();
+  if(name!=="group") clearInterval(chatTimer);
+  if(name==="onboard") renderOnboard();
+}
+document.addEventListener("click",e=>{
+  const nv=e.target.closest("[data-nav]"); if(nv){ if(nv.dataset.nav==="board")BOARD.back="home"; go(nv.dataset.nav); return; }
+  const g=e.target.closest("[data-go]"); if(g){ go(g.dataset.go); return; }
+  const o=e.target.closest("[data-open]"); if(o){ $(o.dataset.open).classList.add("on"); return; }
+});
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{
+  if(e.target===m||e.target.hasAttribute("data-close")) m.classList.remove("on");
+}));
+
+/* ===== STARTSIDA ===== */
+function myScores(){return ME?SCORES.filter(s=>s.profile_id===ME.id):[]}
+function streakInfo(){
+  const days=new Set(myScores().map(s=>s.day));
+  for(let r=0;r<ROUNDS;r++) if(loadSt(r).done) days.add(TODAY);
+  let s=0,d=days.has(TODAY)?TODAY:addDays(TODAY,-1);
+  while(days.has(d)){s++;d=addDays(d,-1);}
+  const sorted=[...days].sort(); let best=0,run=0,prev=null;
+  sorted.forEach(x=>{run=(prev&&dayNum(x)-dayNum(prev)===1)?run+1:1;best=Math.max(best,run);prev=x;});
+  return {cur:s,best:Math.max(best,s),days};
+}
+function dayTotal(){let t=0;for(let r=0;r<ROUNDS;r++){const x=loadSt(r);if(x.done)t+=x.points;}return t}
+function allDone(){for(let r=0;r<ROUNDS;r++)if(!loadSt(r).done)return false;return true}
+function firstOpen(){for(let r=0;r<ROUNDS;r++)if(!loadSt(r).done)return r;return ROUNDS-1}
+function doneCount(){let n=0;for(let r=0;r<ROUNDS;r++)if(loadSt(r).done)n++;return n}
+function avatar(p,size){return "<span class='av' style='width:"+size+"px;height:"+size+"px;font-size:"+Math.round(size*.55)+"px'>"+esc((p&&p.emoji)||"🙂")+"</span>"}
+
+function renderHome(){
+  if(!ME) return;
+  $("homeAv").textContent=ME.emoji||"👤";
+  $("vSwitch").innerHTML=vSwitchHTML();
+  const sk=streakInfo(), n=doneCount(), done=n===ROUNDS, playedToday=sk.days.has(TODAY);
+  $("streakBig").innerHTML="<div class='n'>🔥 "+sk.cur+"</div><div class='l'>"+
+    (sk.cur===0?"Spela idag och tänd elden!":!playedToday?(sk.cur===1?"dag":"dagar")+" i rad – spela idag så brinner elden vidare!":(sk.cur===1?"dag":"dagar")+" i rad – håll elden vid liv!")+"</div>";
+  const ws=weekStart(TODAY),names=["Mån","Tis","Ons","Tor","Fre","Lör","Sön"];
+  $("week").innerHTML=names.map((nm,i)=>{const d=addDays(ws,i);let cls="",inner="";
+    if(d===TODAY){ if(done){cls="f";inner="🔥";} else {cls="t";inner=n+"/3";} }
+    else if(d<TODAY&&sk.days.has(d)){cls="f";inner="🔥";}
+    return "<div class='"+(d===TODAY?"today":"")+"'><i class='"+cls+"'>"+inner+"</i>"+nm+"</div>";}).join("");
+  const today=new Set(SCORES.filter(s=>s.day===TODAY).map(s=>s.profile_id));
+  if(n) today.add(ME.id);
+  const cnt=today.size+" har spelat idag";
+  $("playCard").innerHTML=done?"Dagens verser klara ✓<small>"+dayTotal()+" p · se resultat & topplista · "+cnt+"</small>"
+    :(n?"Fortsätt dagens verser":"Spela dagens verser")+"<small>"+n+" av 3 klar · "+cnt+"</small>";
+  const run=store.get("vjb_mara"), best=maraBest();
+  $("maraRow").innerHTML="<span class='ic'>🏃</span><span>"+(run&&!run.over&&run.n>0?"Fortsätt maraton · <b>"+run.n+"</b> i rad":"Maraton · "+(best?"rekord <b>"+best+"</b> i rad":"hur många verser klarar du i rad?"))+"</span><span class='arr'>›</span>";
+  // bästa placering idag i en grupp
+  const sc=scopeList().filter(s=>s.key.startsWith("g"));const pick=sc[0]||scopeList()[0];
+  const r=rankIn(pick,"day");const gr=$("groupRow");
+  if(GROUPS_ON&&pick.key.startsWith("g")){const gid=+pick.key.slice(1),gn=gCount(gid);gr.style.display="";gr.dataset.scope=pick.key;
+    gr.innerHTML="<span class='ic'>"+esc(pick.icon)+"</span><span><b style='color:var(--text)'>"+esc(pick.label)+"</b><br><small class='mut'>"+(gDone(gid)?"Gruppens verser klara ✓":gn+"/5 gruppverser")+(unread(gid)?" · <span style='color:var(--red)'>● nya meddelanden</span>":"")+"</small></span><span class='arr'>›</span>";}
+  else if(r.total){gr.style.display="";gr.dataset.scope=pick.key;
+    gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
+  else gr.style.display="none";
+  $("churchRow").style.display=!ME.church_id&&!store.get("vjb_church_ask")?"":"none";
+}
+$("churchRow").onclick=()=>{EDIT=true;go("onboard");};
+$("playCard").onclick=()=>{ if(allDone()) openRes(); else go("play"); };
+$("maraRow").onclick=()=>go("mara");
+$("groupRow").onclick=()=>{const sc=$("groupRow").dataset.scope;if(GROUPS_ON&&sc.startsWith("g")){openGroup(+sc.slice(1),unread(+sc.slice(1))?"chat":"verses");return;}BOARD.scope=sc;BOARD.period="day";BOARD.back="home";go("board");};
+
+/* ===== SPELET ===== */
+function fillBookCell(bc,bookIdx,cls){
+  bc.innerHTML="";const n=document.createElement("span");n.className="bn";n.textContent=BOOKS[bookIdx];bc.appendChild(n);
+  if(cls==="x"){const t=document.createElement("span");t.className="bx";t.textContent="✗ fel bok";bc.appendChild(t);}
+  if(cls==="g"){const t=document.createElement("span");t.className="bok";t.textContent="✓";bc.appendChild(t);}
+}
+function staticRow(guess,a){
+  const row=document.createElement("div");row.className="row";
+  const cls=score(guess,a), digs=(pad2(guess.c)+pad2(guess.v)).split("");
+  const bc=document.createElement("div");bc.className="c book filled "+cls.book;fillBookCell(bc,guess.b,cls.book);row.appendChild(bc);
+  digs.forEach((d,i)=>{if(i===2){const k=document.createElement("div");k.className="colon";k.textContent=":";row.appendChild(k);}
+    const c=document.createElement("div");c.className="c filled "+cls.digits[i];c.textContent=d;row.appendChild(c);});
+  return row;
+}
+function renderGrid(anim){
+  const g=$("grid");g.innerHTML="";
+  for(let r=0;r<MAX;r++){
+    const row=document.createElement("div");row.className="row";
+    const guess=st.guesses[r];let book="",digs=["","","",""],cls=null;
+    const active=r===st.guesses.length&&!st.done;
+    if(guess){book=BOOKS[guess.b];digs=(pad2(guess.c)+pad2(guess.v)).split("");cls=score(guess);}
+    else if(active){row.classList.add("active");book=cur.b===null?"":BOOKS[cur.b];digs=(cur.d+"    ").slice(0,4).split("").map(x=>x.trim());}
+    const cells=[];const bc=document.createElement("div");
+    bc.className="c book"+(cls?" "+cls.book:"")+(book?" filled":" empty");
+    if(guess)fillBookCell(bc,guess.b,cls.book);else bc.textContent=book||(active?"Bok":"");
+    if(active)bc.onclick=openBooks;
+    row.appendChild(bc);cells.push(bc);
+    digs.forEach((d,i)=>{if(i===2){const k=document.createElement("div");k.className="colon";k.textContent=":";row.appendChild(k);}
+      const c=document.createElement("div");c.className="c"+(cls?" "+cls.digits[i]:"")+(d?" filled":"");c.textContent=d;row.appendChild(c);cells.push(c);});
+    if(anim&&anim.row===r){if(anim.win)row.classList.add("win");else cells.forEach((c,i)=>{c.classList.add("drop");c.style.animationDelay=(i*STAGGER)+"ms";});}
+    g.appendChild(row);
+  }
+  renderHint();
+  $("chooseBtn").textContent=cur.b===null?"Välj bok":BOOKS[cur.b];
+  $("okBtn").disabled=!(cur.b!==null&&cur.d.length===4)||busy;
+}
+let lastHintKey="";
+function renderHint(){
+  const last=st.guesses[st.guesses.length-1];
+  const h=$("hint"),cb=$("chooseBtn"),bookCell=document.querySelector(".row.active .c.book");
+  cb.classList.remove("pulse");bookCell&&bookCell.classList.remove("pulse");
+  if(st.done||busy){h.innerHTML="&nbsp;";lastHintKey="";return;}
+  if(last){const earlier=cmp(last)<0,key="d"+MODE+(MODE==="mara"?RUN.n:R)+"_"+st.guesses.length;
+    h.innerHTML="<span class='dir"+(key!==lastHintKey?" pop":"")+"'><span class='arr'>"+(earlier?"⬆":"⬇")+"</span>Versen står <b>"+(earlier?"TIDIGARE":"SENARE")+"</b> i Bibeln</span>";lastHintKey=key;return;}
+  lastHintKey="";
+  if(cur.b===null){h.innerHTML="<span class='guide'>👇 Börja med att trycka på <b>Välj bok</b></span>";cb.classList.add("pulse");bookCell&&bookCell.classList.add("pulse");}
+  else if(cur.d.length<4)h.innerHTML="<span class='guide'>Skriv <b>kapitel</b> och <b>vers</b> med siffrorna, t.ex. <b>06 03</b></span>";
+  else h.innerHTML="<span class='guide'>Tryck på <b>✓</b> för att gissa</span>";
+}
+function fitVerse(){const box=$("verseBox"),v=$("verse");let s=21;v.style.fontSize=s+"px";while(s>12&&v.scrollHeight>box.clientHeight-6){s-=.5;v.style.fontSize=s+"px";}}
+addEventListener("resize",()=>{if(SCREEN==="play")fitVerse()});
+function buildPad(){
+  const p=$("pad");
+  [0,1,2,3,4,"⌫",5,6,7,8,9,"✓"].forEach(k=>{const b=document.createElement("button");b.textContent=k;
+    if(k==="✓"){b.className="ok";b.id="okBtn";b.onclick=submit;}else if(k==="⌫")b.onclick=back;else b.onclick=()=>typeDigit(String(k));p.appendChild(b);});
+  $("chooseBtn").onclick=openBooks;
+  document.addEventListener("keydown",e=>{if(SCREEN!=="play"||st.done||busy||document.querySelector(".modal.on"))return;
+    if(/^[0-9]$/.test(e.key))typeDigit(e.key);else if(e.key==="Backspace")back();else if(e.key==="Enter")submit();});
+}
+function typeDigit(k){if(busy||st.done)return;if(cur.d.length<4){cur.d+=k;renderGrid();}}
+function back(){if(busy||st.done)return;cur.d=cur.d.slice(0,-1);renderGrid();}
+function shake(){const r=document.querySelector(".row.active");if(r){r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");}}
+function calcPoints(){const n=st.guesses.length;
+  if(st.guesses.some(g=>cmp(g)===0))return PTS_WIN[n-1];
+  if(st.guesses.some(g=>g.b===ANS.b&&g.c===ANS.c))return PTS_BOOKCH;
+  if(st.guesses.some(g=>g.b===ANS.b))return PTS_BOOK;return 0;}
+function submit(){
+  if(st.done||busy)return;
+  if(cur.b===null){toast("Välj en bok först");shake();return;}
+  if(cur.d.length<4){toast("Skriv kapitel och vers, t.ex. 06:03");shake();return;}
+  const g={b:cur.b,c:+cur.d.slice(0,2),v:+cur.d.slice(2)};
+  const badgesBefore=earnedBadges();
+  st.guesses.push(g);
+  const won=cmp(g)===0;
+  if(won||st.guesses.length>=MAX){st.done=true;st.won=won;st.points=calcPoints();}
+  saveSt();
+  cur={b:possibleBooks()[cur.b]?cur.b:null,d:""};
+  busy=true;renderGrid({row:st.guesses.length-1,win:won});
+  const wait=won?650:4*STAGGER+DROP_MS;
+  setTimeout(()=>{busy=false;renderGrid();renderRounds();
+    if(st.guesses.length===1&&!st.done)maybeLegend();
+    if(st.done){if(MODE==="mara")maraDone(true);else if(MODE==="group")groupRoundDone(true);else finish(true);const nb=earnedBadges().filter(b=>!badgesBefore.includes(b));if(nb.length){const b=BADGES.find(x=>x.id===nb[0]);setTimeout(()=>toast("🏅 Nytt märke: "+b.e+" "+b.name+"!",3200),900);}}
+  },wait);
+}
+function openBooks(){
+  if(st.done||busy)return;
+  const ok=possibleBooks();
+  const item=i=>"<button class='bk"+(ok[i]?"":" dim")+(cur.b===i?" sel":"")+"' data-b='"+i+"'>"+BOOKS[i]+"</button>";
+  let h="<h4>Gamla testamentet</h4><div class='ot'>";for(let i=0;i<39;i++)h+=item(i);
+  h+="</div><h4>Nya testamentet</h4><div class='nt'>";for(let i=39;i<66;i++)h+=item(i);h+="</div><div class='pad-b'></div>";
+  $("bookList").innerHTML=h;$("bookModal").classList.add("on");
+  const first=cur.b!==null?cur.b:ok.indexOf(true);const el=$("bookList").querySelector("[data-b='"+first+"']");
+  $("bookSheet").scrollTop=el&&st.guesses.length?Math.max(0,el.offsetTop-90):0;
+}
+$("bookList").onclick=e=>{const b=e.target.closest("button[data-b]");if(!b)return;cur.b=+b.dataset.b;$("bookModal").classList.remove("on");renderGrid();};
+
+/* färgförklaring */
+function legendHTML(){return "<div class='legend'><button class='lx' aria-label='Stäng'>✕</button><b style='font-size:14px'>Så läser du färgerna</b>"+
+  "<div class='li'><i style='background:var(--green);color:#fff'>1</i>Rätt siffra på <b>rätt plats</b></div>"+
+  "<div class='li'><i style='background:var(--yellow);color:#1c160d'>4</i>Siffran <b>finns</b> i svaret, men på <b>fel plats</b></div>"+
+  "<div class='li'><i style='background:var(--gray);color:#fff'>0</i>Siffran finns inte (där)</div>"+
+  "<div class='li'><span class='tag'>✗ fel bok</span>Det är inte den här boken</div>"+
+  "<div class='lbtns'><button class='pri lshow'>Jag har förstått – fortsätt spela</button></div><div style='font-size:11.5px;color:var(--muted);text-align:center;margin-top:6px'>Du hittar förklaringen igen under ?</div></div>"}
+function showLegend(){$("legendBox").innerHTML=legendHTML();}
+function maybeLegend(){if(!store.get("vjb_legend_n")){store.set("vjb_legend_n",99);showLegend();}}
+$("legendBox").addEventListener("click",e=>{
+  if(e.target.closest(".lnever")){store.set("vjb_legend_n",99);$("legendBox").innerHTML="";toast("Okej! Du hittar förklaringen under ? om du behöver den.");return;}
+  if(e.target.closest(".lx")||e.target.closest(".lshow"))$("legendBox").innerHTML="";});
+$("showLegendBtn").onclick=()=>{$("infoModal").classList.remove("on");if(SCREEN!=="play")go("play");showLegend();};
+
+function renderRounds(){
+  const el=$("rounds");el.innerHTML="";el.style.flexDirection=MODE==="mara"?"column":"";
+  if(MODE==="mara"){el.innerHTML="<div class='mcount'><span class='n'>"+RUN.n+"</span><span class='l'>"+(RUN.n===1?"vers":"verser")+"<br>i rad</span><span class='rb'>Rekord "+maraBest()+"</span></div><div class='mcred'>Valters spelläge · klara versen så kommer nästa</div>";return;}
+  if(MODE==="group"){for(let r=0;r<GROUND;r++){const x=gLoad(GID,r),b=document.createElement("button");const unlocked=r===0||gLoad(GID,r-1).done;
+    b.className=(r===R?"cur ":"")+(x.done?"done":"");b.innerHTML=(r+1)+(x.done?" · <b>"+x.points+"</b>":"");b.disabled=!unlocked;b.onclick=()=>{if(!busy&&unlocked&&r!==R)loadGroupRound(GID,r);};el.appendChild(b);}return;}
+  for(let r=0;r<ROUNDS;r++){const x=loadSt(r),b=document.createElement("button");const unlocked=r===0||loadSt(r-1).done;
+    b.className=(r===R?"cur ":"")+(x.done?"done":"");b.innerHTML="Vers "+(r+1)+(x.done?" · <b>"+x.points+" p</b>":"");
+    b.disabled=!unlocked;b.onclick=()=>{if(!busy&&unlocked&&r!==R)loadRound(r);};el.appendChild(b);}
+}
+function setPlayHeader(){
+  if(MODE==="group"){const g=grpInfo(GID);$("playTitle").textContent=(g.emoji||"👥")+" "+g.name;$("playTitle").style.fontSize="19px";$("playHome").textContent="←";return;}
+  $("playTitle").innerHTML=MODE==="mara"?"🏃 Maraton":"Vers<span>jakten</span>"+BADGE;
+  $("playTitle").style.fontSize=MODE==="mara"?"21px":"";
+  $("playHome").textContent=MODE==="mara"?"✕":"🏠";
+}
+$("playHome").onclick=()=>{if(MODE==="group")openGroup(GID,"verses");else go("home");};
+function loadRound(r){
+  MODE="day";setPlayHeader();
+  R=r;ANS=ansFor(r);st=loadSt(r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  if(st.done)finish(false);else{$("controls").style.display="";$("donebar").style.display="none";}
+  fitVerse();
+}
+function finish(fresh){
+  $("controls").style.display="none";$("hint").innerHTML="&nbsp;";renderRounds();
+  const d=$("donebar");d.style.display="block";const done=allDone();
+  const cheer=st.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][st.guesses.length-1]:"Inte den här gången.";
+  let h="<div class='l1'>"+cheer+" "+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
+  h+=done?"<div class='l2'>Dagens total <b>"+dayTotal()+" p</b> · Nya verser om <b class='cd'></b></div>":"<div class='l2'>Dagens total hittills <b>"+dayTotal()+" p</b></div>";
+  h+="<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(done?"<button class='btn' id='resBtn'>Resultat</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
+  d.innerHTML=h;
+  $("ctxBtn").onclick=()=>openCtx(ANS);
+  if(done)$("resBtn").onclick=openRes;else $("nextBtn").onclick=()=>loadRound(firstOpen());
+  tick();fitVerse();
+  saveScores();
+  if(GROUPS_ON&&fresh&&done)MYGROUPS.forEach(g=>postResult(g.id,"d","klarade dagens 3 verser: "+dayTotal()+" p ("+[0,1,2].map(r=>loadSt(r).points).join("·")+")"));
+}
+async function saveScores(){
+  if(!DB_ON||!ME)return;
+  let changed=false;
+  for(let r=0;r<ROUNDS;r++){const s=loadSt(r);if(!s.done||s.saved)continue;
+    try{const res=await rpc("submit_score",{p_code:ME.code,p_day:TODAY,p_round:r+1,p_attempts:s.guesses.length,p_solved:!!s.won,p_points:s.points,p_guesses:s.guesses.map(g=>({b:g.b,c:g.c,v:g.v}))});
+      s.saved=true;store.set(skey(r),s);if(r===R)st.saved=true;changed=true;
+      if(!SCORES.some(x=>x.profile_id===ME.id&&x.day===TODAY&&x.round===r+1))SCORES.push({profile_id:ME.id,day:TODAY,round:r+1,attempts:s.guesses.length,solved:!!s.won,points:s.points,guesses:s.guesses});
+    }catch(e){toast("Kunde inte spara: "+e.message);break;}
+  }
+  if(changed) loadAll();
+}
+
+/* ---- om versen (sammanhang + bokfakta) ---- */
+function chapterUrl(a){return yvUrl(a.b,a.c)}
+function openCtx(a){
+  const info=BOOKINFO[a.b];
+  $("ctxBody").innerHTML="<h2>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</h2><div class='ctx'>"+esc(a.t)+"</div>"+
+    "<a class='btn ghost' href='"+chapterUrl(a)+"' target='_blank' rel='noopener'>📖 Läs hela kapitel "+a.c+"</a><p class='mut' style='font-size:11.5px;text-align:center;margin:4px 0 0'>Öppnas i YouVersion-appen om du har den, annars på bible.com</p>"+
+    "<div class='card' style='margin-top:12px'><h2 style='font-size:18px'>Om "+esc(BOOKS[a.b])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div></div>"+
+    (MODE==="group"?"":MODE==="mara"?(RUN&&!RUN.over?"<button class='btn' id='ctxNext'>Nästa vers →</button>":""):allDone()?"<button class='btn' data-close id='ctxRes'>Se resultat</button>":"<button class='btn' data-close id='ctxNext'>Nästa vers →</button>")+
+    "<button class='btn ghost' data-close>Stäng</button>";
+  $("ctxModal").classList.add("on");
+  const n=$("ctxNext");if(n)n.onclick=()=>{$("ctxModal").classList.remove("on");if(MODE==="mara")maraNext();else loadRound(firstOpen());};
+  const rr=$("ctxRes");if(rr)rr.onclick=()=>{$("ctxModal").classList.remove("on");openRes();};
+}
+function openRes(){
+  const t=dayTotal(),parts=[];
+  for(let r=0;r<ROUNDS;r++){const x=loadSt(r),a=ansFor(r);parts.push("<tr><td>Vers "+(r+1)+"</td><td>"+(x.done?esc(BOOKS[a.b]+" "+a.c+":"+a.v):"<span class='mut'>Ej spelad</span>")+"</td><td class='n'>"+(x.done?x.points+" p":"–")+"</td></tr>");}
+  const title=!allDone()?"Dagens verser":t>=100?"Fantastisk dag!":t>=50?"Bra jobbat!":t>0?"Det blev några poäng":"Inte idag";
+  $("resBody").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin:10px 0'>"+parts.join("")+"</table>"+
+    "<p class='mut' style='text-align:center'>Nya verser om <b class='cd' style='color:var(--text)'></b></p>"+
+    AD_HTML+(GROUPS_ON&&MYGROUPS.length&&allDone()?"<div class='sec'>"+esc((MYGROUPS[0].emoji||"👥")+" "+MYGROUPS[0].name)+" idag</div>"+rowsTable(aggregate("g"+MYGROUPS[0].id,"day"),true):"")+
+    "<button class='btn' id='resBoard'>🏆 Topplistan</button>"+INVITE_BTN+"<button class='btn ghost' id='resPlay'>Visa mina gissningar</button><button class='btn ghost' id='resHome'>Till startsidan</button>";
+  $("resModal").classList.add("on");tick();
+  $("resBoard").onclick=()=>{$("resModal").classList.remove("on");BOARD.back=SCREEN;go("board");};
+  $("resPlay").onclick=()=>{$("resModal").classList.remove("on");go("play");};
+  $("resHome").onclick=()=>{$("resModal").classList.remove("on");go("home");};
+}
+function tick(){
+  const now=new Date();let txt;
+  if(sthlmDate(now)!==TODAY)txt="nu – ladda om sidan";
+  else{const p=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(now);
+    const g=t=>+p.find(x=>x.type===t).value;const left=86400-(g("hour")*3600+g("minute")*60+g("second"));
+    txt=pad2(Math.floor(left/3600))+":"+pad2(Math.floor(left%3600/60))+":"+pad2(left%60);}
+  document.querySelectorAll(".cd").forEach(e=>e.textContent=txt);
+}
+
+/* ===== MARATON ===== */
+function maraBest(){const loc=store.get("vjb_mara_best")||0;let srv=0;if(ME)MRUNS.forEach(m=>{if(m.profile_id===ME.id&&m.length>srv)srv=m.length;});return Math.max(loc,srv)}
+function verseObj(i){const [b,c,v,t]=VERSES[i];return {b,c,v,t}}
+function todayIdx(){const dn=dayNum(TODAY)-dayNum(START_DAY);return [0,1,2].map(r=>((dn*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length)}
+function pickMaraVerse(used){
+  const ban=new Set(todayIdx().concat(used));let i,tries=0;
+  do{i=Math.floor(Math.random()*VERSES.length);tries++;}while(ban.has(i)&&tries<1000);
+  return i;
+}
+function newRun(){const c=pickMaraVerse([]);RUN={n:0,used:[c],cur:c,st:{guesses:[],done:false},over:false,startBest:maraBest()};store.set("vjb_mara",RUN);}
+function loadMara(){
+  MODE="mara";setPlayHeader();
+  RUN=store.get("vjb_mara");
+  if(!RUN||RUN.over||!RUN.st)newRun();
+  ANS=verseObj(RUN.cur);st=RUN.st;cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  if(st.done&&st.won)maraDone(false);else{$("controls").style.display="";$("donebar").style.display="none";}
+  fitVerse();
+}
+function maraNext(){
+  const c=pickMaraVerse(RUN.used.slice(-350));RUN.cur=c;RUN.used.push(c);if(RUN.used.length>350)RUN.used=RUN.used.slice(-350);
+  RUN.st={guesses:[],done:false};store.set("vjb_mara",RUN);loadMara();
+}
+function maraDone(fresh){
+  $("controls").style.display="none";$("hint").innerHTML="&nbsp;";
+  const ref=esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v),d=$("donebar");d.style.display="block";
+  if(st.won){
+    if(fresh){RUN.n++;store.set("vjb_mara",RUN);if(RUN.n>(store.get("vjb_mara_best")||0))store.set("vjb_mara_best",RUN.n);}
+    renderRounds();
+    d.innerHTML="<div class='l1'>✓ "+ref+" · <b>"+RUN.n+" i rad</b></div><div class='l2'>"+(RUN.n>RUN.startBest?"🎉 Nytt rekord!":"Rekord: <b>"+maraBest()+"</b> · "+(maraBest()-RUN.n+1)+" kvar till nytt rekord")+"</div>"+
+      "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button><button class='btn' id='nextBtn'>Nästa vers →</button></div>";
+    $("ctxBtn").onclick=()=>openCtx(ANS);$("nextBtn").onclick=maraNext;
+  } else {
+    d.innerHTML="<div class='l1'>Slut! Rätt svar: "+ref+"</div><div class='l2'>Du klarade <b>"+RUN.n+"</b> i rad</div>"+
+      "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button><button class='btn' id='againBtn'>Kör igen</button></div>";
+    $("ctxBtn").onclick=()=>openCtx(ANS);$("againBtn").onclick=()=>{newRun();loadMara();};
+    if(fresh)maraOver();
+  }
+  fitVerse();
+}
+function maraRows(scope){
+  const set=playersIn(scope),best={};
+  MRUNS.forEach(m=>{if(set&&!set.has(m.profile_id))return;if(!best[m.profile_id]||m.length>best[m.profile_id])best[m.profile_id]=m.length;});
+  if(ME&&(!set||set.has(ME.id))){const b=maraBest();if(b>0&&(!best[ME.id]||b>best[ME.id]))best[ME.id]=b;}
+  return Object.entries(best).map(([id,len])=>({id,len})).sort((a,b)=>b.len-a.len);
+}
+function maraTable(rows,limit){
+  const meI=ME?rows.findIndex(r=>r.id===ME.id):-1;
+  const row=(r,i)=>{const p=PROFILES[r.id]||(ME&&r.id===ME.id?ME:{name:"?"});return "<div class='row2"+(ME&&r.id===ME.id?" me":"")+"'><span class='rk'>"+(i+1)+"</span>"+esc((p.emoji||"🙂")+" "+p.name)+"<b>"+r.len+" i rad</b></div>";};
+  let h=rows.slice(0,limit).map(row).join("");
+  if(meI>=limit)h+="<div class='row2' style='justify-content:center;color:var(--muted)'>…</div>"+row(rows[meI],meI);
+  return h||"<div class='empty'>Ingen har sprungit maraton här än.</div>";
+}
+async function maraOver(){
+  RUN.over=true;store.set("vjb_mara",RUN);
+  const n=RUN.n,rec=n>0&&n>RUN.startBest;
+  if(DB_ON&&ME&&n>0){try{await rpc("submit_marathon",{p_code:ME.code,p_length:n,p_fell_on:RUN.cur});MRUNS.push({profile_id:ME.id,length:n});}catch(e){console.warn("maraton",e);}}
+  const sc=scopeList().filter(s=>s.key.startsWith("g"))[0]||scopeList()[0];
+  const ref=esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v);
+  $("maraBody").innerHTML="<div class='over'><div class='big'>"+n+"</div><h2>"+(rec?"Nytt rekord! 🎉":n===0?"Oj, ute direkt!":n<5?"Bra försök!":"Starkt lopp!")+"</h2>"+
+    "<div class='died'>Du föll på <b>"+ref+"</b></div>"+(rec?"":"<div class='rec'>Ditt rekord: "+maraBest()+" i rad</div>")+"</div>"+
+    "<div class='mlb'><h3>Längsta maraton · "+esc(sc.label)+"</h3>"+maraTable(maraRows(sc.key),5)+"</div>"+
+    "<p class='mut' style='text-align:center;font-size:12px;margin:10px 0 0'>🏃 Maraton är <b style='color:var(--text)'>Valters</b> idé – tack Valter! 🙌</p><button class='btn' id='maraAgain'>Kör igen</button><button class='btn ghost' id='maraCtx'>📖 Läs om "+ref+"</button>"+
+    AD_HTML+
+    "<button class='btn ghost' data-close>Visa mina gissningar</button><button class='btn ghost' id='maraHome'>Till startsidan</button>";
+  setTimeout(()=>$("maraModal").classList.add("on"),700);
+  $("maraAgain").onclick=()=>{$("maraModal").classList.remove("on");newRun();loadMara();};
+  $("maraCtx").onclick=()=>{$("maraModal").classList.remove("on");openCtx(ANS);};
+  $("maraHome").onclick=()=>{$("maraModal").classList.remove("on");go("home");};
+}
+
+/* ===== TOPPLISTOR ===== */
+let BOARD={scope:"all",period:"day",back:"home"};
+function scopeList(){
+  const l=[{key:"all",icon:"🇸🇪",label:"Hela Sverige"}];
+  if(ME&&ME.church_id)l.push({key:"church",icon:"⛪",label:churchLabel(ME.church_id)});
+  if(ME&&ME.city)l.push({key:"city",icon:"📍",label:ME.city.trim()});
+  MYGROUPS.forEach(g=>l.push({key:"g"+g.id,icon:g.emoji||"👥",label:g.name}));
+  return l;
+}
+function playersIn(scope){
+  if(scope==="all")return null;
+  if(scope==="church")return new Set(Object.values(PROFILES).filter(p=>ME&&p.church_id&&p.church_id===ME.church_id).map(p=>p.id));
+  if(scope==="city")return new Set(Object.values(PROFILES).filter(p=>ME&&sameCity(p.city,ME.city)).map(p=>p.id));
+  if(scope.startsWith("g")){const gid=+scope.slice(1);return new Set(MEMBERS.filter(m=>m.group_id===gid).map(m=>m.profile_id));}
+  return null;
+}
+function aggregate(scope,period){
+  const set=playersIn(scope);
+  const from=period==="day"?TODAY:period==="week"?weekStart(TODAY):"0000";
+  const agg={};
+  SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;if(set&&!set.has(s.profile_id))return;
+    const a=agg[s.profile_id]||(agg[s.profile_id]={id:s.profile_id,pts:0,n:0,w:0,parts:[null,null,null]});
+    a.pts+=s.points;a.n++;if(s.solved)a.w++;if(s.day===TODAY)a.parts[s.round-1]=s.points;});
+  return Object.values(agg).sort((a,b)=>b.pts-a.pts||b.w-a.w);
+}
+function rankIn(sc,period){const rows=aggregate(sc.key,period);const i=ME?rows.findIndex(r=>r.id===ME.id):-1;return {rank:i>=0?i+1:0,total:rows.length}}
+function playerCell(p,clickable){
+  const inner="<span class='em'>"+esc((p&&p.emoji)||"🙂")+"</span><span>"+(clickable?"<u>"+esc(p.name)+"</u> ›":esc(p?p.name:"?"))+(profChurch(p)||(p&&p.city)?"<small>"+esc(profChurch(p)||p.city)+"</small>":"")+"</span>";
+  return clickable?"<button class='pname pl' data-p='"+esc(p.id)+"'>"+inner+"</button>":"<span class='pl'>"+inner+"</span>";
+}
+function renderBoard(){
+  const scopes=scopeList().concat([{key:"league",icon:"⛪",label:"Församlingsligan"}]);
+  if(!scopes.some(s=>s.key===BOARD.scope))BOARD.scope="all";
+  $("scopes").innerHTML=scopes.map(s=>"<button data-s='"+esc(s.key)+"' class='"+(s.key===BOARD.scope?"on":"")+"'>"+esc(s.icon+" "+s.label)+"</button>").join("");
+  [...$("ptabs").children].forEach(b=>b.classList.toggle("on",b.dataset.t===BOARD.period));
+  let html="";
+  if(BOARD.period==="mara"){
+    html="<div class='mlb' style='margin-top:4px'><h3>🏃 Längsta maraton</h3>"+maraTable(maraRows(BOARD.scope==="league"?"all":BOARD.scope),50)+"</div>"+
+      "<button class='btn' data-go='mara'>Spring ett maraton</button>";
+  } else if(BOARD.scope==="league"){
+    const from=BOARD.period==="day"?TODAY:BOARD.period==="week"?weekStart(TODAY):"0000";
+    const per={};
+    SCORES.forEach(s=>{if(s.day<from||s.day>TODAY)return;const p=PROFILES[s.profile_id];if(!p||!p.church_id||!CHURCHES[p.church_id])return;
+      const k=p.church_id;const c=per[k]||(per[k]={id:k,name:churchLabel(k),pts:0,players:new Set()});c.pts+=s.points;c.players.add(s.profile_id);});
+    const rows=Object.values(per).map(c=>({...c,avg:Math.round(c.pts/c.players.size)})).sort((a,b)=>b.avg-a.avg);
+    html=rows.length?"<table><tr><th></th><th>Församling</th><th class='n'>Spelare</th><th class='n'>Snitt</th></tr>"+rows.map((c,i)=>"<tr class='"+(ME&&c.id===ME.church_id?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>⛪ "+esc(c.name)+"</td><td class='n'>"+c.players.size+"</td><td class='n'>"+c.avg+" p</td></tr>").join("")+"</table><p class='mut' style='font-size:12px'>Snitt = poäng per spelare under perioden.</p>"
+      :"<div class='empty'>Inga församlingar har spelat "+(BOARD.period==="day"?"idag":"än")+".</div>";
+  } else {
+    const rows=aggregate(BOARD.scope,BOARD.period);
+    const canCmp=doneCount()>0;
+    if(BOARD.period==="day"){
+      html="<table><tr><th></th><th>Namn</th><th>1·2·3</th><th class='n'>P</th></tr>"+rows.map((a,i)=>{const p=PROFILES[a.id]||{id:a.id,name:"?"};const me=ME&&a.id===ME.id;
+        return "<tr class='"+(me?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+playerCell(p,!me&&canCmp)+"</td><td class='mut' style='font-size:12px'>"+a.parts.map(x=>x===null?"–":x).join("·")+"</td><td class='n'>"+a.pts+"</td></tr>";}).join("")+"</table>";
+      if(!rows.length)html="<div class='empty'>Ingen har spelat idag än. Bli först!</div>";
+      else if(!canCmp)html+="<p class='mut' style='font-size:12px'>Spela en vers för att kunna jämföra dina gissningar med andras.</p>";
+      else html+="<p class='mut' style='font-size:12px'>Tryck på ett namn för att jämföra gissningar.</p>";
+    } else {
+      html=rows.length?"<table><tr><th></th><th>Namn</th><th class='n'>Verser</th><th class='n'>Poäng</th></tr>"+rows.map((a,i)=>{const p=PROFILES[a.id]||{name:"?"};
+        return "<tr class='"+(ME&&a.id===ME.id?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+playerCell(p,false)+"</td><td class='n'>"+a.n+"</td><td class='n'>"+a.pts+"</td></tr>";}).join("")+"</table>":"<div class='empty'>Inga resultat än.</div>";
+    }
+  }
+  $("boardBody").innerHTML=html+(BOARD.scope.startsWith("g")?"":INVITE_BTN);
+}
+$("scopes").onclick=e=>{const b=e.target.closest("button[data-s]");if(!b)return;BOARD.scope=b.dataset.s;renderBoard();};
+$("ptabs").onclick=e=>{const b=e.target.closest("button[data-t]");if(!b)return;BOARD.period=b.dataset.t;renderBoard();};
+$("boardBack").onclick=()=>go(BOARD.back==="board"?"home":BOARD.back||"home");
+$("boardBody").addEventListener("click",e=>{const b=e.target.closest(".pname");if(b)openCompare(b.dataset.p);});
+
+/* jämför */
+let CMP={p:null,r:0};
+function openCompare(pid){const mine=[0,1,2].filter(r=>loadSt(r).done);if(!mine.length)return;CMP={p:pid,r:mine.includes(R)?R:mine[mine.length-1]};renderCompare();$("cmpModal").classList.add("on");}
+function renderCompare(){
+  const {p,r}=CMP,a=ansFor(r),prof=PROFILES[p]||{name:"?"};
+  $("cmpTabs").innerHTML=[0,1,2].map(i=>{const mine=loadSt(i),ok=mine.done;const th=SCORES.find(x=>x.profile_id===p&&x.day===TODAY&&x.round===i+1);
+    return "<button data-r='"+i+"' class='ctab"+(i===r?" on":"")+"' "+(ok?"":"disabled")+"><b>Vers "+(i+1)+"</b><small>"+(!ok?"spela först":(th?th.points:"–")+" – "+mine.points)+"</small></button>";}).join("");
+  $("cmpTitle").textContent="Du mot "+prof.name;$("cmpRef").textContent=BOOKS[a.b]+" "+a.c+":"+a.v;
+  const th=SCORES.find(x=>x.profile_id===p&&x.day===TODAY&&x.round===r+1);
+  const box=(label,guesses,pts)=>{const w=document.createElement("div");w.className="cmpbox";
+    const h=document.createElement("div");h.className="cmph";const l=document.createElement("span");l.textContent=label;h.appendChild(l);const b=document.createElement("b");b.textContent=pts==null?"–":pts+" p";h.appendChild(b);w.appendChild(h);
+    const g=document.createElement("div");g.className="grid minig";
+    if(!guesses||!guesses.length){const e=document.createElement("div");e.className="empty";e.textContent=pts!=null?"Gissningarna finns inte sparade för den här versen.":label+" har inte spelat den här versen än.";g.appendChild(e);}
+    else guesses.forEach(x=>g.appendChild(staticRow(x,a)));w.appendChild(g);return w;};
+  const body=$("cmpBody");body.innerHTML="";
+  body.appendChild(box((prof.emoji||"")+" "+prof.name,th?th.guesses:null,th?th.points:null));
+  const me=loadSt(r);body.appendChild(box((ME.emoji||"")+" Du",me.guesses,me.points));
+}
+$("cmpTabs").onclick=e=>{const b=e.target.closest("button[data-r]");if(!b||b.disabled)return;CMP.r=+b.dataset.r;renderCompare();};
+
+/* ===== BIBELRESAN ===== */
+function myHistory(){ // [{day,round,solved,points,b}]
+  const list=myScores().map(s=>({day:s.day,round:s.round,solved:s.solved,points:s.points,b:ansForDay(s.day,s.round-1).b}));
+  for(let r=0;r<ROUNDS;r++){const x=loadSt(r);if(x.done&&!list.some(l=>l.day===TODAY&&l.round===r+1))list.push({day:TODAY,round:r+1,solved:!!x.won,points:x.points,b:ansFor(r).b});}
+  return list;
+}
+function bookStatus(){const st=Array(66).fill(0);myHistory().forEach(h=>{st[h.b]=Math.max(st[h.b],h.solved?2:1);});return st}
+function journeyHTML(){
+  const bs=bookStatus(),found=bs.filter(x=>x===2).length;
+  const cell=i=>"<button class='"+(bs[i]===2?"g":bs[i]===1?"y":"")+"' data-b='"+i+"'>"+SHORT[i]+"</button>";
+  let h="<div class='card'><h2 class='t' style='margin:0 0 4px;font-size:19px'>🗺️ Din bibelresa</h2><div class='mut'>"+found+" av 66 böcker upptäckta. En bok blir grön när du klarar en vers i den.</div><div class='bar'><div style='width:"+Math.round(found/66*100)+"%'></div></div>";
+  h+="<div class='sec'>Gamla testamentet</div><div class='jb'>";for(let i=0;i<39;i++)h+=cell(i);
+  h+="</div><div class='sec'>Nya testamentet</div><div class='jb'>";for(let i=39;i<66;i++)h+=cell(i);
+  h+="</div><div class='lg'><span><i style='background:var(--green)'></i>Klarad</span><span><i style='background:#6b5a2c'></i>Gissad men ej klarad</span><span><i style='background:var(--cell)'></i>Ej upptäckt</span></div></div>";
+  h+="<p class='mut' style='text-align:center;font-size:12px;margin:0 0 12px'>Tryck på en bok för att läsa om den.</p>";
+  return h;
+}
+function renderStats(){
+  const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
+  let html="<button class='hello' data-go='profile' style='background:none;border:none;width:100%;text-align:left;color:var(--text);padding:0'>"+avatar(ME,54)+"<div><b>"+esc(ME.name)+"</b><small>"+esc(meLine())+" · Ändra profil ›</small></div></button>";
+  html+="<div class='card'><div class='streak'><span class='f'>🔥</span><div><b>"+sk.cur+" "+(sk.cur===1?"dag":"dagar")+" i rad</b><div class='mut'>Ditt rekord: "+sk.best+"</div></div></div>"+
+    "<div class='streak' style='margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'><span class='f'>🏃</span><div><b>"+maraBest()+" i rad</b><div class='mut'>Längsta maraton</div></div></div></div>";
+  html+=INVITE_BTN+"<div style='height:12px'></div>";
+  if(vSwitchHTML())html=vSwitchHTML()+"<div style='height:10px'></div>"+html;
+  html+="<div class='card'><div class='stats'><div><b>"+h.length+"</b><span>Verser</span></div><div><b>"+(h.length?Math.round(100*won/h.length):0)+"%</b><span>Klarade</span></div><div><b>"+bookStatus().filter(x=>x===2).length+"</b><span>Böcker</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div></div>";
+  html+="<div class='card'><h2 class='t' style='margin:0 0 10px;font-size:19px'>🏅 Märken</h2><div class='badges'>"+BADGES.map(b=>{const s=badgeState(b,h);return "<div class='badge"+(s.done?" on":"")+"'><span class='e'>"+b.e+"</span>"+b.name+(s.txt&&!s.done?"<br>"+s.txt:"")+"</div>"}).join("")+"</div></div>";
+  html+=journeyHTML();
+  $("statsBody").innerHTML=html;
+}
+$("statsBody").addEventListener("click",e=>{const b=e.target.closest("button[data-b]");if(!b)return;const i=+b.dataset.b,info=BOOKINFO[i];
+  $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div>"+
+  "<a class='btn ghost' href='"+yvUrl(i,1)+"' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
+  $("ctxModal").classList.add("on");});
+
+/* ===== MÄRKEN ===== */
+const BADGES=[
+  {id:"first",e:"🎯",name:"Rätt på första",test:h=>h.some(x=>x.points===50)},
+  {id:"gospels",e:"🕊️",name:"Evangelierna",prog:h=>new Set(h.filter(x=>x.solved&&x.b>=39&&x.b<=42).map(x=>x.b)).size,of:4},
+  {id:"prophets",e:"📜",name:"Profeterna",prog:h=>new Set(h.filter(x=>x.solved&&x.b>=22&&x.b<=38).map(x=>x.b)).size,of:5},
+  {id:"paul",e:"✉️",name:"Paulus brev",prog:h=>new Set(h.filter(x=>x.solved&&x.b>=44&&x.b<=56).map(x=>x.b)).size,of:13},
+  {id:"psalms",e:"🎵",name:"Psaltaren",prog:h=>h.filter(x=>x.solved&&x.b===18).length,of:5},
+  {id:"moses",e:"🔥",name:"Moseböckerna",prog:h=>new Set(h.filter(x=>x.solved&&x.b<=4).map(x=>x.b)).size,of:5},
+  {id:"perfect",e:"💯",name:"Perfekt dag",test:h=>{const d={};h.forEach(x=>d[x.day]=(d[x.day]||0)+x.points);return Object.values(d).some(v=>v===150)}},
+  {id:"week",e:"📅",name:"7 dagar i rad",prog:()=>streakInfo().best,of:7},
+  {id:"explorer",e:"🗺️",name:"Upptäckare",prog:()=>bookStatus().filter(x=>x===2).length,of:20},
+  {id:"mara",e:"🏃",name:"Maratonlöpare",prog:()=>maraBest(),of:20}];
+function badgeState(b,h){if(b.test)return {done:b.test(h),txt:""};const p=Math.min(b.prog(h),b.of);return {done:p>=b.of,txt:p+"/"+b.of}}
+function earnedBadges(){const h=myHistory();return BADGES.filter(b=>badgeState(b,h).done).map(b=>b.id)}
+
+/* ===== PROFIL ===== */
+function renderProfile(){
+  const h=myHistory(),sk=streakInfo(),won=h.filter(x=>x.solved).length,tot=h.reduce((a,x)=>a+x.points,0);
+  let html="<div class='hello'>"+avatar(ME,60)+"<div><b style='font-size:20px'>"+esc(ME.name)+"</b><small>"+esc(meLine())+"</small></div></div>";
+  html+="<button class='card r2' data-go='stats' style='width:100%;color:var(--text)'><span>🔥 "+sk.cur+(sk.cur===1?" dag":" dagar")+" i rad · "+earnedBadges().length+(earnedBadges().length===1?" märke":" märken")+" · "+bookStatus().filter(x=>x===2).length+(bookStatus().filter(x=>x===2).length===1?" bok":" böcker")+"</span><b>Statistik ›</b></button>";
+  html+="<div class='card'><div class='mut'>Din personliga kod – använd den för att logga in på en annan telefon:</div><div class='code'>"+esc(ME.code)+"</div><p class='mut' style='font-size:12px;margin:0'>Dela inte koden med andra, den fungerar som ett lösenord.</p></div>";
+  html+="<button class='btn ghost' id='editProfile'>✏️ Ändra namn, församling eller figur</button><button class='linkbtn' id='logout' style='display:block;margin:12px auto'>Logga ut från den här telefonen</button>";
+  $("profileBody").innerHTML=html;
+  $("editProfile").onclick=()=>{EDIT=true;go("onboard");};
+  $("logout").onclick=()=>{if(confirmLogout()){store.del("vjb_profile");ME=null;MYGROUPS=[];go("onboard");}};
+}
+function confirmLogout(){return window.confirm("Logga ut? Skriv upp din kod först: "+ME.code)}
+
+/* ===== VÄLKOMMEN / PROFIL ===== */
+let EDIT=false, PICK=EMOJIS[0];
+function renderOnboard(){
+  $("obTitle").textContent=EDIT?"Ändra profil":"Vem är du?";
+  $("obIntro").textContent=EDIT?"Ändringarna syns direkt på topplistorna.":"Skapa din profil. Den syns på topplistan och i dina grupper.";
+  $("obLogin").style.display=EDIT?"none":"";$("obCancel").style.display=EDIT?"":"none";
+  if(EDIT&&ME){$("obName").value=ME.name;$("obCity").value=ME.city||"";PICK=ME.emoji||EMOJIS[0];CHPICK=ME.church_id&&CHURCHES[ME.church_id]?{id:ME.church_id}:null;}
+  else if(!EDIT){CHPICK=null;}
+  $("obChurch").value="";$("obSugg").style.display="none";renderChurchSel();
+  $("obEmo").innerHTML=EMOJIS.map(e=>"<button data-e='"+e+"' class='"+(e===PICK?"on":"")+"'>"+e+"</button>").join("");
+  $("obSave").textContent=EDIT?"Spara ändringar":"Spara profil";
+  if(!EDIT&&!$("obName").value&&store.get("vj_name"))$("obName").value=store.get("vj_name");
+}
+$("obEmo").onclick=e=>{const b=e.target.closest("button[data-e]");if(!b)return;PICK=b.dataset.e;[...$("obEmo").children].forEach(x=>x.classList.toggle("on",x===b));};
+let CHPICK=null; // {id} eller {name:nytt namn}
+function renderChurchSel(){
+  const box=$("obChurchSel"),inp=$("obChurch");
+  if(!CHPICK){box.innerHTML="";inp.style.display="";return;}
+  const label=CHPICK.id?churchLabel(CHPICK.id):CHPICK.name+" "+($("obCity").value.trim()||"");
+  const pending=CHPICK.name||(CHPICK.id&&CHURCHES[CHPICK.id]&&!CHURCHES[CHPICK.id].approved);
+  box.innerHTML="<div class='chsel'><span>⛪ "+esc(label)+(pending?"<small>Ny – väntar på godkännande, men räknas redan för dig</small>":"")+"</span><button type='button' aria-label='Ta bort'>✕</button></div>";
+  inp.style.display="none";
+}
+$("obChurchSel").onclick=e=>{if(e.target.closest("button")){CHPICK=null;renderChurchSel();$("obChurch").focus();}};
+function churchList(){return Object.values(CHURCHES).filter(c=>c.approved||(ME&&c.created_by===ME.id))}
+const norm=t=>t.toLowerCase().replace(/\s+/g," ").trim();
+$("obChurch").oninput=()=>{const q=norm($("obChurch").value);const s=$("obSugg");
+  if(q.length<2){s.style.display="none";return;}
+  const cnt={};Object.values(PROFILES).forEach(p=>{if(p.church_id)cnt[p.church_id]=(cnt[p.church_id]||0)+1;});
+  const words=q.split(" ");
+  const hits=churchList().filter(c=>{const l=norm(c.name+" "+c.city);return words.every(w=>l.includes(w));}).sort((a,b)=>(cnt[b.id]||0)-(cnt[a.id]||0)).slice(0,5);
+  s.innerHTML=hits.map(c=>"<button type='button' data-c='"+c.id+"'>"+esc(churchLabel(c.id))+"<small>"+(cnt[c.id]||0)+" spelare</small></button>").join("")+
+    "<button type='button' class='add' data-new='1'>＋ Lägg till ”"+esc($("obChurch").value.trim())+"” som ny församling</button>";
+  s.style.display="block";};
+$("obSugg").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.new){const n=$("obChurch").value.trim();if(n.length<2)return;
+    if(!$("obCity").value.trim()){toast("Fyll i ort först, så vet vi var kyrkan ligger");$("obCity").focus();return;}
+    CHPICK={name:n};}
+  else CHPICK={id:+b.dataset.c};
+  $("obSugg").style.display="none";$("obChurch").value="";renderChurchSel();};
+$("obCity").oninput=()=>{if(CHPICK&&CHPICK.name)renderChurchSel();};
+$("obCancel").onclick=()=>{EDIT=false;store.set("vjb_church_ask",1);go("profile");};
+$("obSave").onclick=async()=>{
+  const name=$("obName").value.trim().replace(/\s+/g," "),city=$("obCity").value.trim().replace(/\s+/g," ");
+  if(name.length<2){toast("Skriv minst 2 tecken i namnet");return;}
+  if($("obChurch").value.trim()&&!CHPICK){toast("Välj en församling i listan, eller lägg till en ny");return;}
+  if(CHPICK&&CHPICK.name&&!city){toast("Fyll i ort för den nya församlingen");return;}
+  if(!DB_ON){toast("Ingen kontakt med servern");return;}
+  $("obSave").disabled=true;
+  try{
+    const r=await rpc("save_profile",{p_code:EDIT&&ME?ME.code:null,p_name:name,p_emoji:PICK,p_church_id:CHPICK&&CHPICK.id?CHPICK.id:null,p_city:city||null,p_new_church:CHPICK&&CHPICK.name?CHPICK.name:null,p_new_church_city:CHPICK&&CHPICK.name?city:null});
+    store.set("vjb_church_ask",1);
+    if(EDIT){ME={...ME,name,emoji:PICK,city:city||null,church_id:r[0].out_church_id};store.set("vjb_profile",ME);EDIT=false;await loadAll();toast("Profilen är sparad");go("profile");}
+    else{ME={id:r[0].out_id,code:r[0].out_code,name,emoji:PICK,city:city||null,church_id:r[0].out_church_id,church:null};store.set("vjb_profile",ME);
+      await loadAll();await joinFromUrl();saveScores();toast("Välkommen "+name+"! Din kod är "+ME.code,4000);go("home");}
+  }catch(e){toast(e.message);}
+  $("obSave").disabled=false;
+};
+$("obLoginBtn").onclick=()=>{$("loginModal").classList.add("on");setTimeout(()=>$("loginCode").focus(),50);};
+$("loginGo").onclick=async()=>{
+  const c=$("loginCode").value.trim().toUpperCase();if(c.length<5){toast("Skriv hela koden");return;}
+  try{const r=await rpc("login_profile",{p_code:c});if(!r.length){toast("Hittade ingen profil med den koden");return;}
+    ME=r[0];store.set("vjb_profile",ME);$("loginModal").classList.remove("on");await loadAll();await joinFromUrl();saveScores();toast("Inloggad som "+ME.name);go("home");}
+  catch(e){toast(e.message);}
+};
+
+/* ===== GRUPPER ===== */
+function renderGroups(){
+  const sc=scopeList();
+  let h="<h2 class='t'>Mina grupper</h2><div class='card'>";
+  h+=sc.map(s=>{const r=rankIn(s,"day");let sub="";
+    if(s.key==="all")sub=r.total+" har spelat idag";
+    else if(s.key==="church")sub="Din församling · "+playersIn("church").size+" spelare";
+    else if(s.key==="city")sub="Din ort · "+playersIn("city").size+" spelare";
+    else{const g=MYGROUPS.find(x=>"g"+x.id===s.key);sub="Kod "+(g?g.code:"")+" · "+playersIn(s.key).size+" medlemmar";}
+    return "<button class='grp' data-scope='"+esc(s.key)+"'><span class='ic'>"+esc(s.icon)+"</span><span><b>"+esc(s.label)+"</b><small>"+esc(sub)+"</small></span><span class='rk'>"+(r.rank?r.rank+":a":"–")+"</span></button>";}).join("");
+  h+="</div>";
+  if(!MYGROUPS.length)h+="<p class='mut'>Du är inte med i någon egen grupp än. Skapa en för ditt kompisgäng eller din ungdomsgrupp, eller gå med med en kod du har fått.</p>";
+  h+="<button class='btn' id='joinBtn'>＋ Gå med i grupp (ange kod)</button><button class='btn ghost' id='createBtn'>Skapa ny grupp</button>";
+  if(MYGROUPS.length)h+="<p class='mut' style='font-size:12px;margin-top:14px'>Tryck på en grupp för topplistan. Bjud in fler via topplistan.</p>";
+  $("groupsBody").innerHTML=h;
+  $("joinBtn").onclick=()=>{$("joinCode").value="";$("joinModal").classList.add("on");setTimeout(()=>$("joinCode").focus(),50);};
+  $("createBtn").onclick=()=>{$("newGroupName").value="";GPICK=GEMOJIS[0];$("grpEmo").innerHTML=GEMOJIS.map(e=>"<button data-e='"+e+"' class='"+(e===GPICK?"on":"")+"'>"+e+"</button>").join("");$("createModal").classList.add("on");};
+}
+$("groupsBody").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(!b)return;if(GROUPS_ON&&b.dataset.scope.startsWith("g")){openGroup(+b.dataset.scope.slice(1),"verses");return;}BOARD.scope=b.dataset.scope;BOARD.back="groups";go("board");});
+let GPICK=GEMOJIS[0];
+$("grpEmo").onclick=e=>{const b=e.target.closest("button[data-e]");if(!b)return;GPICK=b.dataset.e;[...$("grpEmo").children].forEach(x=>x.classList.toggle("on",x===b));};
+$("createGo").onclick=async()=>{const n=$("newGroupName").value.trim();if(n.length<2){toast("Skriv ett namn på gruppen");return;}
+  try{const r=await rpc("create_group",{p_code:ME.code,p_name:n,p_emoji:GPICK});$("createModal").classList.remove("on");await loadAll();renderGroups();openShare(r[0].id);}catch(e){toast(e.message);}};
+$("joinGo").onclick=async()=>{const c=$("joinCode").value.trim().toUpperCase();if(c.length<5){toast("Skriv hela koden");return;}
+  try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:c});$("joinModal").classList.remove("on");await loadAll();toast("Du är med i "+r[0].name+"!");renderGroups();}catch(e){toast(e.message);}};
+function inviteUrl(code){return location.origin+location.pathname+"?grupp="+encodeURIComponent(code)}
+let SHARE=null;
+function openShare(gid){const g=MYGROUPS.find(x=>x.id===gid);if(!g)return;SHARE=g;$("shareLeave").style.display="block";$("shareText").textContent="Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.";$("shareCode").style.cssText="";
+  $("shareTitle").textContent="Bjud in till "+g.name;$("shareCode").textContent=g.code;
+  const txt="Häng med och spela Versjakten i gruppen \""+g.name+"\"! Tre bibelverser om dagen – gissa var de står. "+inviteUrl(g.code);
+  $("shareWa").href="https://wa.me/?text="+encodeURIComponent(txt);$("shareModal").classList.add("on");}
+$("shareCopy").onclick=async()=>{const u=SHARE&&SHARE.app?appUrl():inviteUrl(SHARE.code);try{await navigator.clipboard.writeText(u);toast("Länken är kopierad");}catch(e){toast(u,5000);}};
+$("shareLeave").onclick=async()=>{if(!SHARE||!window.confirm("Lämna "+SHARE.name+"?"))return;try{await rpc("leave_group",{p_code:ME.code,p_group_id:SHARE.id});$("shareModal").classList.remove("on");await loadAll();BOARD.scope="all";go("groups");toast("Du har lämnat gruppen");}catch(e){toast(e.message);}};
+// bjud in-knapp på grupptopplistan
+const _rb=renderBoard;
+renderBoard=function(){_rb();if(BOARD.scope.startsWith("g")){const gid=+BOARD.scope.slice(1);const b=document.createElement("button");b.className="btn ghost";b.textContent="📨 Bjud in till gruppen";b.onclick=()=>openShare(gid);$("boardBody").appendChild(b);}};
+async function joinFromUrl(){
+  const code=new URLSearchParams(location.search).get("grupp");if(!code||!ME)return;
+  try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:code});await loadAll();toast("Du är med i "+r[0].name+"!",3500);}catch(e){toast(e.message);}
+  history.replaceState(null,"",location.pathname);
+}
+
+/* ===== VERSIONSBYTE (bara för admin) ===== */
+function siteBase(){return location.pathname.replace(/(beta|admin)\/?(index\.html)?$/,"").replace(/index\.html$/,"")}
+function vSwitchHTML(){
+  const p=ME&&PROFILES[ME.id];if(!p||!(p.is_admin||p.is_tester))return "";
+  const b=siteBase();
+  return "<div class='vswitch'><a href='"+b+"' class='"+(IS_BETA?"":"on")+"'>Vanlig</a><a href='"+b+"beta/' class='"+(IS_BETA?"on":"")+"'>Beta</a>"+(p.is_admin?"<a href='"+b+"admin/'>Admin</a>":"")+"</div>";
+}
+
+/* ===== GRUPPSIDA: gruppverser + chatt (bara beta) ===== */
+const GROUND=5;
+let GID=null, GRP={tab:"verses",btab:"g"}, GSCORES=[], GACT={}, CHAT={msgs:[],gid:null,prayer:false,pick:null}, chatTimer=null;
+function hstr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}h^=h>>>16;h=Math.imul(h,0x85ebca6b);h^=h>>>13;h=Math.imul(h,0xc2b2ae35);h^=h>>>16;return h>>>0}
+function dayIdx(day){const dn=dayNum(day)-dayNum(START_DAY);return [0,1,2].map(r=>((dn*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length)}
+function groupVerses(gid,day=TODAY){const pub=dayIdx(day),ban=new Set(pub),out=pub.slice();let k=0;while(out.length<GROUND){const i=hstr(gid+"|"+day+"|"+k)%VERSES.length;k++;if(!ban.has(i)&&!out.includes(i))out.push(i);}return out}
+const gkey=(gid,r,day=TODAY)=>"vjb_g"+gid+"_"+day+"_"+r;
+const gLoad=(gid,r)=>r<ROUNDS?loadSt(r):(store.get(gkey(gid,r))||{guesses:[],done:false,saved:false});
+function gDone(gid){for(let r=0;r<GROUND;r++)if(!gLoad(gid,r).done)return false;return true}
+function gCount(gid){let n=0;for(let r=0;r<GROUND;r++)if(gLoad(gid,r).done)n++;return n}
+function gTotal(gid){let t=0;for(let r=0;r<GROUND;r++){const x=gLoad(gid,r);if(x.done)t+=x.points;}return t}
+function gFirstOpen(gid){for(let r=0;r<GROUND;r++)if(!gLoad(gid,r).done)return r;return GROUND-1}
+function grpInfo(gid){const g=MYGROUPS.find(x=>x.id===gid)||GROUPS[gid]||{id:gid,name:"Grupp",emoji:"👥"};return {...g,created_by:GACT[gid]?GACT[gid].created_by:g.created_by}}
+function grpMembers(gid){return MEMBERS.filter(m=>m.group_id===gid).map(m=>m.profile_id)}
+async function loadGroupData(){
+  if(!GROUPS_ON||!ME||!MYGROUPS.length)return;
+  const ids=MYGROUPS.map(g=>g.id).join(",");
+  GSCORES=await get("group_scores?select=group_id,profile_id,day,round,points,solved,guesses&group_id=in.("+ids+")&day=gte."+addDays(TODAY,-30)+"&limit=20000").catch(()=>GSCORES);
+  const act=await rpc("my_group_activity",{p_code:ME.code}).catch(()=>null);
+  if(act){GACT={};act.forEach(a=>GACT[a.group_id]=a);}
+  updateBadges();
+}
+function unread(gid){const a=GACT[gid];return a&&a.last_id&&a.last_id>(store.get("vjb_seen_"+gid)||0)}
+function updateBadges(){const n=MYGROUPS.filter(g=>unread(g.id)).length;const b=document.querySelector('#nav [data-nav="groups"]');if(b)b.classList.toggle("dot",GROUPS_ON&&n>0);}
+function gRows(gid,from,to,local){ // summerar gruppverser per person
+  const set=new Set(grpMembers(gid)),agg={};
+  const add=(pid,day,round,pts)=>{if(day<from||day>to||!set.has(pid))return;const a=agg[pid]||(agg[pid]={id:pid,pts:0,n:0,parts:Array(GROUND).fill(null)});a.pts+=pts;a.n++;if(day===to)a.parts[round-1]=pts;};
+  SCORES.forEach(s=>add(s.profile_id,s.day,s.round,s.points));
+  GSCORES.forEach(s=>{if(s.group_id===gid&&s.round>ROUNDS)add(s.profile_id,s.day,s.round,s.points);});
+  if(local&&ME&&to===TODAY){const a=agg[ME.id]||(agg[ME.id]={id:ME.id,pts:0,n:0,parts:Array(GROUND).fill(null)});
+    for(let r=0;r<GROUND;r++){const x=gLoad(gid,r);if(x.done&&a.parts[r]===null){a.parts[r]=x.points;a.pts+=x.points;a.n++;}}}
+  return Object.values(agg).sort((a,b)=>b.pts-a.pts);
+}
+function gStreak(gid){ // dagar i rad där minst 2 i gruppen spelade gruppverserna
+  const per={},mem=new Set(grpMembers(gid));GSCORES.forEach(s=>{if(s.group_id!==gid)return;(per[s.day]=per[s.day]||new Set()).add(s.profile_id);});
+  SCORES.forEach(s=>{if(mem.has(s.profile_id))(per[s.day]=per[s.day]||new Set()).add(s.profile_id);});
+  if(ME&&gCount(gid))(per[TODAY]=per[TODAY]||new Set()).add(ME.id);
+  const ok=d=>per[d]&&per[d].size>=2;let n=0,d=ok(TODAY)?TODAY:addDays(TODAY,-1);while(ok(d)){n++;d=addDays(d,-1);}return n;
+}
+function crownInfo(gid){for(let i=0;i<14;i++){const d=addDays(TODAY,-i);const r=gRows(gid,d,d,i===0);if(r.length&&r[0].pts>0)return {id:r[0].id,day:d,pts:r[0].pts};}return null}
+function weekKing(gid){const c=crownInfo(gid);return c?c.id:null}
+function pName(id){const p=PROFILES[id]||(ME&&id===ME.id?ME:null);return p?p.name:"?"}
+function pEmoji(id){const p=PROFILES[id]||(ME&&id===ME.id?ME:null);return (p&&p.emoji)||"🙂"}
+function rowsTable(rows,parts,crown){
+  if(!rows.length)return "<div class='empty'>Ingen har spelat än – bli först!</div>";
+  return "<table>"+rows.map((a,i)=>"<tr class='"+(ME&&a.id===ME.id?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td><span class='pl'><span class='em'>"+esc(pEmoji(a.id))+"</span><span>"+esc(pName(a.id))+(crown===a.id?" 👑":"")+"</span></span></td>"+(parts?"<td class='mut' style='font-size:12px'>"+a.parts.map(x=>x===null?"–":x).join("·")+"</td>":"")+"<td class='n'>"+a.pts+"</td></tr>").join("")+"</table>";
+}
+function openGroup(gid,tab){GID=gid;if(tab)GRP.tab=tab;go("group");}
+function renderGroupPage(){
+  const g=grpInfo(GID);$("grpTitle").textContent=(g.emoji||"👥")+" "+g.name;
+  [...$("grpTabs").children].forEach(b=>{b.classList.toggle("on",b.dataset.t===GRP.tab);if(b.dataset.t==="chat")b.innerHTML="Chatt"+(unread(GID)&&GRP.tab!=="chat"?" <i class='udot'></i>":"");});
+  $("chatBar").style.display=GRP.tab==="chat"?"flex":"none";
+  clearInterval(chatTimer);
+  if(GRP.tab==="verses")renderGroupVerses();else if(GRP.tab==="chat"){renderChat();loadChat();chatTimer=setInterval(()=>{if(SCREEN==="group"&&GRP.tab==="chat")loadChat();},4000);}else renderGroupBoard();
+}
+function renderGroupVerses(){
+  const n=gCount(GID),done=n===GROUND,st2=gStreak(GID),king=weekKing(GID);
+  let h="<div class='gstats'><div><b>🔥 "+st2+"</b><span>gruppens eld</span></div><div><b>"+(king?esc(pEmoji(king)):"–")+"</b><span>"+(king?"👑 "+esc(pName(king))+(crownInfo(GID).day===TODAY?" leder idag":" vann igår"):"ingen krona än")+"</span></div><div><b>"+grpMembers(GID).length+"</b><span>medlemmar</span></div></div>";
+  h+="<button class='bigbtn' id='gPlay' style='margin-top:12px'>"+(done?"Gruppens verser klara ✓":n?"Fortsätt gruppens verser":"Spela gruppens 5 verser")+"<small>"+(done?gTotal(GID)+" p av 250 · se topplistan":n+" av 5 klar · dagens 3 + 2 extra för gruppen")+"</small></button>";
+  h+="<div class='gdots'>"+Array.from({length:GROUND},(_,r)=>{const x=gLoad(GID,r);return "<i class='"+(x.done?(x.won?"w":"l"):"")+"'>"+(x.done?x.points:r+1)+"</i>";}).join("")+"</div>";
+  if(n){h+="<div class='sec'>Idag · alla 5 verser</div>"+rowsTable(gRows(GID,TODAY,TODAY,true),true,king);}
+  h+="<p class='mut' style='font-size:12px;margin-top:12px'>De tre första är samma som dagens verser för alla, sedan kommer två extra bara för gruppen. 👑 Kronan går till den som är bäst för dagen och flyttas när någon annan vinner en dag. 🔥 Gruppens eld växer varje dag minst två i gruppen spelar.</p>";
+  h+="<button class='btn ghost' id='gInviteBtn'>📨 Bjud in till gruppen</button>";
+  $("grpBody").innerHTML=h;
+  $("gPlay").onclick=()=>{if(done){GRP.tab="board";GRP.btab="g";renderGroupPage();}else loadGroupRound(GID,gFirstOpen(GID));};
+  $("gInviteBtn").onclick=()=>openShare(GID);
+}
+function renderGroupBoard(){
+  const segs=[["g","Idag (5)"],["d","Dagens 3"],["w","Veckan"]];
+  let h="<div class='tabs' id='gbTabs' style='margin-top:4px'>"+segs.map(([k,l])=>"<button data-b='"+k+"' class='"+(GRP.btab===k?"on":"")+"'>"+l+"</button>").join("")+"</div>";
+  if(GRP.btab==="g")h+=rowsTable(gRows(GID,TODAY,TODAY,true),true,weekKing(GID));
+  else if(GRP.btab==="w")h+=rowsTable(gRows(GID,weekStart(TODAY),TODAY,true),false,weekKing(GID))+"<p class='mut' style='font-size:12px'>Summan av alla 5 verser per dag sedan måndag.</p>";
+  else{const rows=aggregate("g"+GID,"day");h+=rowsTable(rows.map(r=>({...r,parts:r.parts})),true);}
+  const mem=grpMembers(GID);
+  h+="<div class='sec'>Medlemmar ("+mem.length+")</div><div class='card' style='padding:6px 12px'>"+mem.map(id=>{const played=GSCORES.some(s=>s.group_id===GID&&s.profile_id===id&&s.day===TODAY)||(ME&&id===ME.id&&gCount(GID));
+    return "<div class='r2'><span>"+esc(pEmoji(id)+" "+pName(id))+(grpInfo(GID).created_by===id?" <small class='mut'>· skapade gruppen</small>":"")+"</span><span class='mut' style='font-size:12px'>"+(played?"✓ spelat idag":"")+"</span></div>";}).join("")+"</div>";
+  $("grpBody").innerHTML=h;
+}
+/* --- chatt --- */
+async function loadChat(){
+  if(!DB_ON||!ME||!GID)return;
+  try{const m=await rpc("get_messages",{p_code:ME.code,p_group:GID});
+    const changed=JSON.stringify(m)!==JSON.stringify(CHAT.gid===GID?CHAT.msgs:null);CHAT.msgs=m;CHAT.gid=GID;
+    if(m.length)store.set("vjb_seen_"+GID,m[m.length-1].id);if(GACT[GID]&&m.length)GACT[GID].last_id=m[m.length-1].id;updateBadges();
+    if(changed&&SCREEN==="group"&&GRP.tab==="chat")renderChat();
+  }catch(e){if(GRP.tab==="chat")$("grpBody").innerHTML="<div class='empty'>"+esc(e.message)+"</div>";}
+}
+const REACTS=["🙏","❤️","🔥","😂","👏"];
+function fmtTime(s){const d=new Date(s);const day=sthlmDate(d);const t=d.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Stockholm"});return day===TODAY?t:(day===addDays(TODAY,-1)?"igår ":new Date(s).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})+" ")+(day===TODAY?"":t)}
+function renderChat(){
+  const box=$("grpBody"),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+  const meDone=gDone(GID)&&allDone();
+  if(CHAT.gid!==GID){box.innerHTML="<div class='empty'>Laddar chatten…</div>";return;}
+  if(!CHAT.msgs.length){box.innerHTML="<div class='empty'>Inga meddelanden än.<br>Säg hej, dela en tanke om dagens vers eller lägg upp ett böneämne 🙏</div>";return;}
+  let h="",lastDay="";CHAT.king=weekKing(GID);
+  CHAT.msgs.forEach(m=>{
+    const day=sthlmDate(new Date(m.created_at));if(day!==lastDay){h+="<div class='cday'>"+(day===TODAY?"Idag":day===addDays(TODAY,-1)?"Igår":prettyDate(day))+"</div>";lastDay=day;}
+    const mine=ME&&m.profile_id===ME.id,blur=m.spoiler&&!mine&&!meDone&&day===TODAY;
+    const rx=Object.entries(m.reactions||{}).map(([e,who])=>"<button class='rx"+(ME&&who.includes(ME.id)?" me":"")+"' data-rx='"+e+"' data-m='"+m.id+"'>"+e+" "+who.length+"</button>").join("");
+    if(m.kind==="result"){h+="<div class='cres' data-msg='"+m.id+"'>"+esc(pEmoji(m.profile_id)+" "+pName(m.profile_id))+" "+esc(m.body)+" <span class='ct'>"+fmtTime(m.created_at)+"</span><div class='rxs'>"+rx+"<button class='rx add' data-pick='"+m.id+"'>＋</button></div></div>";return;}
+    h+="<div class='cm"+(mine?" mine":"")+(m.kind==="prayer"?" pray":"")+"' data-msg='"+m.id+"'>"+(mine?"":"<span class='cav'>"+esc(pEmoji(m.profile_id))+"</span>")+"<div class='cb'>"+(mine?"":"<b>"+esc(pName(m.profile_id))+(CHAT.king===m.profile_id?" 👑":"")+"</b>")+(m.kind==="prayer"?"<span class='ptag'>🙏 Böneämne</span>":"")+
+      "<div class='ctext"+(blur?" blur' data-reveal='1' title='Tryck för att visa":"")+"'>"+esc(m.body)+"</div>"+(blur?"<div class='spo'>Kan avslöja dagens verser – tryck för att visa</div>":"")+
+      "<div class='cmeta'><span class='ct'>"+fmtTime(m.created_at)+"</span><button class='rx add' data-pick='"+m.id+"'>＋</button></div>"+(rx||m.kind==="prayer"?"<div class='rxs'>"+(m.kind==="prayer"&&!(m.reactions&&m.reactions["🙏"]&&ME&&m.reactions["🙏"].includes(ME.id))?"<button class='rx pr' data-rx='🙏' data-m='"+m.id+"'>🙏 Jag ber för dig</button>":"")+rx+"</div>":"")+
+      (CHAT.pick===m.id?"<div class='rpick'>"+REACTS.map(e=>"<button data-rx='"+e+"' data-m='"+m.id+"'>"+e+"</button>").join("")+(mine||grpInfo(GID).created_by===ME.id||(PROFILES[ME.id]&&PROFILES[ME.id].is_admin)?"<button class='del' data-del='"+m.id+"'>Ta bort</button>":"")+"</div>":"")+"</div></div>";
+  });
+  box.innerHTML="<div class='chat'>"+h+"</div>";
+  if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init="1";}
+}
+async function sendChat(){
+  const inp=$("chatInp"),txt=inp.value.trim();if(!txt)return;
+  $("chatSend").disabled=true;
+  try{await rpc("send_message",{p_code:ME.code,p_group:GID,p_body:txt,p_kind:CHAT.prayer?"prayer":"msg",p_spoiler:allDone()||gDone(GID)});inp.value="";CHAT.prayer=false;$("chatPray").classList.remove("on");inp.placeholder="Skriv till gruppen…";$("grpBody").dataset.init="";await loadChat();}
+  catch(e){toast(e.message);}
+  $("chatSend").disabled=false;inp.focus();
+}
+async function postResult(gid,kind,text){ // automatiskt resultatinlägg, en gång per dag och grupp
+  const k="vjb_posted_"+kind+"_"+gid+"_"+TODAY;if(store.get(k)||!DB_ON||!ME)return;
+  try{await rpc("send_message",{p_code:ME.code,p_group:gid,p_body:text,p_kind:"result",p_spoiler:false});store.set(k,1);}catch(e){console.warn(e);}
+}
+/* --- spela gruppverser --- */
+function loadGroupRound(gid,r){
+  MODE="group";GID=gid;SCREEN="play";
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-play"));document.body.classList.remove("nav-on");
+  setPlayHeader();R=r;ANS=verseObj(groupVerses(gid)[r]);st=gLoad(gid,r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();
+  if(st.done)groupRoundDone(false);else{$("controls").style.display="";$("donebar").style.display="none";}
+  fitVerse();
+}
+function groupRoundDone(fresh){
+  $("controls").style.display="none";$("hint").innerHTML="&nbsp;";renderRounds();
+  const d=$("donebar");d.style.display="block";const all=gDone(GID);
+  const cheer=st.won?["Fantastiskt!","Snyggt!","Bra jobbat!","Där satt den!","Puh, i sista stund!"][st.guesses.length-1]:"Inte den här gången.";
+  d.innerHTML="<div class='l1'>"+cheer+" "+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div><div class='l2'>Gruppens verser "+gCount(GID)+"/5 · <b>"+gTotal(GID)+" p</b></div>"+
+    "<div class='btnrow'><button class='btn ghost' id='ctxBtn'>📖 Ge kontext</button>"+(all?"<button class='btn' id='gResBtn'>Topplistan</button>":"<button class='btn' id='nextBtn'>Nästa vers →</button>")+"</div>";
+  $("ctxBtn").onclick=()=>openCtx(ANS);
+  if(all)$("gResBtn").onclick=()=>openGroupResult();else $("nextBtn").onclick=()=>loadGroupRound(GID,gFirstOpen(GID));
+  fitVerse();saveGroupScores(GID);
+  if(fresh&&R<ROUNDS&&allDone())MYGROUPS.forEach(g=>postResult(g.id,"d","klarade dagens 3 verser: "+dayTotal()+" p ("+[0,1,2].map(r=>loadSt(r).points).join("·")+")"));
+  if(fresh&&all){const g=GID;setTimeout(()=>openGroupResult(),700);
+    postResult(g,"g","klarade gruppens 5 verser: "+gTotal(g)+" p ("+Array.from({length:GROUND},(_,r)=>gLoad(g,r).points).join("·")+")");}
+}
+async function saveGroupScores(gid){
+  if(!DB_ON||!ME)return;
+  saveScores();
+  for(let r=ROUNDS;r<GROUND;r++){const s=gLoad(gid,r);if(!s.done||s.saved)continue;
+    try{await rpc("submit_group_score",{p_code:ME.code,p_group:gid,p_day:TODAY,p_round:r+1,p_attempts:s.guesses.length,p_solved:!!s.won,p_points:s.points,p_guesses:s.guesses.map(g=>({b:g.b,c:g.c,v:g.v}))});
+      s.saved=true;store.set(gkey(gid,r),s);if(MODE==="group"&&r===R&&gid===GID)st.saved=true;
+      if(!GSCORES.some(x=>x.group_id===gid&&x.profile_id===ME.id&&x.day===TODAY&&x.round===r+1))GSCORES.push({group_id:gid,profile_id:ME.id,day:TODAY,round:r+1,points:s.points,solved:!!s.won});
+    }catch(e){toast("Kunde inte spara: "+e.message);break;}}
+}
+function openGroupResult(){
+  const g=grpInfo(GID),t=gTotal(GID),rows=gRows(GID,TODAY,TODAY,true),me=rows.findIndex(r=>ME&&r.id===ME.id);
+  $("resBody").innerHTML="<div class='res'><h2>"+esc((g.emoji||"👥")+" "+g.name)+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 250 · "+(me>=0?"du är "+(me+1)+":a av "+rows.length+" idag":"")+"</div></div>"+
+    "<div class='sec'>Topplistan idag · alla 5 verser</div>"+rowsTable(rows,true,weekKing(GID))+
+    "<button class='btn' id='gToChat'>💬 Till gruppchatten</button><button class='btn ghost' id='gToGroup'>Till gruppen</button>";
+  $("resModal").classList.add("on");
+  $("gToChat").onclick=()=>{$("resModal").classList.remove("on");openGroup(GID,"chat");};
+  $("gToGroup").onclick=()=>{$("resModal").classList.remove("on");openGroup(GID,"verses");};
+}
+
+$("grpBack").onclick=()=>go("groups");
+$("grpInvite").onclick=()=>openShare(GID);
+$("grpTabs").onclick=e=>{const b=e.target.closest("button[data-t]");if(!b)return;GRP.tab=b.dataset.t;$("grpBody").dataset.init="";renderGroupPage();};
+$("grpBody").addEventListener("click",async e=>{
+  const gb=e.target.closest("#gbTabs button[data-b]");if(gb){GRP.btab=gb.dataset.b;renderGroupBoard();return;}
+  const rv=e.target.closest("[data-reveal]");if(rv){rv.classList.remove("blur");const n=rv.nextElementSibling;if(n&&n.classList.contains("spo"))n.remove();return;}
+  const pk=e.target.closest("[data-pick]");if(pk){CHAT.pick=CHAT.pick===+pk.dataset.pick?null:+pk.dataset.pick;renderChat();return;}
+  const rx=e.target.closest("[data-rx]");if(rx){CHAT.pick=null;try{await rpc("react_message",{p_code:ME.code,p_message:+rx.dataset.m,p_emoji:rx.dataset.rx});await loadChat();renderChat();}catch(err){toast(err.message);}return;}
+  const dl=e.target.closest("[data-del]");if(dl){CHAT.pick=null;try{await rpc("delete_message",{p_code:ME.code,p_message:+dl.dataset.del});await loadChat();renderChat();}catch(err){toast(err.message);}return;}
+});
+$("chatSend").onclick=sendChat;
+$("chatInp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}});
+$("chatInp").addEventListener("input",e=>{const t=e.target;t.style.height="auto";t.style.height=Math.min(110,t.scrollHeight)+"px";});
+$("chatPray").onclick=()=>{CHAT.prayer=!CHAT.prayer;$("chatPray").classList.toggle("on",CHAT.prayer);$("chatInp").placeholder=CHAT.prayer?"Skriv ditt böneämne…":"Skriv till gruppen…";$("chatInp").focus();};
+setInterval(()=>{if(GROUPS_ON&&ME&&SCREEN!=="group")loadGroupData();},60000);
+
+/* ===== UTBILDNING (bara beta) ===== */
+if(IS_BETA){$("navLearn").style.display="";$("nav").classList.add("five");}
+const LSECT=[
+  {k:"mos",name:"Moseböckerna",from:0,to:4},
+  {k:"hist",name:"Historia GT",from:5,to:16},
+  {k:"poe",name:"Vishet & poesi",from:17,to:21},
+  {k:"sprof",name:"Stora profeter",from:22,to:26},
+  {k:"lprof",name:"Små profeter",from:27,to:38},
+  {k:"ev",name:"Evangelier & Apg",from:39,to:43},
+  {k:"paul",name:"Paulus brev + Hebr",from:44,to:57},
+  {k:"allm",name:"Övriga brev + Upp",from:58,to:65}];
+const RAMSA=[["Rom-",[44]],["kor-",[45,46]],["gal-",[47]],["ef, ",[48]],["fil-",[49]],["kol, ",[50]],["tessalon-",[51,52]],["timo-",[53,54]],["tit, ",[55]],["fil-",[56]],["hebraios",[57]]];
+let LEARN={tab:"order",sec:"paul",done:[],pool:[],errs:0,t0:0,hl:-1};
+function ytOverview(b){return "https://www.youtube.com/results?search_query="+encodeURIComponent("BibleProject Svenska Översikt "+BOOKS[b])}
+function startOrder(k){const sc=LSECT.find(x=>x.k===k);LEARN.sec=k;LEARN.done=[];LEARN.errs=0;LEARN.t0=Date.now();
+  const ids=[];for(let i=sc.from;i<=sc.to;i++)ids.push(i);LEARN.pool=ids.sort(()=>Math.random()-.5);}
+function renderLearn(){
+  [...$("lrnTabs").children].forEach(b=>b.classList.toggle("on",b.dataset.l===LEARN.tab));
+  let h="";
+  if(LEARN.tab==="order"){
+    h+="<div class='ramsa'><div class='mut' style='font-size:11px;letter-spacing:1.5px;text-transform:uppercase'>Ramsan från bibelskolan · Paulus brev + Hebreerbrevet</div><div class='say' id='ramsaSay'>"+
+      RAMSA.map((r,i)=>"<span data-ri='"+i+"'>"+r[0]+"</span>").join("")+"</div><div class='map' id='ramsaMap'>"+RAMSA.map((r,i)=>r[1].map(b=>"<i data-ri='"+i+"'>"+SHORT[b]+"</i>").join("")).join("")+"</div>"+
+      "<button class='btn sm' id='ramsaPlay' style='margin-top:10px'>▶ Gå igenom ramsan</button></div>";
+    if(!LEARN.pool.length&&!LEARN.done.length)startOrder(LEARN.sec);
+    const sc=LSECT.find(x=>x.k===LEARN.sec),total=sc.to-sc.from+1;
+    h+="<h2 class='t' style='margin:6px 0 6px;font-size:19px'>Sätt böckerna i ordning</h2><div class='ord-sec' id='ordSec'>"+LSECT.map(x=>"<button data-s='"+x.k+"' class='"+(x.k===LEARN.sec?"on":"")+"'>"+x.name+"</button>").join("")+"</div>";
+    if(LEARN.done.length===total){const sec=Math.round((Date.now()-LEARN.t0)/1000);
+      h+="<div class='card' style='text-align:center'><div style='font-size:40px'>🎉</div><b style='font-size:18px'>"+sc.name+" klara!</b><div class='mut'>"+sec+" sekunder · "+LEARN.errs+(LEARN.errs===1?" fel":" fel")+"</div><div class='ord-done' style='justify-content:center'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><button class='btn' id='ordAgain'>Kör igen</button></div>";
+    } else {
+      h+="<p class='mut' style='margin:0'>Tryck på böckerna i den ordning de står i Bibeln. "+LEARN.done.length+" av "+total+"</p><div class='ord-done'>"+LEARN.done.map(b=>"<i>"+SHORT[b]+"</i>").join("")+"</div><div class='ord-pool' id='ordPool'>"+LEARN.pool.map(b=>"<button data-b='"+b+"'>"+esc(BOOKS[b])+"</button>").join("")+"</div>";
+    }
+  } else if(LEARN.tab==="books"){
+    const cell=i=>"<button data-bk='"+i+"'>"+esc(BOOKS[i])+"<small>"+esc(BOOKINFO[i][1])+"</small></button>";
+    let a="",b="";for(let i=0;i<39;i++)a+=cell(i);for(let i=39;i<66;i++)b+=cell(i);
+    h+="<p class='mut' style='margin:0 0 8px'>Tryck på en bok för fakta, en kort film och för att börja läsa.</p><div class='sec'>Gamla testamentet</div><div class='bklist'>"+a+"</div><div class='sec'>Nya testamentet</div><div class='bklist nt'>"+b+"</div><div style='height:10px'></div>";
+  } else {
+    h+="<div class='res-card'><span class='ri'>🎓</span><div><b>TELOS – Teologi för folket</b><p>Kurser och podd i teologi på svenska, med lärare från bl.a. Pingst, ALT och Evangeliska Alliansen.</p><div class='lnk'><a href='https://telos.nu/' target='_blank' rel='noopener'>Besök telos.nu</a></div></div></div>";
+    h+="<div class='res-card'><span class='ri'>📱</span><div><b>Svenska Kärnbibeln – app</b><p>Gratis bibelapp med Kärnbibeln, förklaringar i texten, grekiska och hebreiska ordböcker, läsplaner och dagligt quiz.</p><div class='lnk'><a href='https://apps.apple.com/se/app/svenska-k%C3%A4rnbibeln/id6443848205' target='_blank' rel='noopener'> App Store</a><a href='https://play.google.com/store/search?q=Svenska%20K%C3%A4rnbibeln&c=apps' target='_blank' rel='noopener'>▶ Google Play</a><a class='g' href='https://www.karnbibeln.se' target='_blank' rel='noopener'>karnbibeln.se</a></div></div></div>";
+    h+="<div class='res-card'><span class='ri'>🎬</span><div><b>BibleProject på svenska</b><p>Över 100 korta animerade filmer – en översikt för nästan varje bok i Bibeln, plus teman som nåd och Messias.</p><div class='lnk'><a href='https://bibleproject.com/sv/' target='_blank' rel='noopener'>Se filmerna</a></div></div></div>";
+    h+="<div class='res-card'><span class='ri'>📖</span><div><b>Läs hela kapitlet i YouVersion</b><p>Efter varje vers kan du trycka 📖 Ge kontext → Läs hela kapitlet. Det öppnas i Bibel-appen om du har den.</p></div></div>";
+  }
+  $("learnBody").innerHTML=h;
+}
+$("lrnTabs").onclick=e=>{const b=e.target.closest("button[data-l]");if(!b)return;LEARN.tab=b.dataset.l;renderLearn();$("s-learn").querySelector(".scroll").scrollTop=0;};
+$("learnBody").addEventListener("click",e=>{
+  const s=e.target.closest("#ordSec button[data-s]");if(s){startOrder(s.dataset.s);renderLearn();return;}
+  if(e.target.closest("#ordAgain")){startOrder(LEARN.sec);renderLearn();return;}
+  const pb=e.target.closest("#ordPool button[data-b]");if(pb){const sc=LSECT.find(x=>x.k===LEARN.sec);const want=sc.from+LEARN.done.length,b=+pb.dataset.b;
+    if(b===want){LEARN.done.push(b);LEARN.pool=LEARN.pool.filter(x=>x!==b);renderLearn();}
+    else{LEARN.errs++;pb.classList.remove("bad");void pb.offsetWidth;pb.classList.add("bad");toast("Inte än – "+esc(BOOKS[b])+" kommer senare");}
+    return;}
+  if(e.target.closest("#ramsaPlay")){let i=0;const step=()=>{document.querySelectorAll("#ramsaSay span,#ramsaMap i").forEach(x=>x.classList.toggle("hl",+x.dataset.ri===i));if(i<RAMSA.length){i++;setTimeout(step,850);}};step();return;}
+  const bk=e.target.closest("button[data-bk]");if(bk){const i=+bk.dataset.bk,info=BOOKINFO[i];
+    $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span><b>Kapitel</b><span>"+DATA.counts[i].length+"</span><b>Plats</b><span>Bok "+(i+1)+" av 66</span></div>"+
+      "<a class='btn' href='"+ytOverview(i)+"' target='_blank' rel='noopener'>▶ Kort film om boken (BibleProject)</a><a class='btn ghost' href='"+yvUrl(i,1)+"' target='_blank' rel='noopener'>📖 Börja läsa kapitel 1</a><button class='btn ghost' data-close>Stäng</button>";
+    $("ctxModal").classList.add("on");}
+});
+
+/* ===== BJUD IN FLER ===== */
+function appUrl(){return location.origin+location.pathname}
+async function inviteApp(){
+  const txt="Häng med och spela Versjakten! Tre bibelverser om dagen – gissa var i Bibeln de står. ";
+  if(navigator.share){try{await navigator.share({title:"Versjakten",text:txt,url:appUrl()});return;}catch(e){if(e&&e.name==="AbortError")return;}}
+  $("shareTitle").textContent="Bjud in fler";$("shareCode").textContent=appUrl().replace(/^https?:\/\//,"");
+  $("shareWa").href="https://wa.me/?text="+encodeURIComponent(txt+appUrl());
+  $("shareLeave").style.display="none";SHARE={code:null,app:true};$("shareText").textContent="Skicka länken till kompisar, familj eller ungdomsgruppen. Alla spelar samma tre verser varje dag.";$("shareCode").style.cssText="font-size:14px;letter-spacing:0;word-break:break-all";$("shareModal").classList.add("on");
+}
+const INVITE_BTN="<button class='btn ghost' data-invite>📨 Bjud in fler</button>";
+document.addEventListener("click",e=>{if(e.target.closest("[data-invite]"))inviteApp();});
+
+/* ===== FLYTT FRÅN GAMLA VERSIONEN ===== */
+function migrateOld(){
+  for(let r=0;r<ROUNDS;r++){
+    if(store.get(skey(r)))continue;
+    const o=store.get("vj_game_"+TODAY+(r?"_"+r:""));
+    if(o&&o.guesses&&o.guesses.length){const g=o.guesses.filter(x=>x&&typeof x==="object");
+      store.set(skey(r),{guesses:g,done:!!o.done,won:!!o.won,points:o.points||0,saved:false});}
+  }
+}
+migrateOld();
+
+/* ===== START ===== */
+buildPad();
+document.addEventListener("dblclick",e=>e.preventDefault());
+setInterval(tick,1000);
+(async()=>{
+  go(ME?"home":"onboard");
+  await loadAll();
+  if(ME){
+    // kontrollera att profilen finns kvar
+    if(!PROFILES[ME.id]){try{const r=await rpc("login_profile",{p_code:ME.code});if(!r.length){store.del("vjb_profile");ME=null;go("onboard");return;}}catch(e){}}
+    else{const p=PROFILES[ME.id];ME={...ME,name:p.name,church:profChurch(p)||null,emoji:p.emoji,church_id:p.church_id,city:p.city};store.set("vjb_profile",ME);}
+    await joinFromUrl();saveScores();
+  }
+  if(SCREEN!=="play")go(SCREEN);
+  if(!ME&&new URLSearchParams(location.search).get("grupp"))$("obIntro").textContent="Du har blivit inbjuden till en grupp! Skapa din profil så går du med direkt.";
+  document.fonts&&document.fonts.ready.then(()=>{if(SCREEN==="play")fitVerse()});
+})();
+</script>
+</body>
+</html>

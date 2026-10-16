@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Versjakten</title>
+<meta name="theme-color" content="#14110f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14110f; --panel:#1e1a17; --cell:#2a2420; --line:#3a322c;
+  --text:#f2ebe1; --muted:#a39785; --green:#5f8f4e; --yellow:#c9a43a; --gray:#4a423b;
+  --accent:#d9a55b;
+  --serif:"Fraunces",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --tile:clamp(34px,5.2dvh,46px);
+  --key:clamp(40px,6dvh,52px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,.c,.pad,.choose,.rounds{-webkit-user-select:none;user-select:none}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{max-width:440px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;padding:0 14px max(10px,env(safe-area-inset-bottom))}
+header{flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+header h1{font-family:var(--serif);font-weight:800;font-size:26px;margin:0;letter-spacing:-.5px}
+header h1 span{color:var(--accent)}
+.iconbtn{background:none;border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:17px}
+.who{flex:none;font-size:12px;color:var(--muted);text-align:center;margin:6px 0 0}
+.who b{color:var(--text)}
+.rounds{flex:none;display:flex;justify-content:center;gap:6px;margin-top:6px}
+.rounds button{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
+.rounds button.done{background:var(--cell);color:var(--text)}
+.rounds button.cur{border-color:var(--accent);color:var(--text)}
+.rounds button b{color:var(--accent)}
+.rounds button:disabled{opacity:.4}
+.verseBox{flex:1 1 auto;min-height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px 2px}
+.verse{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.4;text-align:center;margin:0;text-wrap:balance}
+.src{flex:none;text-align:center;font-size:10px;color:#6f6458;letter-spacing:.5px;margin:-4px 0 6px}
+.grid{flex:none;display:flex;flex-direction:column;gap:5px}
+.row{display:grid;grid-template-columns:1fr var(--tile) var(--tile) 8px var(--tile) var(--tile);gap:5px;align-items:center}
+.c{height:var(--tile);border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600}
+.c.book{justify-content:flex-start;padding:0 10px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c.filled{border-color:#6b5e52}
+.row.active .c{border-color:#55493f}
+.row.active .c.book.empty{color:var(--muted);font-weight:400}
+.c.book .bn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.c.book .bx,.c.book .bok{flex:none;margin-left:6px;font-size:11px;font-weight:700;letter-spacing:.3px}
+body[data-wb="a"] .c.book.x{background:#6e342c;border-color:#6e342c}
+body[data-wb="a"] .c.book .bx{color:#ffd9d2}
+body[data-wb="b"] .c.book.x .bn{text-decoration:line-through;text-decoration-thickness:2px;color:#cfc4b8}
+body[data-wb="b"] .c.book .bx{color:#e8a091}
+body[data-wb="c"] .c.book .bx{background:#b0503f;color:#fff;border-radius:4px;padding:2px 5px}
+.c.book .bok{color:#e6f5dc;font-size:14px}
+.colon{text-align:center;font-weight:700;color:var(--muted)}
+.c.g{background:var(--green);border-color:var(--green)}
+.c.y{background:var(--yellow);border-color:var(--yellow);color:#1c160d}
+.c.x{background:var(--gray);border-color:var(--gray)}
+.c.drop{animation:drop .55s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes drop{
+  0%{transform:translateY(-140px) scale(.9);opacity:0}
+  60%{opacity:1}
+  80%{transform:translateY(0) scale(1.06,.92)}
+  100%{transform:translateY(0) scale(1)}
+}
+.row.win .c{animation:thud .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes thud{0%{transform:translateY(-160px);opacity:0}70%{transform:translateY(0) scale(1.08,.9);opacity:1}100%{transform:none}}
+.hint{flex:none;min-height:34px;display:flex;align-items:center;justify-content:center;text-align:center;margin:6px 0 5px;font-size:13px;color:var(--muted)}
+.hint .dir{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--accent);border-radius:999px;padding:6px 14px;font-size:15.5px;color:var(--text)}
+.hint .dir b{color:var(--accent);font-size:17px;letter-spacing:.5px}
+.hint .dir .arr{font-size:18px;color:var(--accent)}
+.hint .guide{font-size:15px;color:var(--text)}
+.hint .guide b{color:var(--accent)}
+.hint .dir.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.pulse{animation:pulse 1.4s ease-in-out infinite;border-color:var(--accent)!important}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,165,91,.55)}50%{box-shadow:0 0 0 7px rgba(217,165,91,0)}}
+#controls{flex:none}
+.choose{display:block;width:100%;height:var(--key);border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:16px;margin-bottom:7px}
+.pad{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pad button{height:var(--key);border:none;border-radius:8px;background:var(--cell);font-size:19px;font-weight:600}
+.pad button:active{filter:brightness(1.3)}
+.pad .ok{background:var(--green)}
+.pad .ok:disabled{opacity:.45}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.donebar{flex:none;display:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+.donebar .l1{font-family:var(--serif);font-size:17px}
+.donebar .l1 b{color:var(--accent)}
+.donebar .l2{font-size:12px;color:var(--muted);margin-top:2px}
+.donebar .l2 b{color:var(--text);font-variant-numeric:tabular-nums}
+.btn{display:block;width:100%;height:46px;border:none;border-radius:10px;background:var(--accent);color:#1c160d;font-weight:700;font-size:16px;margin-top:10px}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--text)}
+.toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:400px;max-height:88dvh;overflow:auto;padding:18px}
+.sheet h2{font-family:var(--serif);margin:0 0 10px;font-size:22px}
+.sheet p,.sheet li{font-size:14px;line-height:1.55;color:#d9cfc2}
+.sheet input{width:100%;height:48px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px;padding:0 12px}
+/* bokslista */
+.books{padding:0}
+.books .head{position:sticky;top:0;background:var(--panel);padding:16px 18px 8px;font-family:var(--serif);font-weight:800;font-size:20px;border-bottom:1px solid var(--line)}
+.books h4{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 18px 4px;font-weight:500}
+.books .bk{display:block;width:calc(100% - 36px);margin:0 18px;text-align:left;background:none;border:none;border-left:3px solid var(--accent);padding:11px 12px;font-size:16px;border-bottom:1px solid #2b2521}
+.books .nt .bk{border-left-color:var(--green)}
+.books .bk.dim{color:#5c5249;border-left-color:#3a322c}
+.books .bk.sel{background:var(--cell)}
+.books .pad-b{height:14px}
+/* topplista */
+.res h2{text-align:center;margin-bottom:2px}
+.res .pts{text-align:center;font-size:42px;font-weight:800;color:var(--accent);font-family:var(--serif);line-height:1.1}
+.res .sub{text-align:center;color:var(--muted);font-size:14px}
+.res .ref{text-align:center;font-family:var(--serif);font-size:18px;color:var(--accent);margin:6px 0 4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;margin:12px 0 4px;gap:4px}
+.stats b{display:block;font-size:20px}
+.stats span{font-size:11px;color:var(--muted)}
+.lbtitle{font-family:var(--serif);font-size:19px;margin:16px 0 8px}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button{flex:1;height:34px;border-radius:8px;border:1px solid var(--line);background:none;font-size:14px;color:var(--muted)}
+.tabs button.on{background:var(--cell);color:var(--text);border-color:#5a4e44}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:1px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.me td{color:var(--accent);font-weight:700}
+.rank{width:24px;color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:12px 0}
+#cmpTabs{gap:8px}
+#cmpTabs .ctab{height:auto;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid #6b5e52;background:var(--cell);color:var(--text);border-radius:10px;box-shadow:0 2px 0 #0006}
+#cmpTabs .ctab small{font-size:11px;color:var(--muted)}
+#cmpTabs .ctab.on{background:var(--accent);border-color:var(--accent);color:#1c160d;box-shadow:none}
+#cmpTabs .ctab.on small{color:#3b2c17}
+#cmpTabs .ctab:disabled{opacity:.4;box-shadow:none}
+.cmptip{font-size:12px;color:var(--muted);margin:-2px 0 8px;text-align:center}
+.oldnote{font-size:11.5px;color:var(--muted);font-style:italic;margin-top:4px}
+.pname{background:none;border:none;padding:0;color:inherit;font:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+#cmpModal{z-index:45}
+.cmpref{font-size:13px;color:var(--muted);margin:2px 0 8px}
+.cmpref b{color:var(--accent);font-family:var(--serif);font-size:15px}
+.cmpbox{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+.cmph{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}
+.cmph b{color:var(--accent)}
+.grid.minig{--tile:32px}
+.grid.minig .c{font-size:15px}
+.grid.minig .c.book{font-size:12.5px;padding:0 8px}
+.ptable td{padding:5px 4px}
+.small{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+.small button{background:none;border:none;color:var(--muted);text-decoration:underline;font-size:11px}
+</style>
+</head>
+<body data-wb="c">
+<div class="app">
+  <header>
+    <button class="iconbtn" id="infoBtn" aria-label="Regler">?</button>
+    <h1>Vers<span>jakten</span></h1>
+    <button class="iconbtn" id="lbBtn" aria-label="Topplista">🏆</button>
+  </header>
+  <p class="who" id="who"></p>
+  <div class="rounds" id="rounds"></div>
+  <div class="verseBox" id="verseBox"><p class="verse" id="verse"></p></div>
+  <div class="src">Svenska Folkbibeln 2015</div>
+  <div class="grid" id="grid"></div>
+  <div class="hint" id="hint"></div>
+  <div id="controls">
+    <button class="choose" id="chooseBtn">Välj bok</button>
+    <div class="pad" id="pad"></div>
+  </div>
+  <div class="donebar" id="donebar"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="nameModal"><div class="sheet">
+  <h2>Välkommen till Versjakten</h2>
+  <p>Skriv ditt namn så hamnar du på topplistan. Du behöver bara göra det en gång på den här telefonen.</p>
+  <input id="nameInput" maxlength="20" placeholder="Ditt namn" autocomplete="nickname">
+  <button class="btn" id="nameSave">Kör!</button>
+</div></div>
+
+<div class="modal" id="bookModal"><div class="sheet books" id="bookSheet">
+  <div class="head">Välj bok</div>
+  <div id="bookList"></div>
+</div></div>
+
+<div class="modal" id="lbModal"><div class="sheet">
+  <div id="resBox"></div>
+  <div class="lbtitle">Topplista</div>
+  <div class="tabs" id="tabs">
+    <button data-t="day" class="on">Idag</button>
+    <button data-t="week">Veckan</button>
+    <button data-t="all">Totalt</button>
+  </div>
+  <div id="lbBody"><div class="empty">Laddar…</div></div>
+  <button class="btn ghost" data-close>Stäng</button>
+  <div class="small">Bibeltexten är hämtad från Svenska Folkbibeln 2015 · <button id="renameBtn">Byt namn</button></div>
+</div></div>
+
+<div class="modal" id="cmpModal"><div class="sheet">
+  <h2 id="cmpTitle">Jämför</h2>
+  <div class="tabs" id="cmpTabs"></div>
+  <div class="cmptip">👆 Tryck på en vers för att byta (deras – dina poäng)</div>
+  <div class="cmpref">Rätt svar: <b id="cmpRef"></b></div>
+  <div id="cmpBody"></div>
+  <button class="btn ghost" data-close>Tillbaka</button>
+</div></div>
+
+<div class="modal" id="infoModal"><div class="sheet">
+  <h2>Så spelar du</h2>
+  <p>Varje dag kommer <b>tre nya verser</b>. Gissa <b>bok, kapitel och vers</b> på 5 försök per vers. Poängen för alla tre läggs ihop, max 150 p per dag.</p>
+  <ul>
+    <li>Välj bok och skriv kapitel och vers med två siffror var. Kapitel 6 vers 3 skrivs <b>06:03</b>.</li>
+    <li><b style="color:var(--green)">Grönt</b>: rätt bok, eller rätt siffra på rätt plats.</li>
+    <li><b style="color:var(--yellow)">Gult</b>: siffran finns i svaret men på en annan plats.</li>
+    <li>Efter varje miss får du veta om versen står <b>tidigare eller senare</b> i Bibeln. Böcker som inte längre är möjliga tonas ner i listan.</li>
+  </ul>
+  <h2>Poäng</h2>
+  <table class="ptable">
+    <tr><td>Rätt på försök 1</td><td class="n">50 p</td></tr>
+    <tr><td>Rätt på försök 2</td><td class="n">35 p</td></tr>
+    <tr><td>Rätt på försök 3</td><td class="n">25 p</td></tr>
+    <tr><td>Rätt på försök 4</td><td class="n">15 p</td></tr>
+    <tr><td>Rätt på försök 5</td><td class="n">10 p</td></tr>
+    <tr><td>Ej klarat, men rätt bok och kapitel</td><td class="n">8 p</td></tr>
+    <tr><td>Ej klarat, men rätt bok</td><td class="n">5 p</td></tr>
+    <tr><td>Ej klarat</td><td class="n">0 p</td></tr>
+  </table>
+  <p>Nya verser varje dag vid midnatt.</p>
+  <p style="font-size:12px;color:var(--muted)">Bibeltexten är hämtad från Svenska Folkbibeln 2015 (SFB15), © Stiftelsen Svenska Folkbibeln.</p>
+  <button class="btn ghost" data-close>Stäng</button>
+</div></div>
+
+<script>
+/* ===== INSTÄLLNINGAR ===== */
+const SUPABASE_URL = "__SUPABASE_URL__";   // t.ex. https://abcd.supabase.co
+const SUPABASE_KEY = "__SUPABASE_KEY__";   // publishable / anon key
+const START_DAY = "2026-10-14";            // dag 1
+/* ========================= */
+
+const DATA = __DATA__;
+const BOOKS = DATA.books, COUNTS = DATA.counts, VERSES = DATA.verses;
+const PTS_WIN = [50,35,25,15,10], PTS_BOOKCH = 8, PTS_BOOK = 5, MAX = 5;
+const STAGGER = 230, DROP_MS = 550;
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const DB_ON = SUPABASE_URL.startsWith("http") && SUPABASE_KEY.length > 20;
+
+/* ---- datum (svensk tid) ---- */
+function sthlmDate(d=new Date()){
+  return new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",year:"numeric",month:"2-digit",day:"2-digit"}).format(d);
+}
+function dayNum(s){const [y,m,d]=s.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)}
+function addDays(s,n){return new Date((dayNum(s)+n)*864e5).toISOString().slice(0,10)}
+const TODAY = sthlmDate();
+const DAYNO = dayNum(TODAY) - dayNum(START_DAY) + 1;
+const ROUNDS = 3;
+function ansFor(r){const i=(((DAYNO-1)*ROUNDS+r)%VERSES.length+VERSES.length)%VERSES.length;const [b,c,v,t]=VERSES[i];return {b,c,v,t}}
+let R = 0, ANS = ansFor(0);
+function weekStart(s){const wd=(new Date(dayNum(s)*864e5).getUTCDay()+6)%7;return addDays(s,-wd)}
+
+/* ---- state ---- */
+let name = store.get("vj_name");
+const skey = r => "vj_game_"+TODAY+(r?"_"+r:"");
+const loadSt = r => store.get(skey(r)) || {guesses:[], done:false, saved:false};
+let st = loadSt(0);
+let cur = {b:null, d:""};
+let busy = false; // under animation
+
+const pad2 = n => String(n).padStart(2,"0");
+function score(g,a=ANS){
+  const ad=(pad2(a.c)+pad2(a.v)).split(""), gd=(pad2(g.c)+pad2(g.v)).split("");
+  const res=Array(4).fill("x"), left={};
+  gd.forEach((d,i)=>{ if(d===ad[i]) res[i]="g"; else left[ad[i]]=(left[ad[i]]||0)+1; });
+  gd.forEach((d,i)=>{ if(res[i]!=="g" && left[d]>0){res[i]="y";left[d]--;} });
+  return {book: g.b===a.b ? "g":"x", digits:res};
+}
+function cmp(g){ // -1: svaret står tidigare, 1: senare, 0: rätt
+  const a=[ANS.b,ANS.c,ANS.v], b=[g.b,g.c,g.v];
+  for(let i=0;i<3;i++){ if(a[i]<b[i]) return -1; if(a[i]>b[i]) return 1; }
+  return 0;
+}
+/* vilka böcker är fortfarande möjliga? */
+function possibleBooks(){
+  let lo=0, hi=BOOKS.length-1; const no=new Set();
+  st.guesses.forEach(g=>{
+    const d=cmp(g);
+    if(g.b!==ANS.b) no.add(g.b);
+    if(d>0) lo=Math.max(lo,g.b);
+    if(d<0) hi=Math.min(hi,g.b);
+  });
+  return BOOKS.map((_,i)=>i>=lo && i<=hi && !no.has(i));
+}
+
+/* ---- rutnät ---- */
+function fillBookCell(bc,bookIdx,cls){
+  bc.innerHTML="";
+  const n=document.createElement("span"); n.className="bn"; n.textContent=BOOKS[bookIdx]; bc.appendChild(n);
+  if(cls==="x"){const t=document.createElement("span");t.className="bx";t.textContent="✗ fel bok";bc.appendChild(t);}
+  if(cls==="g"){const t=document.createElement("span");t.className="bok";t.textContent="✓";bc.appendChild(t);}
+}
+function staticRow(guess,a){ // färdig gissning; guess={b,c,v} eller mönsterstr "xgxyx"
+  const row=document.createElement("div"); row.className="row";
+  let cls, digs;
+  if(typeof guess==="string"){ cls={book:guess[0],digits:guess.slice(1).split("")}; digs=["","","",""]; }
+  else { cls=score(guess,a); digs=(pad2(guess.c)+pad2(guess.v)).split(""); }
+  const bc=document.createElement("div"); bc.className="c book filled "+cls.book;
+  if(typeof guess==="string") bc.textContent=cls.book==="g"?"Rätt bok":"Fel bok"; else fillBookCell(bc,guess.b,cls.book);
+  row.appendChild(bc);
+  digs.forEach((d,i)=>{
+    if(i===2){const k=document.createElement("div");k.className="colon";k.textContent=":";row.appendChild(k);}
+    const c=document.createElement("div"); c.className="c filled "+cls.digits[i]; c.textContent=d; row.appendChild(c);
+  });
+  return row;
+}
+function renderGrid(anim){ // anim: {row, win}
+  const g=$("grid"); g.innerHTML="";
+  for(let r=0;r<MAX;r++){
+    const row=document.createElement("div"); row.className="row";
+    const guess=st.guesses[r];
+    let book="", digs=["","","",""], cls=null;
+    const active = r===st.guesses.length && !st.done;
+    if(guess){ book=BOOKS[guess.b]; digs=(pad2(guess.c)+pad2(guess.v)).split(""); cls=score(guess); }
+    else if(active){
+      row.classList.add("active");
+      book = cur.b===null ? "" : BOOKS[cur.b];
+      digs = (cur.d+"    ").slice(0,4).split("").map(x=>x.trim());
+    }
+    const cells=[];
+    const bc=document.createElement("div");
+    bc.className="c book"+(cls?" "+cls.book:"")+(book?" filled":" empty");
+    if(guess) fillBookCell(bc,guess.b,cls.book); else bc.textContent = book || (active?"Bok":"");
+    if(active) bc.onclick=openBooks;
+    row.appendChild(bc); cells.push(bc);
+    digs.forEach((d,i)=>{
+      if(i===2){const k=document.createElement("div");k.className="colon";k.textContent=":";row.appendChild(k);}
+      const c=document.createElement("div");
+      c.className="c"+(cls?" "+cls.digits[i]:"")+(d?" filled":"");
+      c.textContent=d; row.appendChild(c); cells.push(c);
+    });
+    if(anim && anim.row===r){
+      if(anim.win) row.classList.add("win");
+      else cells.forEach((c,i)=>{c.classList.add("drop");c.style.animationDelay=(i*STAGGER)+"ms";});
+    }
+    g.appendChild(row);
+  }
+  renderHint();
+  $("chooseBtn").textContent = cur.b===null ? "Välj bok" : BOOKS[cur.b];
+  $("okBtn").disabled = !(cur.b!==null && cur.d.length===4) || busy;
+}
+let lastHintKey="";
+function renderHint(){
+  const last=st.guesses[st.guesses.length-1];
+  const h=$("hint"), cb=$("chooseBtn"), bookCell=document.querySelector(".row.active .c.book");
+  cb.classList.remove("pulse"); bookCell && bookCell.classList.remove("pulse");
+  if(st.done || busy){ h.innerHTML="&nbsp;"; lastHintKey=""; return; }
+  if(last){
+    const earlier=cmp(last)<0, key="d"+st.guesses.length;
+    h.innerHTML="<span class='dir"+(key!==lastHintKey?" pop":"")+"'><span class='arr'>"+(earlier?"⬆":"⬇")+"</span>Versen står <b>"+(earlier?"TIDIGARE":"SENARE")+"</b> i Bibeln</span>";
+    lastHintKey=key; return;
+  }
+  lastHintKey="";
+  // guide för första gissningen
+  if(cur.b===null){
+    h.innerHTML="<span class='guide'>👇 Börja med att trycka på <b>Välj bok</b></span>";
+    cb.classList.add("pulse"); bookCell && bookCell.classList.add("pulse");
+  } else if(cur.d.length<4){
+    h.innerHTML="<span class='guide'>Skriv <b>kapitel</b> och <b>vers</b> med siffrorna, t.ex. <b>06 03</b></span>";
+  } else {
+    h.innerHTML="<span class='guide'>Tryck på <b>✓</b> för att gissa</span>";
+  }
+}
+
+/* ---- versen ska alltid få plats ---- */
+function fitVerse(){
+  const box=$("verseBox"), v=$("verse");
+  let size=21; v.style.fontSize=size+"px";
+  while(size>12 && (v.scrollHeight>box.clientHeight-6)){ size-=.5; v.style.fontSize=size+"px"; }
+}
+addEventListener("resize",fitVerse);
+
+/* ---- knappsats ---- */
+function buildPad(){
+  const p=$("pad");
+  [0,1,2,3,4,"⌫",5,6,7,8,9,"✓"].forEach(k=>{
+    const b=document.createElement("button");
+    b.textContent=k;
+    if(k==="✓"){b.className="ok";b.id="okBtn";b.onclick=submit;}
+    else if(k==="⌫"){b.onclick=back;}
+    else b.onclick=()=>typeDigit(String(k));
+    p.appendChild(b);
+  });
+  $("chooseBtn").onclick=openBooks;
+  document.addEventListener("keydown",e=>{
+    if(st.done || busy || document.querySelector(".modal.on")) return;
+    if(/^[0-9]$/.test(e.key)) typeDigit(e.key);
+    else if(e.key==="Backspace") back();
+    else if(e.key==="Enter") submit();
+  });
+}
+function typeDigit(k){ if(busy||st.done) return; if(cur.d.length<4){cur.d+=k;renderGrid();} }
+function back(){ if(busy||st.done) return; cur.d=cur.d.slice(0,-1);renderGrid(); }
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2200);}
+function shake(){const r=document.querySelector(".row.active");if(r){r.classList.remove("shake");void r.offsetWidth;r.classList.add("shake");}}
+
+function submit(){
+  if(st.done||busy) return;
+  if(cur.b===null){toast("Välj en bok först");shake();return;}
+  if(cur.d.length<4){toast("Skriv kapitel och vers, t.ex. 06:03");shake();return;}
+  const c=+cur.d.slice(0,2), v=+cur.d.slice(2);
+  const g={b:cur.b,c,v};
+  st.guesses.push(g);
+  const won = cmp(g)===0;
+  if(won || st.guesses.length>=MAX){ st.done=true; st.won=won; st.points=calcPoints(); }
+  store.set(skey(R),st);
+  cur={b:possibleBooks()[cur.b]?cur.b:null,d:""};
+  busy=true;
+  renderGrid({row:st.guesses.length-1, win:won});
+  const wait = won ? 650 : 4*STAGGER+DROP_MS;
+  setTimeout(()=>{ busy=false; renderGrid(); renderRounds(); if(st.done) finish(true); }, wait);
+}
+function calcPoints(){
+  const n=st.guesses.length;
+  if(st.guesses.some(g=>cmp(g)===0)) return PTS_WIN[n-1];
+  if(st.guesses.some(g=>g.b===ANS.b && g.c===ANS.c)) return PTS_BOOKCH;
+  if(st.guesses.some(g=>g.b===ANS.b)) return PTS_BOOK;
+  return 0;
+}
+
+/* ---- bokväljare: enkel lista ---- */
+function openBooks(){
+  if(st.done||busy) return;
+  const ok=possibleBooks();
+  const item=i=>"<button class='bk"+(ok[i]?"":" dim")+(cur.b===i?" sel":"")+"' data-b='"+i+"'>"+BOOKS[i]+"</button>";
+  let h="<h4>Gamla testamentet</h4><div class='ot'>";
+  for(let i=0;i<39;i++) h+=item(i);
+  h+="</div><h4>Nya testamentet</h4><div class='nt'>";
+  for(let i=39;i<66;i++) h+=item(i);
+  h+="</div><div class='pad-b'></div>";
+  $("bookList").innerHTML=h;
+  $("bookModal").classList.add("on");
+  // scrolla till första möjliga bok
+  const first = cur.b!==null ? cur.b : ok.indexOf(true);
+  const el=$("bookList").querySelector("[data-b='"+first+"']");
+  const sheet=$("bookSheet");
+  sheet.scrollTop = el && st.guesses.length ? Math.max(0, el.offsetTop - 90) : 0;
+}
+$("bookList").onclick=e=>{const b=e.target.closest("button[data-b]");if(!b)return;cur.b=+b.dataset.b;$("bookModal").classList.remove("on");renderGrid();};
+
+/* ---- modaler ---- */
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{
+  if((e.target===m && m.id!=="nameModal") || e.target.hasAttribute("data-close")) m.classList.remove("on");
+}));
+$("infoBtn").onclick=()=>$("infoModal").classList.add("on");
+$("lbBtn").onclick=openBoard;
+$("renameBtn").onclick=()=>{$("lbModal").classList.remove("on");$("nameInput").value=name||"";$("nameModal").classList.add("on");setTimeout(()=>$("nameInput").focus(),50);};
+$("nameSave").onclick=saveName;
+$("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")saveName();});
+function saveName(){
+  const v=$("nameInput").value.trim().replace(/\s+/g," ");
+  if(v.length<2){toast("Skriv minst 2 tecken");return;}
+  name=v; store.set("vj_name",name); $("nameModal").classList.remove("on"); showWho();
+  saveScore();
+  loadBoard();
+}
+function showWho(){ $("who").innerHTML = name ? "Spelar som <b></b> · Dag "+DAYNO : "Dag "+DAYNO; if(name) $("who").querySelector("b").textContent=name; }
+
+/* ---- Supabase ---- */
+function headers(extra){
+  const h={"apikey":SUPABASE_KEY,"Content-Type":"application/json"};
+  if(SUPABASE_KEY.startsWith("eyJ")) h.Authorization="Bearer "+SUPABASE_KEY;
+  return Object.assign(h,extra||{});
+}
+async function saveScore(){
+  if(!DB_ON || !name) return;
+  for(let r=0;r<ROUNDS;r++){
+    const s=loadSt(r); if(!s.done || s.saved) continue;
+    const a=ansFor(r);
+    try{
+      const res=await fetch(SUPABASE_URL+"/rest/v1/scores",{method:"POST",headers:headers({"Prefer":"return=minimal"}),
+        body:JSON.stringify({player:name,day:TODAY,round:r+1,attempts:s.guesses.length,solved:!!s.won,points:s.points,guesses:s.guesses.map(g=>({b:g.b,c:g.c,v:g.v}))})});
+      if(res.ok || res.status===409){ s.saved=true; store.set(skey(r),s); if(r===R) st.saved=true; if(res.status===409) toast("Du har redan ett resultat för vers "+(r+1)); }
+      else toast("Kunde inte spara resultatet ("+res.status+")");
+    }catch(e){ toast("Ingen kontakt med topplistan"); break; }
+  }
+  loadBoard();
+}
+let ROWS=[], TAB="day";
+async function loadBoard(){
+  if(!DB_ON){ $("lbBody").innerHTML="<div class='empty'>Topplistan är inte kopplad än.</div>"; return; }
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/scores?select=player,day,round,attempts,solved,points,guesses&day=gte."+START_DAY+"&order=day.desc&limit=5000",{headers:headers()});
+    if(!r.ok) throw new Error(r.status);
+    ROWS=await r.json();
+    renderBoard(); renderRes();
+  }catch(e){ $("lbBody").innerHTML="<div class='empty'>Kunde inte ladda topplistan.</div>"; }
+}
+function anyDone(){for(let r=0;r<ROUNDS;r++) if(loadSt(r).done) return true; return false}
+$("lbBody").addEventListener("click",e=>{const b=e.target.closest(".pname"); if(b) openCompare(b.dataset.p);});
+let CMP={p:null,r:0};
+function openCompare(p){
+  const mine=[...Array(ROUNDS).keys()].filter(r=>loadSt(r).done);
+  CMP={p, r: mine.includes(R)?R:mine[mine.length-1]};
+  renderCompare(); $("cmpModal").classList.add("on");
+}
+function renderCompare(){
+  const {p,r}=CMP, a=ansFor(r);
+  const tabs=[...Array(ROUNDS).keys()].map(i=>{
+    const mine=loadSt(i), ok=mine.done;
+    const th=ROWS.find(x=>x.player===p && x.day===TODAY && (x.round||1)===i+1);
+    const sub = !ok ? "spela först" : (th? th.points+" – "+mine.points : "– – "+mine.points);
+    return "<button data-r='"+i+"' class='ctab"+(i===r?" on":"")+"' "+(ok?"":"disabled")+"><b>Vers "+(i+1)+"</b><small>"+sub+"</small></button>";
+  }).join("");
+  $("cmpTabs").innerHTML=tabs;
+  $("cmpTitle").textContent="Du mot "+p;
+  $("cmpRef").textContent=BOOKS[a.b]+" "+a.c+":"+a.v;
+  const theirRow=ROWS.find(x=>x.player===p && x.day===TODAY && (x.round||1)===r+1);
+  const box=(label,guesses,pts)=>{
+    const wrap=document.createElement("div"); wrap.className="cmpbox";
+    const h=document.createElement("div"); h.className="cmph";
+    const l=document.createElement("span"); l.textContent=label; h.appendChild(l);
+    const pt=document.createElement("b"); pt.textContent=pts===null?"–":pts+" p"; h.appendChild(pt);
+    wrap.appendChild(h);
+    const g=document.createElement("div"); g.className="grid minig";
+    if(!guesses||!guesses.length){ const e=document.createElement("div"); e.className="empty"; e.textContent=label+" har inte spelat den här versen än."; g.appendChild(e); }
+    else {
+      guesses.forEach(x=>g.appendChild(staticRow(x,a)));
+      if(typeof guesses[0]==="string"){ const n=document.createElement("div"); n.className="oldnote"; n.textContent="Spelades före uppdateringen, därför syns bara färgerna."; g.appendChild(n); }
+    }
+    wrap.appendChild(g); return wrap;
+  };
+  const body=$("cmpBody"); body.innerHTML="";
+  body.appendChild(box(p, theirRow?theirRow.guesses:null, theirRow?theirRow.points:null));
+  const me=loadSt(r);
+  body.appendChild(box("Du", me.guesses, me.points));
+}
+$("cmpTabs").onclick=e=>{const b=e.target.closest("button[data-r]"); if(!b||b.disabled) return; CMP.r=+b.dataset.r; renderCompare();};
+function openBoard(){ renderRes(); renderBoard(); $("lbModal").classList.add("on"); loadBoard(); }
+$("tabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;TAB=b.dataset.t;[...$("tabs").children].forEach(x=>x.classList.toggle("on",x===b));renderBoard();};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderBoard(){
+  if(!DB_ON) return;
+  let rows=[], head="";
+  if(TAB==="day"){
+    const agg={};
+    ROWS.filter(r=>r.day===TODAY).forEach(r=>{const a=agg[r.player]||(agg[r.player]={p:r.player,pts:0,parts:Array(ROUNDS).fill(null)});a.pts+=r.points;a.parts[(r.round||1)-1]=r.points;});
+    rows=Object.values(agg).sort((a,b)=>b.pts-a.pts);
+    head="<tr><th></th><th>Namn</th><th>Vers 1·2·3</th><th class='n'>Poäng</th></tr>";
+    rows=rows.map((a,i)=>"<tr class='"+(a.p===name?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+(a.p!==name&&anyDone()?"<button class='pname' data-p='"+esc(a.p)+"'>"+esc(a.p)+" ›</button>":esc(a.p))+"</td><td style='color:var(--muted)'>"+a.parts.map(x=>x===null?"–":x).join(" · ")+"</td><td class='n'>"+a.pts+"</td></tr>");
+  } else {
+    const from = TAB==="week" ? weekStart(TODAY) : "0000";
+    const agg={};
+    ROWS.filter(r=>r.day>=from && r.day<=TODAY).forEach(r=>{
+      const a=agg[r.player]||(agg[r.player]={p:r.player,pts:0,n:0,w:0});
+      a.pts+=r.points; a.n++; if(r.solved)a.w++;
+    });
+    rows=Object.values(agg).sort((a,b)=>b.pts-a.pts||b.w-a.w);
+    head="<tr><th></th><th>Namn</th><th class='n'>Verser</th><th class='n'>Snitt</th><th class='n'>Poäng</th></tr>";
+    rows=rows.map((a,i)=>"<tr class='"+(a.p===name?"me":"")+"'><td class='rank'>"+(i+1)+"</td><td>"+esc(a.p)+"</td><td class='n'>"+a.n+"</td><td class='n'>"+Math.round(a.pts/a.n)+"</td><td class='n'>"+a.pts+"</td></tr>");
+  }
+  $("lbBody").innerHTML = rows.length ? "<table>"+head+rows.join("")+"</table>" : "<div class='empty'>"+(TAB==="day"?"Ingen har spelat idag än. Bli först!":"Inga resultat än.")+"</div>";
+}
+
+/* ---- resultat ---- */
+function statsHtml(){
+  const mine=ROWS.filter(r=>r.player===name); if(!mine.length) return "";
+  const won=mine.filter(r=>r.solved).length;
+  const days=new Set(mine.filter(r=>r.solved).map(r=>r.day));
+  let s=0, d=days.has(TODAY)?TODAY:addDays(TODAY,-1);
+  while(days.has(d)){s++;d=addDays(d,-1);}
+  const tot=mine.reduce((a,r)=>a+r.points,0);
+  return "<div class='stats'><div><b>"+mine.length+"</b><span>Verser</span></div><div><b>"+Math.round(100*won/mine.length)+"%</b><span>Vinst</span></div><div><b>"+s+"</b><span>Streak</span></div><div><b>"+tot+"</b><span>Poäng</span></div></div>";
+}
+function renderRounds(){
+  const el=$("rounds"); el.innerHTML="";
+  for(let r=0;r<ROUNDS;r++){
+    const x=loadSt(r), b=document.createElement("button");
+    const unlocked = r===0 || loadSt(r-1).done;
+    b.className=(r===R?"cur ":"")+(x.done?"done":"");
+    b.innerHTML="Vers "+(r+1)+(x.done?" · <b>"+x.points+" p</b>":"");
+    b.disabled=!unlocked;
+    b.onclick=()=>{ if(!busy && unlocked && r!==R) loadRound(r); };
+    el.appendChild(b);
+  }
+}
+function dayTotal(){let t=0;for(let r=0;r<ROUNDS;r++){const x=loadSt(r);if(x.done)t+=x.points;}return t}
+function allDone(){for(let r=0;r<ROUNDS;r++) if(!loadSt(r).done) return false; return true}
+function firstOpen(){for(let r=0;r<ROUNDS;r++) if(!loadSt(r).done) return r; return ROUNDS-1}
+function loadRound(r){
+  R=r; ANS=ansFor(r); st=loadSt(r); cur={b:null,d:""}; busy=false;
+  $("verse").textContent="”"+ANS.t+"”";
+  renderRounds(); renderGrid();
+  if(st.done) finish(false);
+  else { $("controls").style.display=""; $("donebar").style.display="none"; }
+  fitVerse();
+}
+function renderRes(){
+  const parts=[]; let any=false;
+  for(let r=0;r<ROUNDS;r++){
+    const x=loadSt(r), a=ansFor(r);
+    if(x.done){ any=true; parts.push("<tr><td>Vers "+(r+1)+"</td><td>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</td><td class='n'>"+x.points+" p</td></tr>"); }
+    else parts.push("<tr><td>Vers "+(r+1)+"</td><td style='color:var(--muted)'>Ej spelad</td><td class='n'>–</td></tr>");
+  }
+  if(!any){ $("resBox").innerHTML=statsHtml(); return; }
+  const t=dayTotal();
+  const title = !allDone() ? "Dagens verser" : t>=100 ? "Fantastisk dag!" : t>=50 ? "Bra jobbat!" : t>0 ? "Det blev några poäng" : "Inte idag";
+  $("resBox").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin-top:10px'>"+parts.join("")+"</table>"+statsHtml();
+}
+function finish(fresh){
+  $("controls").style.display="none";
+  $("hint").innerHTML="&nbsp;";
+  renderRounds();
+  const d=$("donebar"); d.style.display="block";
+  const done=allDone();
+  let h="<div class='l1'>"+esc(BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v)+" · <b>"+st.points+" p</b></div>";
+  if(done) h+="<div class='l2'>Dagens total <b>"+dayTotal()+" p</b> · Nya verser om <b id='cd'></b></div><button class='btn' id='showLb'>Resultat & topplista</button>";
+  else h+="<div class='l2'>Dagens total hittills <b>"+dayTotal()+" p</b></div><button class='btn' id='nextBtn'>Nästa vers →</button>";
+  d.innerHTML=h;
+  if(done){ $("showLb").onclick=openBoard; tick(); }
+  else $("nextBtn").onclick=()=>loadRound(firstOpen());
+  fitVerse();
+  if(fresh){ if(name) saveScore(); else $("nameModal").classList.add("on"); if(done) setTimeout(openBoard,400); }
+  else saveScore();
+}
+function tick(){
+  const el=$("cd"); if(!el) return;
+  const now=new Date();
+  if(sthlmDate(now)!==TODAY){ el.textContent="nu – ladda om sidan"; return; }
+  const parts=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(now);
+  const g=t=>+parts.find(p=>p.type===t).value;
+  const left=86400-(g("hour")*3600+g("minute")*60+g("second"));
+  el.textContent=pad2(Math.floor(left/3600))+":"+pad2(Math.floor(left%3600/60))+":"+pad2(left%60);
+}
+
+/* ---- start ---- */
+buildPad(); showWho();
+document.addEventListener("dblclick",e=>e.preventDefault());
+setInterval(tick,1000);
+loadRound(firstOpen()); document.fonts && document.fonts.ready.then(fitVerse);
+if(!name) $("nameModal").classList.add("on");
+loadBoard();
+</script>
+</body>
+</html>
