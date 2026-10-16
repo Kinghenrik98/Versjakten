@@ -544,6 +544,7 @@ const SUPABASE_URL = "https://qccrlaxzfiddgfsxozim.supabase.co";
 const SUPABASE_KEY = "sb_publishable_q_6FHlE8r41gQqtgTwNn7g_1QPN0zbs";
 const START_DAY = "2026-10-14";
 const IS_BETA = true;
+const GROUPS_ON = true; // gruppsida, chatt, gruppverser – ute i båda versionerna
 const AD_HTML = IS_BETA?"<div class='ad' style='margin-top:12px'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>":"";
 const BADGE = IS_BETA?"<i class='beta'>BETA</i>":"";
 if(!IS_BETA){document.title="Versjakten";document.querySelectorAll("h1 .beta").forEach(e=>e.remove());const tn=document.getElementById("testNote");if(tn)tn.remove();}
@@ -770,7 +771,7 @@ function renderHome(){
   // bästa placering idag i en grupp
   const sc=scopeList().filter(s=>s.key.startsWith("g"));const pick=sc[0]||scopeList()[0];
   const r=rankIn(pick,"day");const gr=$("groupRow");
-  if(IS_BETA&&pick.key.startsWith("g")){const gid=+pick.key.slice(1),gn=gCount(gid);gr.style.display="";gr.dataset.scope=pick.key;
+  if(GROUPS_ON&&pick.key.startsWith("g")){const gid=+pick.key.slice(1),gn=gCount(gid);gr.style.display="";gr.dataset.scope=pick.key;
     gr.innerHTML="<span class='ic'>"+esc(pick.icon)+"</span><span><b style='color:var(--text)'>"+esc(pick.label)+"</b><br><small class='mut'>"+(gDone(gid)?"Gruppens verser klara ✓":gn+"/5 gruppverser")+(unread(gid)?" · <span style='color:var(--red)'>● nya meddelanden</span>":"")+"</small></span><span class='arr'>›</span>";}
   else if(r.total){gr.style.display="";gr.dataset.scope=pick.key;
     gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
@@ -780,7 +781,7 @@ function renderHome(){
 $("churchRow").onclick=()=>{EDIT=true;go("onboard");};
 $("playCard").onclick=()=>{ if(allDone()) openRes(); else go("play"); };
 $("maraRow").onclick=()=>go("mara");
-$("groupRow").onclick=()=>{const sc=$("groupRow").dataset.scope;if(IS_BETA&&sc.startsWith("g")){openGroup(+sc.slice(1),unread(+sc.slice(1))?"chat":"verses");return;}BOARD.scope=sc;BOARD.period="day";BOARD.back="home";go("board");};
+$("groupRow").onclick=()=>{const sc=$("groupRow").dataset.scope;if(GROUPS_ON&&sc.startsWith("g")){openGroup(+sc.slice(1),unread(+sc.slice(1))?"chat":"verses");return;}BOARD.scope=sc;BOARD.period="day";BOARD.back="home";go("board");};
 
 /* ===== SPELET ===== */
 function fillBookCell(bc,bookIdx,cls){
@@ -927,7 +928,7 @@ function finish(fresh){
   if(done)$("resBtn").onclick=openRes;else $("nextBtn").onclick=()=>loadRound(firstOpen());
   tick();fitVerse();
   saveScores();
-  if(IS_BETA&&fresh&&done)MYGROUPS.forEach(g=>postResult(g.id,"d","klarade dagens 3 verser: "+dayTotal()+" p ("+[0,1,2].map(r=>loadSt(r).points).join("·")+")"));
+  if(GROUPS_ON&&fresh&&done)MYGROUPS.forEach(g=>postResult(g.id,"d","klarade dagens 3 verser: "+dayTotal()+" p ("+[0,1,2].map(r=>loadSt(r).points).join("·")+")"));
 }
 async function saveScores(){
   if(!DB_ON||!ME)return;
@@ -960,7 +961,7 @@ function openRes(){
   const title=!allDone()?"Dagens verser":t>=100?"Fantastisk dag!":t>=50?"Bra jobbat!":t>0?"Det blev några poäng":"Inte idag";
   $("resBody").innerHTML="<div class='res'><h2>"+title+"</h2><div class='pts'>"+t+" p</div><div class='sub'>av 150 möjliga</div></div><table class='ptable' style='margin:10px 0'>"+parts.join("")+"</table>"+
     "<p class='mut' style='text-align:center'>Nya verser om <b class='cd' style='color:var(--text)'></b></p>"+
-    AD_HTML+(IS_BETA&&MYGROUPS.length&&allDone()?"<div class='sec'>"+esc((MYGROUPS[0].emoji||"👥")+" "+MYGROUPS[0].name)+" idag</div>"+rowsTable(aggregate("g"+MYGROUPS[0].id,"day"),true):"")+
+    AD_HTML+(GROUPS_ON&&MYGROUPS.length&&allDone()?"<div class='sec'>"+esc((MYGROUPS[0].emoji||"👥")+" "+MYGROUPS[0].name)+" idag</div>"+rowsTable(aggregate("g"+MYGROUPS[0].id,"day"),true):"")+
     "<button class='btn' id='resBoard'>🏆 Topplistan</button>"+INVITE_BTN+"<button class='btn ghost' id='resPlay'>Visa mina gissningar</button><button class='btn ghost' id='resHome'>Till startsidan</button>";
   $("resModal").classList.add("on");tick();
   $("resBoard").onclick=()=>{$("resModal").classList.remove("on");BOARD.back=SCREEN;go("board");};
@@ -1281,7 +1282,7 @@ function renderGroups(){
   $("joinBtn").onclick=()=>{$("joinCode").value="";$("joinModal").classList.add("on");setTimeout(()=>$("joinCode").focus(),50);};
   $("createBtn").onclick=()=>{$("newGroupName").value="";GPICK=GEMOJIS[0];$("grpEmo").innerHTML=GEMOJIS.map(e=>"<button data-e='"+e+"' class='"+(e===GPICK?"on":"")+"'>"+e+"</button>").join("");$("createModal").classList.add("on");};
 }
-$("groupsBody").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(!b)return;if(IS_BETA&&b.dataset.scope.startsWith("g")){openGroup(+b.dataset.scope.slice(1),"verses");return;}BOARD.scope=b.dataset.scope;BOARD.back="groups";go("board");});
+$("groupsBody").addEventListener("click",e=>{const b=e.target.closest("[data-scope]");if(!b)return;if(GROUPS_ON&&b.dataset.scope.startsWith("g")){openGroup(+b.dataset.scope.slice(1),"verses");return;}BOARD.scope=b.dataset.scope;BOARD.back="groups";go("board");});
 let GPICK=GEMOJIS[0];
 $("grpEmo").onclick=e=>{const b=e.target.closest("button[data-e]");if(!b)return;GPICK=b.dataset.e;[...$("grpEmo").children].forEach(x=>x.classList.toggle("on",x===b));};
 $("createGo").onclick=async()=>{const n=$("newGroupName").value.trim();if(n.length<2){toast("Skriv ett namn på gruppen");return;}
@@ -1328,7 +1329,7 @@ function gFirstOpen(gid){for(let r=0;r<GROUND;r++)if(!gLoad(gid,r).done)return r
 function grpInfo(gid){const g=MYGROUPS.find(x=>x.id===gid)||GROUPS[gid]||{id:gid,name:"Grupp",emoji:"👥"};return {...g,created_by:GACT[gid]?GACT[gid].created_by:g.created_by}}
 function grpMembers(gid){return MEMBERS.filter(m=>m.group_id===gid).map(m=>m.profile_id)}
 async function loadGroupData(){
-  if(!IS_BETA||!ME||!MYGROUPS.length)return;
+  if(!GROUPS_ON||!ME||!MYGROUPS.length)return;
   const ids=MYGROUPS.map(g=>g.id).join(",");
   GSCORES=await get("group_scores?select=group_id,profile_id,day,round,points,solved,guesses&group_id=in.("+ids+")&day=gte."+addDays(TODAY,-30)+"&limit=20000").catch(()=>GSCORES);
   const act=await rpc("my_group_activity",{p_code:ME.code}).catch(()=>null);
@@ -1336,7 +1337,7 @@ async function loadGroupData(){
   updateBadges();
 }
 function unread(gid){const a=GACT[gid];return a&&a.last_id&&a.last_id>(store.get("vjb_seen_"+gid)||0)}
-function updateBadges(){const n=MYGROUPS.filter(g=>unread(g.id)).length;const b=document.querySelector('#nav [data-nav="groups"]');if(b)b.classList.toggle("dot",IS_BETA&&n>0);}
+function updateBadges(){const n=MYGROUPS.filter(g=>unread(g.id)).length;const b=document.querySelector('#nav [data-nav="groups"]');if(b)b.classList.toggle("dot",GROUPS_ON&&n>0);}
 function gRows(gid,from,to,local){ // summerar gruppverser per person
   const set=new Set(grpMembers(gid)),agg={};
   const add=(pid,day,round,pts)=>{if(day<from||day>to||!set.has(pid))return;const a=agg[pid]||(agg[pid]={id:pid,pts:0,n:0,parts:Array(GROUND).fill(null)});a.pts+=pts;a.n++;if(day===to)a.parts[round-1]=pts;};
@@ -1487,7 +1488,7 @@ $("chatSend").onclick=sendChat;
 $("chatInp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}});
 $("chatInp").addEventListener("input",e=>{const t=e.target;t.style.height="auto";t.style.height=Math.min(110,t.scrollHeight)+"px";});
 $("chatPray").onclick=()=>{CHAT.prayer=!CHAT.prayer;$("chatPray").classList.toggle("on",CHAT.prayer);$("chatInp").placeholder=CHAT.prayer?"Skriv ditt böneämne…":"Skriv till gruppen…";$("chatInp").focus();};
-setInterval(()=>{if(IS_BETA&&ME&&SCREEN!=="group")loadGroupData();},60000);
+setInterval(()=>{if(GROUPS_ON&&ME&&SCREEN!=="group")loadGroupData();},60000);
 
 /* ===== UTBILDNING (bara beta) ===== */
 if(IS_BETA){$("navLearn").style.display="";$("nav").classList.add("five");}
