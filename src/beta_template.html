@@ -383,7 +383,7 @@ body.nav-on .navback{visibility:hidden}
     <button class="mrow" id="groupRow" style="display:none"></button>
     <a class="mrow" id="tipRow" target="_blank" rel="noopener" style="display:none;text-decoration:none"><span class="ic">📱</span><span><small class="mut" style="font-size:11px;letter-spacing:1px">TIPS</small><br>Läs Bibeln i <b>Kärnbibeln</b>-appen – gratis och med förklaringar</span><span class="arr">›</span></a>
     <button class="mrow" id="churchRow" style="display:none;border-color:var(--accent)"><span class="ic">⛪</span><span>Nytt: välj din <b>församling</b> och <b>ort</b> i listan</span><span class="arr">›</span></button>
-    <p class="mut" id="testNote" style="text-align:center;font-size:11px;margin-top:22px">Testversion · resultaten här räknas inte i den vanliga Versjakten</p>
+    <p class="mut" id="testNote" style="text-align:center;font-size:11px;margin-top:22px">Testversion · här provar vi nya saker innan de kommer ut till alla</p>
   </div>
 </section>
 
@@ -613,7 +613,7 @@ const GROUPS_ON = true; // gruppsida, chatt, gruppverser – ute i båda version
 const AD_HTML = IS_BETA?"<div class='ad' style='margin-top:12px'><span class='al'>ANNONS · EXEMPEL</span><span class='ae'>🍬</span><span><b>Godispengen</b><span class='at'>Tjäna pengar till din klass och förening</span></span></div>":"";
 const BADGE = IS_BETA?"<i class='beta'>BETA</i>":"";
 if(GROUP_FIRST)document.getElementById("s-home").classList.add("home2");
-if(IS_BETA)document.getElementById("s-home").classList.add("home3");
+document.getElementById("s-home").classList.add("home3");
 if(!IS_BETA){document.title="Versjakten";document.querySelectorAll("h1 .beta").forEach(e=>e.remove());const tn=document.getElementById("testNote");if(tn)tn.remove();}
 /* ========================= */
 const DATA = __DATA__;
@@ -843,7 +843,7 @@ function renderHome(){
   else if(r.total){gr.style.display="";gr.dataset.scope=pick.key;
     gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
   else gr.style.display="none";
-  if(IS_BETA){const run2=store.get("vjb_mara"),wb=weekBook();$("maraRow").style.display="none";$("moreWrap").style.display="";
+  {const run2=store.get("vjb_mara"),wb=weekBook();$("maraRow").style.display="none";$("moreWrap").style.display="";
     $("moreRow").innerHTML="<button data-more='mara'><span class='mi'>🏃</span><span><b>Maraton</b><small>"+(run2&&!run2.over&&run2.n>0?"Fortsätt · "+run2.n+" i rad":best?"Rekord "+best:"Hur många i rad?")+"</small></span></button>"+
       "<button data-more='week'><span class='mi'>📖</span><span><b>Veckans bok</b><small>"+esc(BOOKS[wb])+"</small></span></button>"+
       "<button data-more='quiz'><span class='mi'>❓</span><span><b>Snabbquiz</b><small>5 frågor"+(store.get("vjb_quiz_best")?" · rekord "+store.get("vjb_quiz_best")+"/5":"")+"</small></span></button>"+
@@ -856,7 +856,7 @@ function renderHome(){
     const pl=mem.filter(id=>played.has(id)).length,cr=crownInfo(hg);
     const sub=gdone?"Klart ✓ · "+gTotal(hg)+" p · "+(unread(hg)?"nya meddelanden i chatten":"till chatten"):gn?"Fortsätt · "+gn+" av 5 klara":"Dagens 5 verser";
     pc.classList.add("grp");pc.dataset.gid=hg;
-    if(IS_BETA){const n2=unread(hg)?" · nytt":"";
+    if(true){const n2=unread(hg)?" · nytt":"";
       pc.innerHTML="<span class='kick'>DIN GRUPP</span><span class='gname'>"+esc(g.name)+"</span><span class='brow'><small>"+(gdone?"Klart ✓ "+gTotal(hg)+" p":gn?"Fortsätt · "+gn+" av 5":"Dagens 5 verser")+"</small><span class='gochat' data-chat='1'>"+(gdone?"Till chatten"+n2:"Spela →")+"</span></span><small style='margin-top:8px'>"+(cr&&cr.day===TODAY?esc(pName(cr.id))+" leder · ":"")+pl+" av "+mem.length+" har spelat</small>";}
     else pc.innerHTML="<span class='kick'>SPELA MED DIN GRUPP</span><span class='gname'>"+esc(g.name)+"</span><small>"+sub+"</small><span class='pill'>"+(cr&&cr.day===TODAY?esc(pName(cr.id))+" leder · ":"")+pl+" av "+mem.length+" har spelat</span>";
     gr.style.display="none";}
@@ -1050,7 +1050,7 @@ function openCtx(a){
   $("ctxBody").innerHTML="<h2>"+esc(BOOKS[a.b]+" "+a.c+":"+a.v)+"</h2><div class='ctx'>"+esc(a.t)+"</div>"+
     "<a class='btn ghost' href='"+chapterUrl(a)+"' target='_blank' rel='noopener'>📖 Läs hela kapitel "+a.c+"</a><p class='mut' style='font-size:11.5px;text-align:center;margin:4px 0 0'>Öppnas i YouVersion-appen om du har den, annars på bible.com</p>"+
     "<div class='card' style='margin-top:12px'><h2 style='font-size:18px'>Om "+esc(BOOKS[a.b])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span></div>"+
-    (IS_BETA?"<a class='btn ghost' href='"+ytOverview(a.b)+"' target='_blank' rel='noopener' style='margin-top:8px'>▶ Kort film om "+esc(BOOKS[a.b])+" (BibleProject)</a>":"")+"</div>"+
+    (true?"<a class='btn ghost' href='"+ytOverview(a.b)+"' target='_blank' rel='noopener' style='margin-top:8px'>▶ Kort film om "+esc(BOOKS[a.b])+" (BibleProject)</a>":"")+"</div>"+
     (MODE==="group"?"":MODE==="mara"?(RUN&&!RUN.over?"<button class='btn' id='ctxNext'>Nästa vers →</button>":""):allDone()?"<button class='btn' data-close id='ctxRes'>Se resultat</button>":"<button class='btn' data-close id='ctxNext'>Nästa vers →</button>")+
     "<button class='btn ghost' data-close>Stäng</button>";
   $("ctxModal").classList.add("on");
@@ -1391,7 +1391,7 @@ $("createGo").onclick=async()=>{const n=$("newGroupName").value.trim();if(n.leng
   try{const r=await rpc("create_group",{p_code:ME.code,p_name:n,p_emoji:GPICK});$("createModal").classList.remove("on");await loadAll();renderGroups();openShare(r[0].id);}catch(e){toast(e.message);}};
 $("joinGo").onclick=async()=>{const c=$("joinCode").value.trim().toUpperCase();if(c.length<5){toast("Skriv hela koden");return;}
   try{const r=await rpc("join_group",{p_code:ME.code,p_group_code:c});$("joinModal").classList.remove("on");await loadAll();toast("Du är med i "+r[0].name+"!");renderGroups();}catch(e){toast(e.message);}};
-function inviteUrl(code){return location.origin+location.pathname+"?grupp="+encodeURIComponent(code)}
+function inviteUrl(code){return location.origin+siteBase()+"?grupp="+encodeURIComponent(code)} // alltid vanliga versionen
 let SHARE=null;
 function openShare(gid){const g=MYGROUPS.find(x=>x.id===gid);if(!g)return;SHARE=g;$("shareLeave").style.display="block";$("shareText").textContent="Dela koden eller länken. Den som öppnar länken går med i gruppen direkt.";$("shareCode").style.cssText="";
   $("shareTitle").textContent="Bjud in till "+g.name;$("shareCode").textContent=g.code;
@@ -1599,7 +1599,7 @@ $("chatPray").onclick=()=>{CHAT.prayer=!CHAT.prayer;$("chatPray").classList.togg
 setInterval(()=>{if(GROUPS_ON&&ME&&SCREEN!=="group")loadGroupData();},60000);
 
 /* ===== UTBILDNING (bara beta) ===== */
-if(IS_BETA){$("navLearn").style.display="";$("nav").classList.add("five");}
+$("navLearn").style.display="";$("nav").classList.add("five");
 const LSECT=[
   {k:"mos",name:"Moseböckerna",from:0,to:4},
   {k:"hist",name:"Historia GT",from:5,to:16},
@@ -1702,7 +1702,7 @@ $("learnBody").addEventListener("click",e=>{
 });
 
 /* ===== BJUD IN FLER ===== */
-function appUrl(){return location.origin+location.pathname}
+function appUrl(){return location.origin+siteBase()}
 async function inviteApp(){
   const txt="Häng med och spela Versjakten! Tre bibelverser om dagen – gissa var i Bibeln de står. ";
   if(navigator.share){try{await navigator.share({title:"Versjakten",text:txt,url:appUrl()});return;}catch(e){if(e&&e.name==="AbortError")return;}}
