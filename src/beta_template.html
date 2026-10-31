@@ -33,6 +33,15 @@ header h1 span{color:var(--accent)}
 .beta{font-family:var(--sans);font-size:9.5px;font-weight:800;letter-spacing:1px;background:var(--red);color:#fff;border-radius:4px;padding:2px 5px;margin-left:5px}
 .iconbtn{background:none;border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:17px}
 .iconbtn.ghost{visibility:hidden}
+.hdrR{display:flex;gap:6px}
+#cmpNow{position:relative;font-size:16px}#cmpNow.pulse2{border-color:var(--accent);animation:pulse 1.4s ease-in-out 3}
+#cmpNow i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#1c160d;font-style:normal;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+.oth{border-top:1px solid var(--line);padding:10px 0}
+.oth .oh{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px}.oth .oh b{color:var(--accent)}
+.oth.blind .c{color:transparent!important}.oth.blind .c *{visibility:hidden}
+.remind label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.remind input[type=time]{width:100%;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:20px;padding:0 12px;box-sizing:border-box}
+.remind a.btn{display:flex;align-items:center;justify-content:center;text-decoration:none}
 h2.t{font-family:var(--serif);font-size:22px;margin:14px 0 10px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .mut{color:var(--muted);font-size:13px}
@@ -392,7 +401,7 @@ body.nav-on .navback{visibility:hidden}
   <header>
     <button class="iconbtn" id="playHome" aria-label="Hem">🏠</button>
     <h1 id="playTitle">Vers<span>jakten</span><i class="beta">BETA</i></h1>
-    <button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button>
+    <div class="hdrR"><button class="iconbtn" id="cmpNow" aria-label="Jämför med andra" style="display:none">👥</button><button class="iconbtn" data-open="infoModal" aria-label="Regler">?</button></div>
   </header>
   <div class="rounds" id="rounds"></div>
   <div class="verseBox" id="verseBox"><p class="verse" id="verse"></p><div id="legendBox"></div></div>
@@ -559,6 +568,16 @@ body.nav-on .navback{visibility:hidden}
 
 <div class="modal" id="resModal"><div class="sheet" id="resBody"></div></div>
 
+<div class="modal" id="othModal"><div class="sheet" id="othBody"></div></div>
+<div class="modal" id="remModal"><div class="sheet remind">
+  <h2>🔔 Påminn mig varje dag</h2>
+  <p class="mut" style="margin:0">Lägg in en daglig påminnelse i telefonens kalender. Den plingar varje dag och har en länk direkt till spelet.</p>
+  <label for="remTime">Vilken tid?</label>
+  <input type="time" id="remTime" value="07:30">
+  <a class="btn" id="remGoogle" target="_blank" rel="noopener">Google Kalender (Android)</a>
+  <a class="btn ghost" id="remIcs" download="versjakten.ics">iPhone / annan kalender</a>
+  <button class="btn ghost" data-close>Stäng</button>
+</div></div>
 <div class="modal" id="cmpModal"><div class="sheet">
   <h2 id="cmpTitle">Jämför</h2>
   <div class="tabs" id="cmpTabs"></div>
@@ -844,7 +863,7 @@ function renderHome(){
     gr.innerHTML="<span class='ic'>🏆</span><span>"+(r.rank?"Du är <b>"+r.rank+":a</b> av "+r.total+" i "+esc(pick.label)+" idag":esc(pick.label)+": "+r.total+" har spelat idag")+"</span><span class='arr'>›</span>";}
   else gr.style.display="none";
   {const run2=store.get("vjb_mara"),wb=weekBook();$("maraRow").style.display="none";$("moreWrap").style.display="";
-    $("moreRow").innerHTML="<button data-more='mara'><span class='mi'>🏃</span><span><b>Maraton</b><small>"+(run2&&!run2.over&&run2.n>0?"Fortsätt · "+run2.n+" i rad":best?"Rekord "+best:"Hur många i rad?")+"</small></span></button>"+
+    $("moreRow").innerHTML=(IS_BETA?"<button data-more='remind'><span class='mi'>🔔</span><span><b>Påminnelse</b><small>"+(store.get("vjb_remind")?"Varje dag "+(store.get("vjb_remind_time")||""):"Få en pling varje dag")+"</small></span></button>":"")+"<button data-more='mara'><span class='mi'>🏃</span><span><b>Maraton</b><small>"+(run2&&!run2.over&&run2.n>0?"Fortsätt · "+run2.n+" i rad":best?"Rekord "+best:"Hur många i rad?")+"</small></span></button>"+
       "<button data-more='week'><span class='mi'>📖</span><span><b>Veckans bok</b><small>"+esc(BOOKS[wb])+"</small></span></button>"+
       "<button data-more='quiz'><span class='mi'>❓</span><span><b>Snabbquiz</b><small>5 frågor"+(store.get("vjb_quiz_best")?" · rekord "+store.get("vjb_quiz_best")+"/5":"")+"</small></span></button>"+
       "<button data-more='order'><span class='mi'>🔢</span><span><b>Ordningen</b><small>Sätt böckerna i ordning</small></span></button>";}
@@ -879,6 +898,7 @@ $("playCard").onclick=e=>{const gid=$("playCard").dataset.gid;
 $("maraRow").onclick=()=>go("mara");
 $("moreRow").onclick=e=>{const b=e.target.closest("button[data-more]");if(!b)return;const k=b.dataset.more;
   if(k==="mara"){go("mara");return;}
+  if(k==="remind"){openRemind();return;}
   if(k==="week"){LEARN.tab="books";go("learn");openBook(weekBook());return;}
   LEARN.tab=k;go("learn");};
 $("groupRow").onclick=()=>{const sc=$("groupRow").dataset.scope;if(GROUPS_ON&&sc.startsWith("g")){openGroup(+sc.slice(1),unread(+sc.slice(1))?"chat":"verses");return;}BOARD.scope=sc;BOARD.period="day";BOARD.back="home";go("board");};
@@ -962,7 +982,7 @@ function submit(){
   cur={b:possibleBooks()[cur.b]?cur.b:null,d:""};
   busy=true;renderGrid({row:st.guesses.length-1,win:won});
   const wait=won?650:4*STAGGER+DROP_MS;
-  setTimeout(()=>{busy=false;renderGrid();renderRounds();
+  setTimeout(()=>{busy=false;renderGrid();renderRounds();updateCmpBtn(true);
     if(st.guesses.length===1&&!st.done)maybeLegend();
     if(st.done){if(MODE==="mara")maraDone(true);else if(MODE==="group")groupRoundDone(true);else finish(true);const nb=earnedBadges().filter(b=>!badgesBefore.includes(b));if(nb.length){const b=BADGES.find(x=>x.id===nb[0]);setTimeout(()=>toast("🏅 Nytt märke: "+b.e+" "+b.name+"!",3200),900);}}
   },wait);
@@ -1003,6 +1023,7 @@ function renderRounds(){
     b.disabled=!unlocked;b.onclick=()=>{if(!busy&&unlocked&&r!==R)loadRound(r);};el.appendChild(b);}
 }
 function setPlayHeader(){
+  if($("cmpNow"))$("cmpNow").style.display="none";
   if(MODE==="group"){const g=grpInfo(GID);$("playTitle").textContent=(g.emoji||"👥")+" "+g.name;$("playTitle").style.fontSize="19px";$("playHome").textContent="←";return;}
   $("playTitle").innerHTML=MODE==="mara"?"🏃 Maraton":"Vers<span>jakten</span>"+BADGE;
   $("playTitle").style.fontSize=MODE==="mara"?"21px":"";
@@ -1012,7 +1033,7 @@ $("playHome").onclick=()=>{if(MODE==="group")openGroup(GID,"verses");else go("ho
 function loadRound(r){
   MODE="day";setPlayHeader();
   R=r;ANS=ansFor(r);st=loadSt(r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
-  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();maybeIntro();
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();maybeIntro();updateCmpBtn(false);
   if(st.done)finish(false);else{$("controls").style.display="";$("donebar").style.display="none";}
   fitVerse();
 }
@@ -1540,7 +1561,7 @@ function loadGroupRound(gid,r){
   MODE="group";GID=gid;SCREEN="play";if(GROUP_FIRST)store.set("vjb_lastgroup",gid);
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-play"));document.body.classList.remove("nav-on");
   setPlayHeader();R=r;ANS=verseObj(groupVerses(gid)[r]);st=gLoad(gid,r);cur={b:null,d:""};busy=false;$("legendBox").innerHTML="";
-  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();maybeIntro();
+  $("verse").textContent="”"+ANS.t+"”";renderRounds();renderGrid();maybeIntro();updateCmpBtn(false);
   if(st.done)groupRoundDone(false);else{$("controls").style.display="";$("donebar").style.display="none";}
   fitVerse();
 }
@@ -1582,7 +1603,7 @@ function openGroupResult(){
   $("gToGroup").onclick=()=>{$("resModal").classList.remove("on");openGroup(GID,"verses");};
 }
 
-$("grpBack").onclick=()=>go("groups");
+$("grpBack").onclick=()=>go(IS_BETA?"home":"groups");
 $("grpInvite").onclick=()=>openShare(GID);
 $("grpTabs").onclick=e=>{const b=e.target.closest("button[data-t]");if(!b)return;GRP.tab=b.dataset.t;$("grpBody").dataset.init="";renderGroupPage();};
 $("grpBody").addEventListener("click",async e=>{
@@ -1614,6 +1635,57 @@ let LEARN={tab:"order",sec:"paul",done:[],pool:[],errs:0,t0:0,hl:-1};
 function ytOverview(b){return "https://www.youtube.com/results?search_query="+encodeURIComponent("BibleProject Svenska Översikt "+BOOKS[b])}
 function startOrder(k){const sc=LSECT.find(x=>x.k===k);LEARN.sec=k;LEARN.rec=false;LEARN.done=[];LEARN.errs=0;LEARN.t0=Date.now();
   const ids=[];for(let i=sc.from;i<=sc.to;i++)ids.push(i);LEARN.pool=ids.sort(()=>Math.random()-.5);}
+/* ===== BETA: jämför med andra under spelets gång ===== */
+function othersFor(){ // [{id,guesses,points,solved}] för aktuell vers
+  if(MODE==="mara")return [];
+  const round=R+1;let rows;
+  if(MODE==="group"&&R>=ROUNDS)rows=GSCORES.filter(x=>x.group_id===GID&&x.day===TODAY&&x.round===round);
+  else rows=SCORES.filter(x=>x.day===TODAY&&x.round===round);
+  const gid=MODE==="group"?GID:homeGroup();
+  if(gid){const mem=new Set(grpMembers(gid));rows=rows.filter(x=>mem.has(x.profile_id));}
+  return rows.filter(x=>(!ME||x.profile_id!==ME.id)&&x.guesses&&x.guesses.length).sort((a,b)=>b.points-a.points).slice(0,12)
+    .map(x=>({id:x.profile_id,guesses:x.guesses,points:x.points,solved:x.solved}));
+}
+function updateCmpBtn(fresh){
+  const b=$("cmpNow");if(!IS_BETA||!b)return;const n=othersFor().length;
+  b.style.display=n?"":"none";b.innerHTML="👥<i>"+n+"</i>";
+  if(fresh&&n){b.classList.remove("pulse2");void b.offsetWidth;b.classList.add("pulse2");}
+}
+function openOthers(){
+  const list=othersFor(),blind=!st.done;
+  const box=(label,guesses,pts,mine)=>{const w=document.createElement("div");w.className="oth"+(blind&&!mine?" blind":"");
+    const h=document.createElement("div");h.className="oh";const l=document.createElement("span");l.textContent=label;h.appendChild(l);const bb=document.createElement("b");bb.textContent=pts==null?"spelar…":pts+" p";h.appendChild(bb);w.appendChild(h);
+    const g=document.createElement("div");g.className="grid minig";(guesses||[]).forEach(x=>g.appendChild(staticRow(x,ANS)));
+    if(!guesses||!guesses.length){const e=document.createElement("div");e.className="mut";e.style.fontSize="13px";e.textContent="Inga gissningar än";g.appendChild(e);}
+    w.appendChild(g);return w;};
+  const body=$("othBody");body.innerHTML="";
+  const t=document.createElement("h2");t.textContent="Vers "+(R+1)+" · så gissade de andra";body.appendChild(t);
+  const note=document.createElement("p");note.className="mut";note.style.cssText="margin:0 0 6px;font-size:13px";
+  note.textContent=blind?"Du ser bara deras färger tills du klarat versen – inga spoilers 😉":"Rätt svar: "+BOOKS[ANS.b]+" "+ANS.c+":"+ANS.v;body.appendChild(note);
+  body.appendChild(box((ME&&ME.emoji||"")+" Du",st.guesses,st.done?st.points:null,true));
+  list.forEach(o=>body.appendChild(box(pEmoji(o.id)+" "+pName(o.id),o.guesses,o.points,false)));
+  const c=document.createElement("button");c.className="btn ghost";c.setAttribute("data-close","");c.textContent="Stäng";body.appendChild(c);
+  $("othModal").classList.add("on");
+}
+$("cmpNow").onclick=openOthers;
+/* ===== BETA: daglig påminnelse via kalendern ===== */
+function remindLinks(){
+  const t=($("remTime").value||"07:30").split(":"),hh=t[0].padStart(2,"0"),mm=(t[1]||"00").padStart(2,"0");store.set("vjb_remind_time",hh+":"+mm);
+  const now=new Date(),nowHM=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(now);
+  const day=(nowHM<hh+":"+mm?TODAY:addDays(TODAY,1)).replace(/-/g,"");
+  const end=new Date(Date.UTC(2000,0,1,+hh,+mm+10)),eh=pad2(end.getUTCHours()),em=pad2(end.getUTCMinutes());
+  const url=location.origin+siteBase(),title="🔥 Versjakten – dagens verser",desc="Dags att spela dagens verser! "+url;
+  $("remGoogle").href="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(title)+"&details="+encodeURIComponent(desc)+
+    "&dates="+day+"T"+hh+mm+"00/"+day+"T"+eh+em+"00&ctz=Europe/Stockholm&recur="+encodeURIComponent("RRULE:FREQ=DAILY");
+  const stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Versjakten//SV","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:versjakten-daglig-"+stamp+"@kinghenrik98.github.io","DTSTAMP:"+stamp,
+    "DTSTART;TZID=Europe/Stockholm:"+day+"T"+hh+mm+"00","DURATION:PT10M","RRULE:FREQ=DAILY","SUMMARY:"+title,"DESCRIPTION:"+desc,"URL:"+url,
+    "BEGIN:VALARM","TRIGGER:PT0M","ACTION:DISPLAY","DESCRIPTION:Dags för dagens verser!","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  $("remIcs").href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);
+}
+function openRemind(){$("remTime").value=store.get("vjb_remind_time")||"07:30";remindLinks();$("remModal").classList.add("on");}
+$("remTime").addEventListener("input",remindLinks);
+["remGoogle","remIcs"].forEach(id=>$(id).addEventListener("click",()=>{store.set("vjb_remind",1);setTimeout(()=>{$("remModal").classList.remove("on");if(SCREEN==="home")renderHome();toast("Toppen! Nu får du en påminnelse varje dag 🔔",3200);},400);}));
 function weekBook(){return hstr("vecka|"+weekStart(TODAY))%66}
 function openBook(i){const info=BOOKINFO[i];
   $("ctxBody").innerHTML="<h2>"+esc(BOOKS[i])+"</h2><div class='fact'><b>Skriven av</b><span>"+esc(info[0])+"</span><b>Typ</b><span>"+esc(info[1])+"</span><b>Handlar om</b><span>"+esc(info[2])+"</span><b>Kapitel</b><span>"+DATA.counts[i].length+"</span><b>Plats</b><span>Bok "+(i+1)+" av 66</span></div>"+
@@ -1737,7 +1809,8 @@ setInterval(tick,1000);
     else{const p=PROFILES[ME.id];ME={...ME,name:p.name,church:profChurch(p)||null,emoji:p.emoji,church_id:p.church_id,city:p.city};store.set("vjb_profile",ME);}
     await joinFromUrl();saveScores();
   }
-  if(SCREEN!=="play")go(SCREEN);
+  if(IS_BETA&&ME&&SCREEN==="home"&&homeGroup()){await loadGroupData().catch(()=>{});const hg=homeGroup();openGroup(hg,gDone(hg)?"chat":"verses");}
+  else if(SCREEN!=="play")go(SCREEN);
   if(!ME&&new URLSearchParams(location.search).get("grupp"))$("obIntro").textContent="Du har blivit inbjuden till en grupp! Skapa din profil så går du med direkt.";
   document.fonts&&document.fonts.ready.then(()=>{if(SCREEN==="play")fitVerse()});
 })();
